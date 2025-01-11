@@ -1,4 +1,4 @@
-package org.example.backend.event_account.entity;
+package org.example.backend.participant.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,11 +16,11 @@ import org.example.backend.event.entity.Event;
 
 @Entity
 @Getter
-@Table(name = "event_account")
+@Table(name = "participants")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class EventAccount {
+public class Participant {
     @Id
-    @Column(name = "event_account_id")
+    @Column(name = "participant_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,7 +43,7 @@ public class EventAccount {
     @Setter
     private String projectInfo;
 
-    public EventAccount(Event event, Account account) {
+    public Participant(Event event, Account account) {
         this.event = event;
         this.account = account;
     }

@@ -27,4 +27,9 @@ public class EventController {
     public ResponseEntity<?> fetchDetails(@AuthenticationPrincipal Account account, @PathVariable Long id) {
         return ResponseEntity.ok(eventService.fetchDetails(account.getId(), id));
     }
+
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<?> fetchParticipantList(@AuthenticationPrincipal Account account, @PathVariable Long id) {
+        return ResponseEntity.ok(eventService.fetchParticipantList(account.getId(), id));
+    }
 }
