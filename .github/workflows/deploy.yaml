@@ -11,11 +11,14 @@ jobs:
       - name: repository 로드
         uses: actions/checkout@v4
 
-      - name: 필요 설정 로드
+      - name: 카카오 설정 로드
         run: echo "${{ secrets.KAKAO_PROPERTIES }}" > ./src/main/resources/application-kakao.properties
 
+      - name: db 설정 로드
+        run: echo "${{ secrets.PROD_PROPERTIES }}" > ./src/main/resources/application-prod.properties
+
       - name: 테스트 및 빌드
-        run: ./gradlew clean build
+        run: ./gradlew clean build -Pprofile=prod
 
       - name: 빌드된 파일 이름 변경
         run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
@@ -42,5 +45,5 @@ jobs:
             mv ~/backend/new/project.jar ~/backend/current/project.jar
             cd ~/backend/current
             sudo fuser -k -n tcp 8080 || true
-            nohup java -jar project.jar --server.port=8080 > ./output.log 2>&1 &
+            nohup java -jar project.jar --server.port=8080 --spring.profiles.active=prod > ./output.log 2>&1 &
             sudo rm -rf ~/backend/new
