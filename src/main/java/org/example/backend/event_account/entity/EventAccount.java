@@ -1,47 +1,41 @@
 package org.example.backend.event_account.entity;
 
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
-import java.io.Serializable;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.event.entity.Event;
 
 @Entity
+@Getter
 @Table(name = "event_account")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class EventAccount {
-    @EmbeddedId
-    private Pk pk;
+    @Id
+    @Column(name = "event_account_id")
+    private Long id;
 
-    @MapsId("eventId")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "events", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id")
     private Event event;
 
-    @MapsId("accountId")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "accounts", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
     private Account account;
 
-    @Embeddable
-    @Getter
-    @EqualsAndHashCode
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Pk implements Serializable {
-        private Long eventId;
-        private Long accountId;
-    }
+    @Column
+    private String jobGroup;
+
+    @Column
+    private String teamName;
+
+    @Column
+    private String projectInfo;
 }
