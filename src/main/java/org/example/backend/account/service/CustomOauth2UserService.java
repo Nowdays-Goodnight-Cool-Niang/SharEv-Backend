@@ -1,6 +1,5 @@
 package org.example.backend.account.service;
 
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.account.repository.AccountRepository;
@@ -10,6 +9,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
