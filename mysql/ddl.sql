@@ -11,7 +11,9 @@ CREATE TABLE `events`
     `organizer`  VARCHAR(255)       NOT NULL,                -- 주최자
     `image_url`  VARCHAR(255)       NOT NULL,                -- 이벤트 이미지 URL
     `event_url`  VARCHAR(255)       NOT NULL                 -- 이벤트 페이지 URL
-);
+) ENGINE = InnoDB
+  CHARSET = utf8mb4
+  COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `accounts`
 (
@@ -22,7 +24,9 @@ CREATE TABLE `accounts`
     `instagram_url`    VARCHAR(255)       NULL,     -- Instagram 프로필 URL (선택)
     `facebook_url`     VARCHAR(255)       NULL,     -- Facebook 프로필 URL (선택)
     `profile_image_id` INT                NOT NULL  -- 프로필 이미지 ID
-);
+) ENGINE = InnoDB
+  CHARSET = utf8mb4
+  COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `participants`
 (
@@ -34,7 +38,9 @@ CREATE TABLE `participants`
     `project_info`   VARCHAR(255)       NOT NULL,                -- 프로젝트 정보
     FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`),
     FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`)
-);
+) ENGINE = InnoDB
+  CHARSET = utf8mb4
+  COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `found_participants`
 (
@@ -43,7 +49,9 @@ CREATE TABLE `found_participants`
     CONSTRAINT pk_found_participants PRIMARY KEY (`participant_id`, `account_id`),
     CONSTRAINT fk_found_participants_participant FOREIGN KEY (`participant_id`) REFERENCES `participants` (`participant_id`),
     CONSTRAINT fk_found_participants_account FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`)
-);
+) ENGINE = InnoDB
+  CHARSET = utf8mb4
+  COLLATE utf8mb4_general_ci;
 
 -- Events 테이블 Mock 데이터
 INSERT INTO `events`
