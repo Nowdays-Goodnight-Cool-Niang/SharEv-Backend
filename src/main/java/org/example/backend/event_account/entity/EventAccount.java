@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.backend.account.entity.Account;
 import org.example.backend.event.entity.Event;
 
@@ -31,11 +32,19 @@ public class EventAccount {
     private Account account;
 
     @Column
+    @Setter
     private String jobGroup;
 
     @Column
+    @Setter
     private String teamName;
 
     @Column
+    @Setter
     private String projectInfo;
+
+    public EventAccount(Event event, Account account) {
+        this.event = event;
+        this.account = account;
+    }
 }
