@@ -3,6 +3,7 @@ package org.example.backend.event.service;
 import java.util.List;
 
 import org.example.backend.event.dto.response.EventDetailsDto;
+import org.example.backend.event.dto.response.EventMyParticipantOverviewDto;
 import org.example.backend.event.dto.response.EventOverviewDto;
 import org.example.backend.event.dto.response.EventParticipantOverviewDto;
 import org.example.backend.event.repository.EventRepository;
@@ -28,6 +29,11 @@ public class EventService {
     public List<EventParticipantOverviewDto> fetchParticipantList(Long accountId, Long eventId) {
         validateEvent(eventId);
         return eventRepository.fetchParticipantList(eventId, accountId);
+    }
+
+    public EventMyParticipantOverviewDto fetchMyParticipant(Long accountId, Long eventId) {
+        validateEvent(eventId);
+        return eventRepository.fetchMyParticipant(eventId, accountId);
     }
 
     private void validateEvent(Long eventId) {

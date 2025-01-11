@@ -3,6 +3,7 @@ package org.example.backend.participant.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.participant.dto.request.RequestPutParticipantInfo;
+import org.example.backend.participant.dto.response.ResponseGetParticipantInfo;
 import org.example.backend.participant.service.ParticipantService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,8 +24,14 @@ public class ParticipantController {
     }
 
     @GetMapping("/info/{id}")
-    public ResponseEntity<?> fetchParticipants(@AuthenticationPrincipal Account account, @PathVariable Long id) {
+    public ResponseEntity<ResponseGetParticipantInfo> fetchParticipants(@AuthenticationPrincipal Account account, @PathVariable Long id) {
         return ResponseEntity.ok(participantService.fetchParticipants(account.getId(), id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> putFoundParticipants(@AuthenticationPrincipal Account account, @PathVariable Long id) {
+        participantService.putFoundParticipant(account.getId(), id);
+        return ResponseEntity.noContent().build();
     }
 
 }

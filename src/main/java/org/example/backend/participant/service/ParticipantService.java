@@ -2,10 +2,12 @@ package org.example.backend.participant.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
+import org.example.backend.account.repository.AccountRepository;
 import org.example.backend.event.entity.Event;
 import org.example.backend.event.repository.EventRepository;
 import org.example.backend.participant.dto.request.RequestPutParticipantInfo;
 import org.example.backend.participant.dto.response.ResponseGetParticipantInfo;
+import org.example.backend.participant.entity.FoundParticipant;
 import org.example.backend.participant.entity.Participant;
 import org.example.backend.participant.repository.FoundParticipantRepository;
 import org.example.backend.participant.repository.ParticipantRepository;
@@ -21,6 +23,7 @@ public class ParticipantService {
     private final ParticipantRepository participantRepository;
     private final EventRepository eventRepository;
     private final FoundParticipantRepository foundParticipantRepository;
+    private final AccountRepository accountRepository;
 
     @Transactional
     public void putParticipant(Account account, RequestPutParticipantInfo requestPutParticipantInfo) {
@@ -53,6 +56,18 @@ public class ParticipantService {
     public ResponseGetParticipantInfo fetchParticipants(Long accountId, Long participantId) {
         validateFoundParticipant(accountId, participantId);
         return participantRepository.fetchDetailsBy(participantId);
+    }
+
+    public void putFoundParticipant(Long accountId, Long participantId) {
+        if (foundParticipantRepository.existsByAccountIdAndParticipantId(accountId, participantId)) {
+            return;
+        }
+        FoundParticipant.Pk pk = new FoundParticipant.Pk(participantId, accountId);
+        Participant participant = participantRepository.findById(participantId)
+            .orElseThrow(() -> new IllegalArgumentException("Does not found participant"));
+        Account account = accountRepository.findById(accountId)
+            .orElseThrow(() -> new IllegalArgumentException("Does not found account"));
+        foundParticipantRepository.save(new FoundParticipant(pk, participant, account));
     }
 
     private void validateFoundParticipant(Long accountId, Long participantId) {

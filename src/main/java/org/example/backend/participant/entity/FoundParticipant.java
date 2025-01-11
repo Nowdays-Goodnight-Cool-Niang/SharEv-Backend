@@ -45,4 +45,10 @@ public class FoundParticipant {
         private Long participantId;
         private Long accountId;
     }
+
+    public FoundParticipant(Pk pk, Participant participant, Account account) {
+        this.pk = pk;
+        this.participant = participant;
+        this.account = account;
+    }
 }
