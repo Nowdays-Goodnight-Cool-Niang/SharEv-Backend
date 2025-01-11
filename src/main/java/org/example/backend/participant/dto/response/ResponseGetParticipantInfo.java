@@ -9,6 +9,9 @@ public class ResponseGetParticipantInfo {
     private String name;
     private String phone;
     private Integer profileImageId;
+    private String github;
+    private String instagram;
+    private String facebook;
     private String jobGroup;
     private String teamName;
     private String projectInfo;
@@ -19,6 +22,9 @@ public class ResponseGetParticipantInfo {
             String name,
             String phone,
             Integer profileImageId,
+            String github,
+            String instagram,
+            String facebook,
             String jobGroup,
             String teamName,
             String projectInfo) {
@@ -27,6 +33,9 @@ public class ResponseGetParticipantInfo {
         this.name = name;
         this.phone = phone;
         this.profileImageId = profileImageId;
+        this.github = github;
+        this.instagram = instagram;
+        this.facebook = facebook;
         this.jobGroup = jobGroup;
         this.teamName = teamName;
         this.projectInfo = projectInfo;

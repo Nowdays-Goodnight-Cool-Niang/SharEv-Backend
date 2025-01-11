@@ -23,8 +23,11 @@ public class ParticipantRepositoryImpl implements ParticipantRepositoryExtension
                     ResponseGetParticipantInfo.class,
                     QParticipant.participant.id.as("id"),
                     QParticipant.participant.account.name.as("name"),
-                    QParticipant.participant.account.profileImageId.as("profileImageId"),
                     QParticipant.participant.account.phone.as("phone"),
+                    QParticipant.participant.account.profileImageId.as("profileImageId"),
+                    QParticipant.participant.account.githubUrl.as("github"),
+                    QParticipant.participant.account.instagramUrl.as("instagram"),
+                    QParticipant.participant.account.facebookUrl.as("facebook"),
                     QParticipant.participant.jobGroup.as("jobGroup"),
                     QParticipant.participant.teamName.as("teamName"),
                     QParticipant.participant.projectInfo.as("projectInfo")
