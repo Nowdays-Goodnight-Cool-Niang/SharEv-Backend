@@ -23,7 +23,7 @@ CREATE TABLE `accounts`
     `github_url`       VARCHAR(255)       NULL,     -- Github 프로필 URL (선택)
     `instagram_url`    VARCHAR(255)       NULL,     -- Instagram 프로필 URL (선택)
     `facebook_url`     VARCHAR(255)       NULL,     -- Facebook 프로필 URL (선택)
-    `profile_image_id` INT                NOT NULL  -- 프로필 이미지 ID
+    `profile_image_id` INT                NULL      -- 프로필 이미지 ID
 ) ENGINE = InnoDB
   CHARSET = utf8mb4
   COLLATE utf8mb4_general_ci;

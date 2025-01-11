@@ -1,6 +1,7 @@
 package org.example.backend.config;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.backend.account.entity.Account;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -87,7 +88,15 @@ public class SecurityConfig {
     }
 
     private AuthenticationSuccessHandler loginSuccessHandler() {
-        return (request, response, authentication) -> response.sendRedirect(oauth2RedirectUrl);
+        return (request, response, authentication) -> {
+            Account account = (Account) authentication.getPrincipal();
+
+            if (account.getProfileImageId() == null) {
+                response.sendRedirect(oauth2RedirectUrl + "account");
+            }
+
+            response.sendRedirect(oauth2RedirectUrl + "events");
+        };
     }
 
     private LogoutSuccessHandler logoutSuccessHandler() {

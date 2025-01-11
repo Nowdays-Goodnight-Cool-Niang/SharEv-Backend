@@ -4,15 +4,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Getter
@@ -51,7 +52,6 @@ public class Account implements OAuth2User {
     public Account(Long id, String name) {
         this.id = id;
         this.name = name;
-        this.profileImageId = 1;
     }
 
     @Override
