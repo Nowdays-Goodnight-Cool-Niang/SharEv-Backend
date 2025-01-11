@@ -4,7 +4,8 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     profiles:
       - docker
     environment:
@@ -13,9 +14,15 @@ services:
   mysql:
     image: mysql:8.4.0
     volumes:
-      - ./ddl.sql:/docker-entrypoint-initdb.d/ddl.sql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/ddl.sql:/docker-entrypoint-initdb.d/ddl.sql
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
       - MYSQL_DATABASE=hackathon
     ports:
       - 3306:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=root_password" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
