@@ -1,6 +1,5 @@
 package org.example.backend.account.service;
 
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.account.repository.AccountRepository;
@@ -10,6 +9,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +28,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
             throw new OAuth2AuthenticationException("로그인 도중 오류가 발생했습니다. 운영진에게 문의해주세요.");
         }
 
-        Account account = accountRepository.findById(id).orElseGet(() -> this.createAccount(oAuth2User, id));
-        System.out.println(account.getName());
-        return account;
+        return accountRepository.findById(id).orElseGet(() -> this.createAccount(oAuth2User, id));
     }
 
     private Account createAccount(OAuth2User oAuth2User, Long id) {
