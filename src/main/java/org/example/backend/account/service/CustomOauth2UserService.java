@@ -27,9 +27,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
             throw new OAuth2AuthenticationException("로그인 도중 오류가 발생했습니다. 운영진에게 문의해주세요.");
         }
 
-        Account account = accountRepository.findById(id).orElseGet(() -> this.createAccount(oAuth2User, id));
-        System.out.println(account.getName());
-        return account;
+        return accountRepository.findById(id).orElseGet(() -> this.createAccount(oAuth2User, id));
     }
 
     private Account createAccount(OAuth2User oAuth2User, Long id) {
@@ -38,7 +36,19 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @SuppressWarnings("unchecked")
     private String getNickname(OAuth2User oAuth2User) {
-        Map<String, String> properties = (Map<String, String>) oAuth2User.getAttributes().get("properties");
-        return properties.get("nickname");
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        Map<String, String> properties = (Map<String, String>) attributes.get("properties");
+
+        if (properties == null) {
+            return "삐약톤";
+        }
+
+        String nickname = properties.get("nickname").trim();
+
+        if (nickname.isEmpty()) {
+            return "삐약톤";
+        }
+
+        return nickname;
     }
 }
