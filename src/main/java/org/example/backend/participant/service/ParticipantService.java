@@ -14,6 +14,7 @@ import org.example.backend.participant.repository.ParticipantRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -54,7 +55,12 @@ public class ParticipantService {
     }
 
     public ResponseGetParticipantInfo fetchParticipants(Long accountId, Long participantId) {
-        validateFoundParticipant(accountId, participantId);
+        Participant participant = participantRepository.findById(participantId)
+            .orElseThrow(() -> new IllegalArgumentException("Does not found participant"));
+        if (!Objects.equals(participant.getAccount().getId(), accountId)
+            && !foundParticipantRepository.existsByAccountIdAndParticipantId(accountId, participantId)) {
+           throw new RuntimeException("Forbidden");
+        }
         return participantRepository.fetchDetailsBy(participantId);
     }
 
@@ -71,11 +77,5 @@ public class ParticipantService {
         Account account = accountRepository.findById(accountId)
             .orElseThrow(() -> new IllegalArgumentException("Does not found account"));
         foundParticipantRepository.save(new FoundParticipant(pk, participant, account));
-    }
-
-    private void validateFoundParticipant(Long accountId, Long participantId) {
-        if (!foundParticipantRepository.existsByAccountIdAndParticipantId(accountId, participantId)) {
-            throw new RuntimeException("Forbidden");
-        }
     }
 }
