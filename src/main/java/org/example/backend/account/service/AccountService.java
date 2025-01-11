@@ -14,6 +14,6 @@ public class AccountService {
         account.setProfileImageId(requestUpdateInfoDto.profileImageId());
         account.setGithubUrl(requestUpdateInfoDto.githubUrl());
         account.setInstagramUrl(requestUpdateInfoDto.instagramUrl());
-        account.setFacebook(requestUpdateInfoDto.facebookUrl());
+        account.setFacebookUrl(requestUpdateInfoDto.facebookUrl());
     }
 }

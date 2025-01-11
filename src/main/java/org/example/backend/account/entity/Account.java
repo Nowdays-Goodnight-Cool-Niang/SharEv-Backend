@@ -42,7 +42,7 @@ public class Account implements OAuth2User {
 
     @Column
     @Setter
-    private String facebook;
+    private String facebookUrl;
 
     @Column
     @Setter
