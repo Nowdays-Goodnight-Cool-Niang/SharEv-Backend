@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.backend.event.dto.response.EventDetailsDto;
+import org.example.backend.event.dto.response.EventMyParticipantOverviewDto;
 import org.example.backend.event.dto.response.EventOverviewDto;
 import org.example.backend.event.dto.response.EventParticipantOverviewDto;
 import org.example.backend.event.entity.QEvent;
@@ -95,8 +96,27 @@ public class EventRepositoryImpl implements EventRepositoryExtension {
             )
             .where(
                 QParticipant.participant.event.id.eq(eventId)
+                    .and(QParticipant.participant.account.id.eq(accountId).not())
             )
             .fetch();
+    }
+
+    @Override
+    public EventMyParticipantOverviewDto fetchMyParticipant(Long eventId, Long accountId) {
+        return Optional.ofNullable(
+            queryFactory
+                .select(Projections.constructor(
+                    EventMyParticipantOverviewDto.class,
+                    QParticipant.participant.id.as("id"),
+                    QParticipant.participant.account.profileImageId.as("profileImageId")
+                ))
+                .from(QParticipant.participant)
+                .where(
+                    QParticipant.participant.event.id.eq(eventId)
+                        .and(QParticipant.participant.account.id.eq(accountId))
+                )
+                .fetchOne()
+        ).orElseThrow(() -> new RuntimeException("Does not found my participant"));
     }
 
 }
