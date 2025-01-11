@@ -21,10 +21,18 @@ public class EventService {
     }
 
     public EventDetailsDto fetchDetails(Long accountId, Long eventId) {
+        validateEvent(eventId);
         return eventRepository.fetchBy(eventId, accountId);
     }
 
     public List<EventParticipantOverviewDto> fetchParticipantList(Long accountId, Long eventId) {
+        validateEvent(eventId);
         return eventRepository.fetchParticipantList(eventId, accountId);
+    }
+
+    private void validateEvent(Long eventId) {
+        if (!eventRepository.existsById(eventId)) {
+            throw new RuntimeException("Does not found event");
+        }
     }
 }
