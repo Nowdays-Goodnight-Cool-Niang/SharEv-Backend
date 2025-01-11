@@ -56,7 +56,8 @@ public class EventRepositoryImpl implements EventRepositoryExtension {
                 .from(QEvent.event)
                 .leftJoin(QParticipant.participant)
                 .on(
-                    QParticipant.participant.account.id.eq(accountId)
+                    QEvent.event.id.eq(QParticipant.participant.event.id)
+                        .and(QParticipant.participant.account.id.eq(accountId))
                 )
                 .where(
                     QEvent.event.id.eq(eventId)
@@ -89,7 +90,8 @@ public class EventRepositoryImpl implements EventRepositoryExtension {
             .from(QParticipant.participant)
             .leftJoin(QFoundParticipant.foundParticipant)
             .on(
-                QFoundParticipant.foundParticipant.account.id.eq(accountId)
+                QParticipant.participant.account.id.eq(QFoundParticipant.foundParticipant.account.id)
+                    .and(QFoundParticipant.foundParticipant.account.id.eq(accountId))
             )
             .where(
                 QParticipant.participant.event.id.eq(eventId)
