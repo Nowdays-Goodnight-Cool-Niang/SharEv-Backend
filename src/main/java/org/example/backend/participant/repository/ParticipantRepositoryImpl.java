@@ -22,6 +22,7 @@ public class ParticipantRepositoryImpl implements ParticipantRepositoryExtension
                 .select(Projections.constructor(
                     ResponseGetParticipantInfo.class,
                     QParticipant.participant.id.as("id"),
+                    QParticipant.participant.account.id.as("accountId"),
                     QParticipant.participant.account.name.as("name"),
                     QParticipant.participant.account.phone.as("phone"),
                     QParticipant.participant.account.profileImageId.as("profileImageId"),
