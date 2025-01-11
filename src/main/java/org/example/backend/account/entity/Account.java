@@ -20,14 +20,31 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 public class Account implements OAuth2User {
 
     @Id
+    @Column(name = "account_id")
     private Long id;
 
     @Column
     private String name;
 
+    @Column
+    private String phone;
+
+    @Column
+    private String githubUrl;
+
+    @Column
+    private String instagramUrl;
+
+    @Column
+    private String facebook;
+
+    @Column
+    private Integer profileImageId;
+
     public Account(Long id, String name) {
         this.id = id;
         this.name = name;
+        this.profileImageId = 1;
     }
 
     @Override
