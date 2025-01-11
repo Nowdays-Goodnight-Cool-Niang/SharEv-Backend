@@ -1,12 +1,6 @@
 package org.example.backend.participant.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +15,7 @@ import org.example.backend.event.entity.Event;
 public class Participant {
     @Id
     @Column(name = "participant_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,8 +38,11 @@ public class Participant {
     @Setter
     private String projectInfo;
 
-    public Participant(Event event, Account account) {
+    public Participant(Event event, Account account, String jobGroup, String teamName, String projectInfo) {
         this.event = event;
         this.account = account;
+        this.jobGroup = jobGroup;
+        this.teamName = teamName;
+        this.projectInfo = projectInfo;
     }
 }

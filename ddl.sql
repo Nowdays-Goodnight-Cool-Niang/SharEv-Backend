@@ -2,15 +2,15 @@ USE hackathon;
 
 CREATE TABLE `events`
 (
-    `event_id`   BIGINT PRIMARY KEY NOT NULL, -- 이벤트 고유 식별자
-    `title`      VARCHAR(255)       NOT NULL, -- 이벤트 제목
-    `content`    TEXT               NOT NULL, -- 이벤트 내용
-    `started_at` DateTime           NOT NULL, -- 시작 일시
-    `ended_at`   DateTime           NOT NULL, -- 종료 일시
-    `place`      VARCHAR(255)       NOT NULL, -- 장소
-    `organizer`  VARCHAR(255)       NOT NULL, -- 주최자
-    `image_url`  VARCHAR(255)       NOT NULL, -- 이벤트 이미지 URL
-    `event_url`  VARCHAR(255)       NOT NULL  -- 이벤트 페이지 URL
+    `event_id`   BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT, -- 이벤트 고유 식별자
+    `title`      VARCHAR(255)       NOT NULL,                -- 이벤트 제목
+    `content`    TEXT               NOT NULL,                -- 이벤트 내용
+    `started_at` DateTime           NOT NULL,                -- 시작 일시
+    `ended_at`   DateTime           NOT NULL,                -- 종료 일시
+    `place`      VARCHAR(255)       NOT NULL,                -- 장소
+    `organizer`  VARCHAR(255)       NOT NULL,                -- 주최자
+    `image_url`  VARCHAR(255)       NOT NULL,                -- 이벤트 이미지 URL
+    `event_url`  VARCHAR(255)       NOT NULL                 -- 이벤트 페이지 URL
 );
 
 CREATE TABLE `accounts`
@@ -26,12 +26,12 @@ CREATE TABLE `accounts`
 
 CREATE TABLE `participants`
 (
-    `participant_id` BIGINT PRIMARY KEY NOT NULL, -- 이벤트-계정 관계 고유 식별자
-    `event_id`         BIGINT             NOT NULL, -- 이벤트 참조 ID
-    `account_id`       BIGINT             NOT NULL, -- 계정 참조 ID
-    `job_group`        VARCHAR(255)       NOT NULL, -- 직무 그룹
-    `team_name`        VARCHAR(255)       NOT NULL, -- 팀 이름
-    `project_info`     VARCHAR(255)       NOT NULL, -- 프로젝트 정보
+    `participant_id` BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT, -- 이벤트-계정 관계 고유 식별자
+    `event_id`       BIGINT             NOT NULL,                -- 이벤트 참조 ID
+    `account_id`     BIGINT             NOT NULL,                -- 계정 참조 ID
+    `job_group`      VARCHAR(255)       NOT NULL,                -- 직무 그룹
+    `team_name`      VARCHAR(255)       NOT NULL,                -- 팀 이름
+    `project_info`   VARCHAR(255)       NOT NULL,                -- 프로젝트 정보
     FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`),
     FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`)
 );
@@ -39,7 +39,7 @@ CREATE TABLE `participants`
 CREATE TABLE `found_participants`
 (
     `participant_id` BIGINT NOT NULL,
-    `account_id`        BIGINT      NOT NULL,
+    `account_id`     BIGINT NOT NULL,
     CONSTRAINT pk_found_participants PRIMARY KEY (`participant_id`, `account_id`),
     CONSTRAINT fk_found_participants_participant FOREIGN KEY (`participant_id`) REFERENCES `participants` (`participant_id`),
     CONSTRAINT fk_found_participants_account FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`)
