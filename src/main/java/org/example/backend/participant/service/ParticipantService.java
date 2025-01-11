@@ -65,6 +65,9 @@ public class ParticipantService {
         FoundParticipant.Pk pk = new FoundParticipant.Pk(participantId, accountId);
         Participant participant = participantRepository.findById(participantId)
             .orElseThrow(() -> new IllegalArgumentException("Does not found participant"));
+        Long eventId = participant.getEvent().getId();
+        participantRepository.findByEventIdAndAccountId(eventId, accountId)
+            .orElseThrow(() -> new IllegalArgumentException("Does not found account's participant"));
         Account account = accountRepository.findById(accountId)
             .orElseThrow(() -> new IllegalArgumentException("Does not found account"));
         foundParticipantRepository.save(new FoundParticipant(pk, participant, account));
