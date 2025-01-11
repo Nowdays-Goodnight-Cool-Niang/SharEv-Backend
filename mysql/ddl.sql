@@ -59,8 +59,8 @@ INSERT INTO `events`
 VALUES (1, '삐약톤: 캠퍼스 대항전',
         '친구들과 함께 머리를 맞대고 밤새 새로운 아이디어를 구현하며, 유쾌한 협업을 경험할 수 있는 오프라인 해커톤!\nGDG Campus Korea 에서 캠퍼스 대항전 🐣삐약톤🐣을 주최합니다. 🎉\n대학교의 이름을 걸고 여러분의 반짝이는 아이디어와 열정을 마음껏 펼칠 수 있는 이 자리에 함께 해주세요!\n함께 웃고 도전하며 성장할 수 있는 소중한 시간을 만들어드릴게요.\n여러분의 꿈과 열정을 응원하는 삐약톤에서 만나요! 😊',
         '2025-01-11 11:00:00', '2025-01-12 14:00:00', '동국대학교 서울캠퍼스 혜화관 고순청 세미나실',
-        'GDG Campus Korea', 'https://example.com/images/meetup.jpg', 'https://example.com/events/startup-meetup'),
+        'GDG Campus Korea', 'https://cf.festa.io/img/2024-11-22/cd01d222-e60e-455e-b961-734e30658f2f.png', 'https://festa.io/events/6381'),
        (2, '오픈소스 컨트리뷰톤', '오픈소스 프로젝트 기여 행사', '2025-05-20 09:00:00', '2025-05-20 18:00:00', '강남 개발자 센터', '오픈소스 커뮤니티',
-        'https://example.com/images/contributhon.jpg', 'https://example.com/events/contributhon-2024'),
+        'https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Ff8882592-3f24-4f4d-8f7a-51e03c5c45ff%2F07e66aa8-aed1-4a3a-acac-faf1b3d6ce32%2F2024_OSSCA_ossportal_title_image_broken.jpg&blockId=5b6265b1-e29e-4d7a-b5d4-3c58fe07cda8', 'https://www.contribution.ac/ossca'),
        (3, '2024 개발자 컨퍼런스', '최신 기술 트렌드와 개발 경험을 공유하는 컨퍼런스', '2024-03-15 10:00:00', '2024-03-15 18:00:00', '코엑스 그랜드볼룸',
         '테크 커뮤니티', 'https://example.com/images/conf2024.jpg', 'https://example.com/events/dev-conf-2024');
