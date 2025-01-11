@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -24,21 +25,27 @@ public class Account implements OAuth2User {
     private Long id;
 
     @Column
+    @Setter
     private String name;
 
     @Column
+    @Setter
     private String phone;
 
     @Column
+    @Setter
     private String githubUrl;
 
     @Column
+    @Setter
     private String instagramUrl;
 
     @Column
+    @Setter
     private String facebook;
 
     @Column
+    @Setter
     private Integer profileImageId;
 
     public Account(Long id, String name) {
