@@ -93,9 +93,9 @@ public class SecurityConfig {
 
             if (account.getProfileImageId() == null) {
                 response.sendRedirect(oauth2RedirectUrl + "account");
+            } else {
+                response.sendRedirect(oauth2RedirectUrl + "events");
             }
-
-            response.sendRedirect(oauth2RedirectUrl + "events");
         };
     }
 
