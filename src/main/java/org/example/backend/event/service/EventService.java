@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.example.backend.event.dto.response.EventDetailsDto;
 import org.example.backend.event.dto.response.EventOverviewDto;
+import org.example.backend.event.dto.response.EventParticipantOverviewDto;
 import org.example.backend.event.repository.EventRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,5 +22,9 @@ public class EventService {
 
     public EventDetailsDto fetchDetails(Long accountId, Long eventId) {
         return eventRepository.fetchBy(eventId, accountId);
+    }
+
+    public List<EventParticipantOverviewDto> fetchParticipantList(Long accountId, Long eventId) {
+        return eventRepository.fetchParticipantList(eventId, accountId);
     }
 }

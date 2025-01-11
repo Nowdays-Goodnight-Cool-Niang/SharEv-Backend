@@ -5,8 +5,10 @@ import java.util.Optional;
 
 import org.example.backend.event.dto.response.EventDetailsDto;
 import org.example.backend.event.dto.response.EventOverviewDto;
+import org.example.backend.event.dto.response.EventParticipantOverviewDto;
 import org.example.backend.event.entity.QEvent;
-import org.example.backend.event_account.entity.QEventAccount;
+import org.example.backend.participant.entity.QFoundParticipant;
+import org.example.backend.participant.entity.QParticipant;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -49,12 +51,12 @@ public class EventRepositoryImpl implements EventRepositoryExtension {
                     QEvent.event.eventUrl.as("eventUrl"),
                     QEvent.event.startedAt.as("startedAt"),
                     QEvent.event.endedAt.as("endedAt"),
-                    QEventAccount.eventAccount.account.id.as("accountId")
+                    QParticipant.participant.account.id.as("accountId")
                 ))
                 .from(QEvent.event)
-                .leftJoin(QEventAccount.eventAccount)
+                .leftJoin(QParticipant.participant)
                 .on(
-                    QEventAccount.eventAccount.account.id.eq(accountId)
+                    QParticipant.participant.account.id.eq(accountId)
                 )
                 .where(
                     QEvent.event.id.eq(eventId)
@@ -63,14 +65,36 @@ public class EventRepositoryImpl implements EventRepositoryExtension {
         ).orElseThrow(() ->  new RuntimeException("Does not found event"));
 
         Long count = queryFactory
-            .select(QEventAccount.eventAccount.count())
-            .from(QEventAccount.eventAccount)
+            .select(QParticipant.participant.count())
+            .from(QParticipant.participant)
             .where(
-                QEventAccount.eventAccount.event.id.eq(eventId)
+                QParticipant.participant.event.id.eq(eventId)
             )
             .fetchOne();
 
         dto.setTotalRegistration(count);
         return dto;
     }
+
+    @Override
+    public List<EventParticipantOverviewDto> fetchParticipantList(Long eventId, Long accountId) {
+        return queryFactory
+            .select(Projections.constructor(
+                EventParticipantOverviewDto.class,
+                QParticipant.participant.id.as("id"),
+                QParticipant.participant.account.name.as("name"),
+                QParticipant.participant.account.profileImageId.as("profileImageId"),
+                QFoundParticipant.foundParticipant.account.id.as("accountId")
+            ))
+            .from(QParticipant.participant)
+            .leftJoin(QFoundParticipant.foundParticipant)
+            .on(
+                QFoundParticipant.foundParticipant.account.id.eq(accountId)
+            )
+            .where(
+                QParticipant.participant.event.id.eq(eventId)
+            )
+            .fetch();
+    }
+
 }

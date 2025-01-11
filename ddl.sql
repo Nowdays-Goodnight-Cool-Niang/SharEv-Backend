@@ -24,9 +24,9 @@ CREATE TABLE `accounts`
     `profile_image_id` INT                NOT NULL  -- 프로필 이미지 ID
 );
 
-CREATE TABLE `event_account`
+CREATE TABLE `participants`
 (
-    `event_account_id` BIGINT PRIMARY KEY NOT NULL, -- 이벤트-계정 관계 고유 식별자
+    `participant_id` BIGINT PRIMARY KEY NOT NULL, -- 이벤트-계정 관계 고유 식별자
     `event_id`         BIGINT             NOT NULL, -- 이벤트 참조 ID
     `account_id`       BIGINT             NOT NULL, -- 계정 참조 ID
     `job_group`        VARCHAR(255)       NOT NULL, -- 직무 그룹
@@ -34,6 +34,15 @@ CREATE TABLE `event_account`
     `project_info`     VARCHAR(255)       NOT NULL, -- 프로젝트 정보
     FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`),
     FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`)
+);
+
+CREATE TABLE `found_participants`
+(
+    `participant_id` BIGINT NOT NULL,
+    `account_id`        BIGINT      NOT NULL,
+    CONSTRAINT pk_found_participants PRIMARY KEY (`participant_id`, `account_id`),
+    CONSTRAINT fk_found_participants_participant FOREIGN KEY (`participant_id`) REFERENCES `participants` (`participant_id`),
+    CONSTRAINT fk_found_participants_account FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`)
 );
 
 -- Events 테이블 Mock 데이터
