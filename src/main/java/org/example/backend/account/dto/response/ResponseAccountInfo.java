@@ -8,7 +8,7 @@ public class ResponseAccountInfo {
     private final Long id;
     private final String name;
     private final String phone;
-    private final int profileImageId;
+    private final Integer profileImageId;
     private final String github;
     private final String instagram;
     private final String facebook;
