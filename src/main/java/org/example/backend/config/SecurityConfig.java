@@ -28,8 +28,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${oauth2.redirectUrl}")
-    private String oauth2RedirectUrl;
+    @Value("${origin.url}")
+    private String originUrl;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -92,9 +92,9 @@ public class SecurityConfig {
             Account account = (Account) authentication.getPrincipal();
 
             if (account.getProfileImageId() == null) {
-                response.sendRedirect(oauth2RedirectUrl + "account");
+                response.sendRedirect(originUrl + "account");
             } else {
-                response.sendRedirect(oauth2RedirectUrl + "events");
+                response.sendRedirect(originUrl + "events");
             }
         };
     }
