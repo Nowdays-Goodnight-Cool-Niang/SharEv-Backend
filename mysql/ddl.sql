@@ -69,18 +69,16 @@ INSERT INTO `accounts`
 (`account_id`, `name`, `phone`, `github_url`, `instagram_url`, `facebook_url`, `profile_image_id`)
 VALUES (10, 'name01', '01012345678', 'www.github.com/jjeonghak', null, null, 1),
     (11, 'name02', '01012345679', null, null, null, 3),
-    (12, null, null, null, null, null, 1);
+    (12, "name03", null, null, null, null, 1);
 
 INSERT INTO `participants`
 (`participant_id`, `event_id`, `account_id`, `job_group`, `team_name`, `project_info`)
 VALUES (1, 1, 10, 'jobGroup01', 'teamName01', 'projectInfo01'),
        (2, 1, 11, 'jobGroup02', 'teamName02', 'projectInfo02'),
-       (3, 1, 12, 'jobGroup03', 'teamName03', 'projectInfo03'),
-       (4, 1, 1, 'jobGroup04', 'teamName04', 'projectInfo04');
+       (3, 1, 12, 'jobGroup03', 'teamName03', 'projectInfo03');
+
 
 INSERT INTO `found_participants`
 (`participant_id`, `account_id`)
 VALUES (1, 11),
-    (1, 12),
-    (4, 12),
-    (4, 11);
+    (1, 12);
