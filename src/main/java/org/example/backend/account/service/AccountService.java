@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class AccountService {
+    @Transactional
     public void updateAccountInfo(Account account, RequestUpdateInfoDto requestUpdateInfoDto) {
         account.setName(requestUpdateInfoDto.name());
         account.setPhone(requestUpdateInfoDto.phone());
