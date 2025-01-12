@@ -7,10 +7,7 @@ import org.example.backend.account.entity.Account;
 import org.example.backend.account.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +18,7 @@ public class AccountController {
 
     @PatchMapping
     public ResponseEntity<Void> updateAccountInfo(@AuthenticationPrincipal Account account,
-                                                  RequestUpdateInfoDto requestUpdateInfoDto) {
+                                                  @RequestBody RequestUpdateInfoDto requestUpdateInfoDto) {
 
         accountService.updateAccountInfo(account, requestUpdateInfoDto);
         return ResponseEntity.ok().build();
