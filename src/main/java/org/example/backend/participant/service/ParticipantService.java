@@ -56,10 +56,10 @@ public class ParticipantService {
 
     public ResponseGetParticipantInfo fetchParticipants(Long accountId, Long participantId) {
         Participant participant = participantRepository.findById(participantId)
-            .orElseThrow(() -> new IllegalArgumentException("Does not found participant"));
+                .orElseThrow(() -> new IllegalArgumentException("Does not found participant"));
         if (!Objects.equals(participant.getAccount().getId(), accountId)
-            && !foundParticipantRepository.existsByAccountIdAndParticipantId(accountId, participantId)) {
-           throw new RuntimeException("Forbidden");
+                && !foundParticipantRepository.existsByAccountIdAndParticipantId(accountId, participantId)) {
+            throw new RuntimeException("Forbidden");
         }
         return participantRepository.fetchDetailsBy(participantId);
     }
@@ -70,12 +70,18 @@ public class ParticipantService {
         }
         FoundParticipant.Pk pk = new FoundParticipant.Pk(participantId, accountId);
         Participant participant = participantRepository.findById(participantId)
-            .orElseThrow(() -> new IllegalArgumentException("Does not found participant"));
+                .orElseThrow(() -> new IllegalArgumentException("Does not found participant"));
         Long eventId = participant.getEvent().getId();
         participantRepository.findByEventIdAndAccountId(eventId, accountId)
-            .orElseThrow(() -> new IllegalArgumentException("Does not found account's participant"));
+                .orElseThrow(() -> new IllegalArgumentException("Does not found account's participant"));
         Account account = accountRepository.findById(accountId)
-            .orElseThrow(() -> new IllegalArgumentException("Does not found account"));
+                .orElseThrow(() -> new IllegalArgumentException("Does not found account"));
         foundParticipantRepository.save(new FoundParticipant(pk, participant, account));
+    }
+
+    public Long getParticipantId(Account account, Long eventId) {
+        Participant participant = participantRepository.findByEventIdAndAccountId(eventId, account.getId())
+                .orElseThrow();
+        return participant.getId();
     }
 }
