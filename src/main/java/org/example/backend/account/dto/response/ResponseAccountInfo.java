@@ -7,19 +7,17 @@ import org.example.backend.account.entity.Account;
 public class ResponseAccountInfo {
     private final Long id;
     private final String name;
-    private final String phone;
-    private final Integer profileImageId;
-    private final String github;
-    private final String instagram;
-    private final String facebook;
+    private final String email;
+    private final String linkedinUrl;
+    private final String githubUrl;
+    private final String instagramUrl;
 
     public ResponseAccountInfo(Account account) {
         this.id = account.getId();
         this.name = account.getName();
-        this.phone = account.getPhone();
-        this.profileImageId = account.getProfileImageId();
-        this.github = account.getGithubUrl();
-        this.instagram = account.getInstagramUrl();
-        this.facebook = account.getFacebookUrl();
+        this.email = account.getEmail();
+        this.linkedinUrl = account.getLinkedinUrl();
+        this.githubUrl = account.getGithubUrl();
+        this.instagramUrl = account.getInstagramUrl();
     }
 }

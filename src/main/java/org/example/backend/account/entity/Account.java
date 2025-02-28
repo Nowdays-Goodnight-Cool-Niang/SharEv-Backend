@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
@@ -31,7 +32,11 @@ public class Account implements OAuth2User {
 
     @Column
     @Setter
-    private String phone;
+    private String email;
+
+    @Column
+    @Setter
+    private String linkedinUrl;
 
     @Column
     @Setter
@@ -41,17 +46,13 @@ public class Account implements OAuth2User {
     @Setter
     private String instagramUrl;
 
-    @Column
-    @Setter
-    private String facebookUrl;
-
-    @Column
-    @Setter
-    private Integer profileImageId;
-
     public Account(Long id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public boolean isAuthenticated() {
+        return this.name != null && this.email != null;
     }
 
     @Override
@@ -61,6 +62,11 @@ public class Account implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        System.out.println(isAuthenticated());
+        if (this.isAuthenticated()) {
+            return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+
         return List.of();
     }
 
