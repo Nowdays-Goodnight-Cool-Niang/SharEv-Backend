@@ -20,7 +20,7 @@ public class AccountController {
     public ResponseEntity<Void> updateAccountInfo(@AuthenticationPrincipal Account account,
                                                   @RequestBody RequestUpdateInfoDto requestUpdateInfoDto) {
 
-        accountService.updateAccountInfo(account, requestUpdateInfoDto);
+        accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto);
         return ResponseEntity.ok().build();
     }
 

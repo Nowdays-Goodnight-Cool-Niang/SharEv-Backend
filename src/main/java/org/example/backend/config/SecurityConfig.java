@@ -2,7 +2,6 @@ package org.example.backend.config;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.backend.account.entity.Account;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,9 +27,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${origin.url}")
-    private String originUrl;
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.httpBasic(AbstractHttpConfigurer::disable);
@@ -53,12 +49,12 @@ public class SecurityConfig {
         });
 
         http.authorizeHttpRequests(authorizeRequests -> {
-            authorizeRequests.requestMatchers(HttpMethod.GET)
-                    .permitAll();
             authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
                     .permitAll();
-            authorizeRequests.anyRequest()
+            authorizeRequests.requestMatchers(HttpMethod.PATCH, "/accounts")
                     .authenticated();
+            authorizeRequests.anyRequest()
+                    .hasRole("USER");
         });
 
         return http.build();
@@ -72,7 +68,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
 
         // 허용할 HTTP 메서드 설정
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("*"));
 
         // 허용할 헤더 설정
         configuration.setAllowedHeaders(List.of("*"));
@@ -91,11 +87,9 @@ public class SecurityConfig {
         return (request, response, authentication) -> {
             Account account = (Account) authentication.getPrincipal();
 
-            if (account.getProfileImageId() == null) {
-                response.sendRedirect(originUrl + "account");
-            } else {
-                response.sendRedirect(originUrl + "events");
-            }
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(String.format("{\"isAuthenticated\": %s}", account.isAuthenticated()));
         };
     }
 
