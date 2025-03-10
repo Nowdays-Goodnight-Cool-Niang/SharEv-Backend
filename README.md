@@ -17,6 +17,15 @@
 
 http://localhost:8080/oauth2/authorization/kakao
 
+```json
+{
+  "isAuthenticated": false
+}
+```
+
+- `isAuthenticated` 필드가 false라면 프로필이 작성되지 않은 사용자입니다. 프로필 작성 view를 보여주세요.
+- `isAuthenticated` 필드가 true라면 프로필이 작성된 사용자입니다. 행사 view를 보여주세요.
+
 ## 로그아웃
 
 http://localhost:8080/logout
