@@ -49,9 +49,11 @@ public class SecurityConfig {
         });
 
         http.authorizeHttpRequests(authorizeRequests -> {
+            authorizeRequests.requestMatchers(HttpMethod.GET)
+                    .permitAll();
             authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
                     .permitAll();
-            authorizeRequests.requestMatchers(HttpMethod.PATCH, "/accounts")
+            authorizeRequests.requestMatchers("/accounts")
                     .authenticated();
             authorizeRequests.anyRequest()
                     .hasRole("USER");
