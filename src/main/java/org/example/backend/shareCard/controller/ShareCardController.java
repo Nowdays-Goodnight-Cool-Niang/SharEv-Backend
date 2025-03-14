@@ -28,12 +28,6 @@ public class ShareCardController {
         return ResponseEntity.ok(responseShareCardDto);
     }
 
-    @GetMapping
-    public ResponseEntity<ResponseShareCardDto> getShareCard(@AuthenticationPrincipal Account account) {
-        ResponseShareCardDto responseShareCardDto = shareCardService.getShareCard(account.getId());
-        return ResponseEntity.ok(responseShareCardDto);
-    }
-
     @GetMapping("/{participantsId}")
     public ResponseEntity<ResponseShareCardDto> getShareCard(@PathVariable(name = "participantsId") UUID participantsId) {
         ResponseShareCardDto responseShareCardDto = shareCardService.getShareCard(participantsId);
