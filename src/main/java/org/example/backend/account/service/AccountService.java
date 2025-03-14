@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -17,8 +19,10 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     @Transactional
-    public void updateAccountInfo(Long accountId, RequestUpdateInfoDto requestUpdateInfoDto) {
-        Account accountEntity = accountRepository.findById(accountId).orElseThrow();
+    public void updateAccountInfo(UUID accountId, RequestUpdateInfoDto requestUpdateInfoDto) {
+        Account accountEntity = accountRepository.findById(accountId)
+                .orElseThrow();
+
         accountEntity.setName(requestUpdateInfoDto.name());
         accountEntity.setEmail(requestUpdateInfoDto.email());
         accountEntity.setLinkedinUrl(requestUpdateInfoDto.linkedinUrl());
