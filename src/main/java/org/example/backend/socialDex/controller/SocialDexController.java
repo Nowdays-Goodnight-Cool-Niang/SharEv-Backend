@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.socialDex.dto.request.RequestUpdateSocialDexDto;
 import org.example.backend.socialDex.dto.response.ResponseSocialDexDto;
+import org.example.backend.socialDex.dto.response.ResponseSocialDexInfoDto;
 import org.example.backend.socialDex.service.SocialDexService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/social-dex")
@@ -26,5 +25,10 @@ public class SocialDexController {
                 socialDexService.updateSocialDex(account.getId(), requestUpdateSocialDexDto.targetAccountId());
 
         return ResponseEntity.ok(responseSocialDexDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<ResponseSocialDexInfoDto> getSocialDex(@AuthenticationPrincipal Account account, Pageable pageable) {
+        return ResponseEntity.ok(socialDexService.getSocialDex(account.getId(), pageable));
     }
 }

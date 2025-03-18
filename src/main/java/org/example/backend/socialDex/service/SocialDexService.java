@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.account.repository.AccountRepository;
 import org.example.backend.socialDex.dto.response.ResponseSocialDexDto;
+import org.example.backend.socialDex.dto.response.ResponseSocialDexInfoDto;
 import org.example.backend.socialDex.entity.SocialDex;
 import org.example.backend.socialDex.repository.SocialDexRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,5 +33,12 @@ public class SocialDexService {
 
         SocialDex.SocialDexId socialDexId = socialDex.getId();
         return new ResponseSocialDexDto(socialDexId.getFirstAccountId(), socialDexId.getFirstAccountId());
+    }
+
+    public ResponseSocialDexInfoDto getSocialDex(UUID accountId, Pageable pageable) {
+        long count = accountRepository.count() - 1;
+        Page<ResponseSocialDexInfoDto.AccountInfo> accountInfoPage = socialDexRepository.findDexParticipants(accountId, pageable);
+
+        return new ResponseSocialDexInfoDto(count, accountInfoPage);
     }
 }
