@@ -76,7 +76,7 @@ public class Account implements OAuth2User, Comparable<Account> {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        System.out.println(isAuthenticated());
+
         if (this.isAuthenticated()) {
             return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
