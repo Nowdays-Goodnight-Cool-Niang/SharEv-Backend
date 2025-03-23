@@ -2,6 +2,7 @@ package org.example.backend.config;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.backend.account.entity.Account;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,6 +27,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    @Value("${origin.url}")
+    private String originUrl;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -89,9 +93,11 @@ public class SecurityConfig {
         return (request, response, authentication) -> {
             Account account = (Account) authentication.getPrincipal();
 
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(String.format("{\"isAuthenticated\": %s}", account.isAuthenticated()));
+            if (account.isAuthenticated()) {
+                response.sendRedirect(originUrl + "/events");
+            } else {
+                response.sendRedirect(originUrl + "/profile-setup");
+            }
         };
     }
 
