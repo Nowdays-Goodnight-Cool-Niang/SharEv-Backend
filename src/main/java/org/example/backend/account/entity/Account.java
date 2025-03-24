@@ -1,9 +1,6 @@
 package org.example.backend.account.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,16 +12,21 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "accounts")
-public class Account implements OAuth2User {
+public class Account implements OAuth2User, Comparable<Account> {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "account_id")
-    private Long id;
+    private UUID id;
+
+    @Column
+    private Long kakaoOauthId;
 
     @Column
     @Setter
@@ -46,8 +48,20 @@ public class Account implements OAuth2User {
     @Setter
     private String instagramUrl;
 
-    public Account(Long id, String name) {
-        this.id = id;
+    @Column
+    @Setter
+    private String teamName;
+
+    @Column
+    @Setter
+    private String position;
+
+    @Column
+    @Setter
+    private String introductionText;
+
+    public Account(Long kakaoOauthId, String name) {
+        this.kakaoOauthId = kakaoOauthId;
         this.name = name;
     }
 
@@ -62,7 +76,7 @@ public class Account implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        System.out.println(isAuthenticated());
+
         if (this.isAuthenticated()) {
             return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
@@ -73,5 +87,10 @@ public class Account implements OAuth2User {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public int compareTo(Account o) {
+        return this.id.compareTo(o.id);
     }
 }

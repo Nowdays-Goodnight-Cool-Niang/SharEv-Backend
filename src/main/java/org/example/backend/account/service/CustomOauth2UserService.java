@@ -22,13 +22,13 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = defaultOAuth2UserService.loadUser(userRequest);
-        Long id = oAuth2User.getAttribute("id");
+        Long kakaoOauthId = oAuth2User.getAttribute("id");
 
-        if (id == null) {
+        if (kakaoOauthId == null) {
             throw new OAuth2AuthenticationException("로그인 도중 오류가 발생했습니다. 운영진에게 문의해주세요.");
         }
 
-        return accountRepository.findById(id).orElseGet(() -> this.createAccount(oAuth2User, id));
+        return accountRepository.findByKakaoOauthId(kakaoOauthId).orElseGet(() -> this.createAccount(oAuth2User, kakaoOauthId));
     }
 
     private Account createAccount(OAuth2User oAuth2User, Long id) {

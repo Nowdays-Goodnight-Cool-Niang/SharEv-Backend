@@ -1,7 +1,9 @@
 package org.example.backend.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.backend.account.entity.Account;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,7 +20,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -26,6 +30,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    @Value("${origin.url}")
+    private String originUrl;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -91,8 +98,26 @@ public class SecurityConfig {
 
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(String.format("{\"isAuthenticated\": %s}", account.isAuthenticated()));
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> responseData = accountEntityToLoginResponse(account);
+
+            String jsonResponse = objectMapper.writeValueAsString(responseData);
+            response.getWriter().write(jsonResponse);
         };
+    }
+
+    private static Map<String, Object> accountEntityToLoginResponse(Account account) {
+        Map<String, Object> responseData = new HashMap<>();
+
+        responseData.put("isAuthenticated", account.isAuthenticated());
+        responseData.put("id", account.getId());
+        responseData.put("name", account.getName());
+        responseData.put("email", account.getEmail());
+        responseData.put("linkedinUrl", account.getLinkedinUrl());
+        responseData.put("githubUrl", account.getGithubUrl());
+        responseData.put("instagramUrl", account.getInstagramUrl());
+        return responseData;
     }
 
     private LogoutSuccessHandler logoutSuccessHandler() {
