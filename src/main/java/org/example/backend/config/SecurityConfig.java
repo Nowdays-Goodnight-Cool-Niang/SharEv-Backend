@@ -1,5 +1,6 @@
 package org.example.backend.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.backend.account.entity.Account;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +20,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -93,12 +96,28 @@ public class SecurityConfig {
         return (request, response, authentication) -> {
             Account account = (Account) authentication.getPrincipal();
 
-            if (account.isAuthenticated()) {
-                response.sendRedirect(originUrl + "/events");
-            } else {
-                response.sendRedirect(originUrl + "/profile-setup");
-            }
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> responseData = accountEntityToLoginResponse(account);
+
+            String jsonResponse = objectMapper.writeValueAsString(responseData);
+            response.getWriter().write(jsonResponse);
         };
+    }
+
+    private static Map<String, Object> accountEntityToLoginResponse(Account account) {
+        Map<String, Object> responseData = new HashMap<>();
+
+        responseData.put("isAuthenticated", account.isAuthenticated());
+        responseData.put("id", account.getId());
+        responseData.put("name", account.getName());
+        responseData.put("email", account.getEmail());
+        responseData.put("linkedinUrl", account.getLinkedinUrl());
+        responseData.put("githubUrl", account.getGithubUrl());
+        responseData.put("instagramUrl", account.getInstagramUrl());
+        return responseData;
     }
 
     private LogoutSuccessHandler logoutSuccessHandler() {
