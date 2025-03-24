@@ -33,4 +33,10 @@ public class ShareCardController {
         ResponseShareCardDto responseShareCardDto = shareCardService.getShareCard(participantsId);
         return ResponseEntity.ok(responseShareCardDto);
     }
+
+    @GetMapping
+    public ResponseEntity<ResponseShareCardDto> getMyShareCard(@AuthenticationPrincipal Account account) {
+        ResponseShareCardDto responseShareCardDto = shareCardService.getShareCard(account.getId());
+        return ResponseEntity.ok(responseShareCardDto);
+    }
 }
