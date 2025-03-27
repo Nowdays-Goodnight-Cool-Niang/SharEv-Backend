@@ -1,6 +1,7 @@
 package org.example.backend.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.backend.account.entity.Account;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,7 +59,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorizeRequests -> {
             authorizeRequests.requestMatchers(HttpMethod.GET)
                     .permitAll();
-            authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
+            authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login", "/accounts/{count}")
                     .permitAll();
             authorizeRequests.requestMatchers("/accounts")
                     .authenticated();
@@ -121,6 +122,14 @@ public class SecurityConfig {
     }
 
     private LogoutSuccessHandler logoutSuccessHandler() {
-        return (request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK);
+        return (request, response, authentication) -> {
+            Cookie cookie = new Cookie("JSESSIONID", null);
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
+
+            response.setStatus(HttpServletResponse.SC_OK);
+        };
     }
 }
