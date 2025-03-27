@@ -1,10 +1,7 @@
 package org.example.backend.socialDex.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.example.backend.account.entity.Account;
 
 import java.io.Serializable;
@@ -40,6 +37,7 @@ public class SocialDex {
 
     @Embeddable
     @Getter
+    @EqualsAndHashCode
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
     static public class SocialDexId implements Serializable {
