@@ -1,5 +1,6 @@
 package org.example.backend.account.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.dto.request.RequestUpdateInfoDto;
 import org.example.backend.account.dto.response.ResponseAccountIdDto;
@@ -19,9 +20,11 @@ public class AccountController {
 
     @PatchMapping
     public ResponseEntity<Void> updateAccountInfo(@AuthenticationPrincipal Account account,
-                                                  @RequestBody RequestUpdateInfoDto requestUpdateInfoDto) {
+                                                  @Valid @RequestBody RequestUpdateInfoDto requestUpdateInfoDto) {
 
-        accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto);
+        accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto.name(), requestUpdateInfoDto.email(),
+                requestUpdateInfoDto.linkedinUrl(), requestUpdateInfoDto.githubUrl(),
+                requestUpdateInfoDto.instagramUrl());
         return ResponseEntity.ok().build();
     }
 

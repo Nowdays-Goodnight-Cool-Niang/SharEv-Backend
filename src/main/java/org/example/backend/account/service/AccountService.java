@@ -1,7 +1,6 @@
 package org.example.backend.account.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.backend.account.dto.request.RequestUpdateInfoDto;
 import org.example.backend.account.entity.Account;
 import org.example.backend.account.repository.AccountRepository;
 import org.springframework.security.core.Authentication;
@@ -19,15 +18,17 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     @Transactional
-    public void updateAccountInfo(UUID accountId, RequestUpdateInfoDto requestUpdateInfoDto) {
+    public void updateAccountInfo(UUID accountId, String name, String email, String linkedinUrl, String githubUrl,
+                                  String instagramUrl) {
+
         Account accountEntity = accountRepository.findById(accountId)
                 .orElseThrow();
 
-        accountEntity.setName(requestUpdateInfoDto.name());
-        accountEntity.setEmail(requestUpdateInfoDto.email());
-        accountEntity.setLinkedinUrl(requestUpdateInfoDto.linkedinUrl());
-        accountEntity.setGithubUrl(requestUpdateInfoDto.githubUrl());
-        accountEntity.setInstagramUrl(requestUpdateInfoDto.instagramUrl());
+        accountEntity.setName(name);
+        accountEntity.setEmail(email);
+        accountEntity.setLinkedinUrl(linkedinUrl);
+        accountEntity.setGithubUrl(githubUrl);
+        accountEntity.setInstagramUrl(instagramUrl);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String clientRegistrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
