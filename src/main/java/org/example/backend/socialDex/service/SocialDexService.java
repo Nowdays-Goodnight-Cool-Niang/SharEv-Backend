@@ -32,7 +32,7 @@ public class SocialDexService {
         SocialDex socialDex = socialDexRepository.save(new SocialDex(firstAccount, secondAccount));
 
         SocialDex.SocialDexId socialDexId = socialDex.getId();
-        return new ResponseSocialDexDto(socialDexId.getFirstAccountId(), socialDexId.getFirstAccountId());
+        return new ResponseSocialDexDto(socialDexId.getFirstAccountId(), socialDexId.getSecondAccountId());
     }
 
     public ResponseSocialDexInfoDto getSocialDex(UUID accountId, Pageable pageable) {
