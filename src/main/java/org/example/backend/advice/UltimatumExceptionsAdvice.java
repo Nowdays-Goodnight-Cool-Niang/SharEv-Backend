@@ -21,7 +21,7 @@ public class UltimatumExceptionsAdvice {
                 .forEach(fieldError -> errorMessages.add(fieldError.getField(), getDefaultMessage(fieldError)));
 
         return ResponseEntity.badRequest()
-                .body(BasicErrorResponse.of(errorMessages.toString()));
+                .body(errorMessages);
     }
 
     private static String getDefaultMessage(FieldError fieldError) {
@@ -36,12 +36,5 @@ public class UltimatumExceptionsAdvice {
         }
 
         return defaultMessage;
-    }
-
-    private record BasicErrorResponse(String message) {
-
-        static BasicErrorResponse of(String message) {
-            return new BasicErrorResponse(message);
-        }
     }
 }
