@@ -38,13 +38,6 @@ public class UltimatumExceptionsAdvice {
         return defaultMessage;
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleExceptions(Exception e) {
-        return ResponseEntity
-                .internalServerError()
-                .body(BasicErrorResponse.of(e.getMessage()));
-    }
-
     private record BasicErrorResponse(String message) {
 
         static BasicErrorResponse of(String message) {
