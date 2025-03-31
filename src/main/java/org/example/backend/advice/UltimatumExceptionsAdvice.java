@@ -1,37 +1,54 @@
 package org.example.backend.advice;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 @RestControllerAdvice
 public class UltimatumExceptionsAdvice {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleRuntimeExceptions(HttpServletRequest request, RuntimeException e) {
-        return ResponseEntity
-            .badRequest()
-            .body(BasicErrorResponse.of(e.getMessage()));
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<?> handleBindException(BindException exception) {
+        MultiValueMap<String, String> errorMessages = new LinkedMultiValueMap<>();
+
+        exception.getFieldErrors()
+                .forEach(fieldError -> errorMessages.add(fieldError.getField(), getDefaultMessage(fieldError)));
+
+        return ResponseEntity.badRequest()
+                .body(BasicErrorResponse.of(errorMessages.toString()));
+    }
+
+    private static String getDefaultMessage(FieldError fieldError) {
+        if (fieldError.isBindingFailure()) {
+            return "유효한 값이 아닙니다";
+        }
+
+        String defaultMessage = fieldError.getDefaultMessage();
+
+        if (Objects.isNull(defaultMessage)) {
+            return "조건이 충족되지 않았습니다";
+        }
+
+        return defaultMessage;
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleExceptions(HttpServletRequest request, Exception e) {
+    public ResponseEntity<?> handleExceptions(Exception e) {
         return ResponseEntity
-            .badRequest()
-            .body(BasicErrorResponse.of(e.getMessage()));
+                .internalServerError()
+                .body(BasicErrorResponse.of(e.getMessage()));
     }
 
-    private static class BasicErrorResponse {
-        private boolean success;
-        private String message;
+    private record BasicErrorResponse(String message) {
 
         static BasicErrorResponse of(String message) {
-            BasicErrorResponse response = new BasicErrorResponse();
-            response.success = false;
-            response.message = message;
-            return response;
+            return new BasicErrorResponse(message);
         }
     }
 }
