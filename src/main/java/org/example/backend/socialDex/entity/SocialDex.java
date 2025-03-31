@@ -17,12 +17,12 @@ public class SocialDex {
     SocialDexId id;
 
     @MapsId("firstAccountId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "first_account_id")
     Account firstAccount;
 
     @MapsId("secondAccountId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "second_account_id")
     Account secondAccount;
 

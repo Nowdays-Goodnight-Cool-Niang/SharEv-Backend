@@ -37,4 +37,9 @@ public class AccountService {
 
         SecurityContextHolder.getContext().setAuthentication(oAuth2AuthenticationToken);
     }
+
+    @Transactional
+    public void delete(Account account) {
+        accountRepository.delete(account);
+    }
 }
