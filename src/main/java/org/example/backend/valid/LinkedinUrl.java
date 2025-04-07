@@ -12,9 +12,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = OptionalUrlValidator.LinkedInUrlValidator.class)
 public @interface LinkedinUrl {
-    String regexp() default "^www\\.linkedin\\.com/in/[\\w\\p{L}-]{3,30}$";
+    String regexp() default "^linkedin\\.com/in/[\\w\\p{L}-]{3,30}$";
 
-    String message() default "올바른 링크드인 URL 형식이 아닙니다. (www.linkedin.com/in/ 다음에 3-30자의 문자, 숫자, 하이픈만 허용)";
+    String message() default "올바른 링크드인 URL 형식이 아닙니다. (linkedin.com/in/ 다음에 3-30자의 문자, 숫자, 하이픈만 허용)";
 
     Class<?>[] groups() default {};
 
