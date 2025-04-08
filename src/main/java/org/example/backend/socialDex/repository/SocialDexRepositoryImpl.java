@@ -1,5 +1,7 @@
 package org.example.backend.socialDex.repository;
 
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -23,21 +25,32 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
 
         List<ResponseSocialDexInfoDto.AccountInfo> content = queryFactory
                 .select(new QResponseSocialDexInfoDto_AccountInfo(
+                        account.name,
                         account.email,
                         account.linkedinUrl,
                         account.githubUrl,
                         account.instagramUrl,
                         account.teamName,
                         account.position,
-                        account.introductionText
+                        account.introductionText,
+                        new CaseBuilder()
+                                .when(getRegisterFlag().gt(0))
+                                .then(true)
+                                .otherwise(false)
+
                 ))
                 .from(account)
-                .join(socialDex)
+                .leftJoin(socialDex)
                 .on(
                         socialDex.firstAccount.id.eq(account.id).and(socialDex.secondAccount.id.eq(accountId))
                                 .or(
                                         socialDex.secondAccount.id.eq(account.id).and(socialDex.firstAccount.id.eq(accountId))
                                 )
+                )
+                .where(account.id.ne(accountId))
+                .orderBy(
+                        getRegisterFlag()
+                                .desc()
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -46,14 +59,22 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(account.count())
                 .from(account)
-                .join(socialDex)
+                .leftJoin(socialDex)
                 .on(
                         socialDex.firstAccount.id.eq(account.id).and(socialDex.secondAccount.id.eq(accountId))
                                 .or(
                                         socialDex.secondAccount.id.eq(account.id).and(socialDex.firstAccount.id.eq(accountId))
                                 )
-                );
+                )
+                .where(account.id.ne(accountId));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    private static NumberExpression<Long> getRegisterFlag() {
+        return new CaseBuilder()
+                .when(socialDex.id.isNotNull())
+                .then(account.kakaoOauthId)
+                .otherwise(account.kakaoOauthId.negate());
     }
 }
