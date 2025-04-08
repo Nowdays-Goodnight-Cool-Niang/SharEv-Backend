@@ -1,29 +1,28 @@
 package org.example.backend.socialDex.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
-import org.springframework.data.domain.Page;
 
-public record ResponseSocialDexInfoDto(Long totalSize, Page<SocialDexInfo> socialDexInfoPage) {
+public interface ResponseSocialDexInfoDto {
 
-    public interface SocialDexInfo {
-    }
-
-    public record AccountInfo(String name, String email, String linkedinUrl, String githubUrl, String instagramUrl,
-                              String teamName, String position, String introductionText, boolean registerFlag)
-            implements SocialDexInfo {
+    record AccountInfo(String name, String email, String linkedinUrl, String githubUrl, String instagramUrl,
+                       String teamName, String position, String introductionText, boolean registerFlag)
+            implements ResponseSocialDexInfoDto {
         @QueryProjection
         public AccountInfo {
         }
 
-        public SocialDexInfo convertSocialDexInfo() {
+        public ResponseSocialDexInfoDto convertSocialDexInfo() {
             if (registerFlag) {
                 return this;
             }
 
             return new NotRegisteredAccountInfo(name, false);
         }
-    }
 
-    public record NotRegisteredAccountInfo(String name, boolean registerFlag) implements SocialDexInfo {
+        public record NotRegisteredAccountInfo(String name, boolean registerFlag) implements ResponseSocialDexInfoDto {
+        }
     }
 }
+
+
+

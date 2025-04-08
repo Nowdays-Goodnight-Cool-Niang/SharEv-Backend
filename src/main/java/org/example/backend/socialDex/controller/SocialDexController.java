@@ -31,7 +31,7 @@ public class SocialDexController {
 
     @GetMapping
     @Secured("ROLE_USER")
-    public ResponseEntity<Page<ResponseSocialDexInfoDto.SocialDexInfo>> getSocialDex(@AuthenticationPrincipal Account account, Pageable pageable) {
+    public ResponseEntity<Page<ResponseSocialDexInfoDto>> getSocialDex(@AuthenticationPrincipal Account account, Pageable pageable) {
         return ResponseEntity.ok(socialDexService.getSocialDex(account.getId(), pageable));
     }
 }

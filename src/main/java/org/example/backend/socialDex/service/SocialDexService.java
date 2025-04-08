@@ -35,7 +35,7 @@ public class SocialDexService {
         return new ResponseSocialDexDto(socialDexId.getFirstAccountId(), socialDexId.getSecondAccountId());
     }
 
-    public Page<ResponseSocialDexInfoDto.SocialDexInfo> getSocialDex(UUID accountId, Pageable pageable) {
+    public Page<ResponseSocialDexInfoDto> getSocialDex(UUID accountId, Pageable pageable) {
 
         Page<ResponseSocialDexInfoDto.AccountInfo> accountInfoPage = socialDexRepository.findDexParticipants(accountId, pageable);
         return accountInfoPage.map(ResponseSocialDexInfoDto.AccountInfo::convertSocialDexInfo);
