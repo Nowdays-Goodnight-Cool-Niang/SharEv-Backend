@@ -54,9 +54,9 @@ class SocialDexRepositoryTest {
         em.persist(fourthAccount);
         em.persist(fifthAccount);
 
-        em.persist(new SocialDex(thirdAccount, firstAccount));
-        em.persist(new SocialDex(thirdAccount, fourthAccount));
         em.persist(new SocialDex(thirdAccount, fifthAccount));
+        em.persist(new SocialDex(thirdAccount, fourthAccount));
+        em.persist(new SocialDex(thirdAccount, firstAccount));
 
         em.persist(new SocialDex(secondAccount, firstAccount));
         em.persist(new SocialDex(secondAccount, fourthAccount));
@@ -66,9 +66,9 @@ class SocialDexRepositoryTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(3, result.getTotalElements());
+        assertEquals(4, result.getTotalElements());
         assertEquals(2, result.getTotalPages());
         assertEquals(2, result.get().count());
-        assertEquals(List.of("one@email.com", "four@email.com"), result.get().map(ResponseSocialDexInfoDto.AccountInfo::email).toList());
+        assertEquals(List.of("five@email.com", "four@email.com"), result.get().map(ResponseSocialDexInfoDto.AccountInfo::email).toList());
     }
 }
