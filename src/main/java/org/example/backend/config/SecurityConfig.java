@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -71,6 +72,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Profile("docker")
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
