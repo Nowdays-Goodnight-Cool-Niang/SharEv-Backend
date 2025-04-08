@@ -58,12 +58,12 @@ public class SecurityConfig {
         });
 
         http.authorizeHttpRequests(authorizeRequests -> {
-            authorizeRequests.requestMatchers(HttpMethod.GET)
-                    .permitAll();
             authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
                     .permitAll();
             authorizeRequests.requestMatchers("/accounts")
                     .authenticated();
+            authorizeRequests.requestMatchers(HttpMethod.GET)
+                    .permitAll();
             authorizeRequests.anyRequest()
                     .hasRole("USER");
         });
