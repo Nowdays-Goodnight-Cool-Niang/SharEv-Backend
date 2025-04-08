@@ -6,6 +6,7 @@ import org.example.backend.shareCard.dto.request.RequestUpdateShareCardDto;
 import org.example.backend.shareCard.dto.response.ResponseShareCardDto;
 import org.example.backend.shareCard.service.ShareCardService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,7 @@ public class ShareCardController {
     }
 
     @GetMapping
+    @Secured("ROLE_USER")
     public ResponseEntity<ResponseShareCardDto> getMyShareCard(@AuthenticationPrincipal Account account) {
         ResponseShareCardDto responseShareCardDto = shareCardService.getShareCard(account.getId());
         return ResponseEntity.ok(responseShareCardDto);
