@@ -35,10 +35,9 @@ public class SocialDexService {
         return new ResponseSocialDexDto(socialDexId.getFirstAccountId(), socialDexId.getSecondAccountId());
     }
 
-    public ResponseSocialDexInfoDto getSocialDex(UUID accountId, Pageable pageable) {
-        long count = accountRepository.count() - 1;
-        Page<ResponseSocialDexInfoDto.AccountInfo> accountInfoPage = socialDexRepository.findDexParticipants(accountId, pageable);
+    public Page<ResponseSocialDexInfoDto.SocialDexInfo> getSocialDex(UUID accountId, Pageable pageable) {
 
-        return new ResponseSocialDexInfoDto(count, accountInfoPage);
+        Page<ResponseSocialDexInfoDto.AccountInfo> accountInfoPage = socialDexRepository.findDexParticipants(accountId, pageable);
+        return accountInfoPage.map(ResponseSocialDexInfoDto.AccountInfo::convertSocialDexInfo);
     }
 }
