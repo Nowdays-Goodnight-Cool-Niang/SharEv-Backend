@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -35,9 +36,9 @@ public class SocialDexService {
         return new ResponseSocialDexDto(socialDexId.getFirstAccountId(), socialDexId.getSecondAccountId());
     }
 
-    public Page<ResponseSocialDexInfoDto> getSocialDex(UUID accountId, Pageable pageable) {
+    public Page<ResponseSocialDexInfoDto> getSocialDex(UUID accountId, LocalDateTime snapshotTime, Pageable pageable) {
 
-        Page<ResponseSocialDexInfoDto.AccountInfo> accountInfoPage = socialDexRepository.findDexParticipants(accountId, pageable);
+        Page<ResponseSocialDexInfoDto.AccountInfo> accountInfoPage = socialDexRepository.findDexParticipants(accountId, snapshotTime, pageable);
         return accountInfoPage.map(ResponseSocialDexInfoDto.AccountInfo::convertSocialDexInfo);
     }
 }

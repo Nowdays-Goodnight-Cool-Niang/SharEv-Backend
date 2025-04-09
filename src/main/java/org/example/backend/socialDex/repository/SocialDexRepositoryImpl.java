@@ -1,7 +1,6 @@
 package org.example.backend.socialDex.repository;
 
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +21,7 @@ import static org.example.backend.socialDex.entity.QSocialDex.socialDex;
 public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
-    public Page<ResponseSocialDexInfoDto.AccountInfo> findDexParticipants(UUID accountId, Pageable pageable) {
+    public Page<ResponseSocialDexInfoDto.AccountInfo> findDexParticipants(UUID accountId, LocalDateTime snapshotTime, Pageable pageable) {
 
         List<ResponseSocialDexInfoDto.AccountInfo> content = queryFactory
                 .select(new QResponseSocialDexInfoDto_AccountInfo(
@@ -34,7 +34,7 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
                         account.position,
                         account.introductionText,
                         new CaseBuilder()
-                                .when(getRegisterFlag().gt(0))
+                                .when(socialDex.id.isNotNull())
                                 .then(true)
                                 .otherwise(false)
 
@@ -49,7 +49,11 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
                 )
                 .where(account.id.ne(accountId))
                 .orderBy(
-                        getRegisterFlag()
+                        account.createdAt.asc(),
+                        new CaseBuilder()
+                                .when(socialDex.id.isNotNull().and(socialDex.createdAt.loe(snapshotTime)))
+                                .then(account.kakaoOauthId)
+                                .otherwise(account.kakaoOauthId.negate())
                                 .desc()
                 )
                 .offset(pageable.getOffset())
@@ -69,12 +73,5 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
                 .where(account.id.ne(accountId));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
-    }
-
-    private static NumberExpression<Long> getRegisterFlag() {
-        return new CaseBuilder()
-                .when(socialDex.id.isNotNull())
-                .then(account.kakaoOauthId)
-                .otherwise(account.kakaoOauthId.negate());
     }
 }
