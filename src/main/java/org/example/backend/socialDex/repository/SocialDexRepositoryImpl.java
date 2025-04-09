@@ -49,12 +49,12 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
                 )
                 .where(account.id.ne(accountId))
                 .orderBy(
-                        account.createdAt.asc(),
                         new CaseBuilder()
                                 .when(socialDex.id.isNotNull().and(socialDex.createdAt.loe(snapshotTime)))
                                 .then(account.kakaoOauthId)
                                 .otherwise(account.kakaoOauthId.negate())
-                                .desc()
+                                .desc(),
+                        account.createdAt.asc()
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
