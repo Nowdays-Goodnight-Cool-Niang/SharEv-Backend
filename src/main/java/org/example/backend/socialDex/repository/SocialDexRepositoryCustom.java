@@ -8,5 +8,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public interface SocialDexRepositoryCustom {
+    Long getRegisterCount(UUID accountId, LocalDateTime snapshotTime);
+
     Page<ResponseSocialDexInfoDto.AccountInfo> findDexParticipants(UUID accountId, LocalDateTime snapshotTime, Pageable pageable);
 }
