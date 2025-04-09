@@ -36,9 +36,11 @@ public class SocialDexService {
         return new ResponseSocialDexDto(socialDexId.getFirstAccountId(), socialDexId.getSecondAccountId());
     }
 
-    public Page<ResponseSocialDexInfoDto> getSocialDex(UUID accountId, LocalDateTime snapshotTime, Pageable pageable) {
-
+    public ResponseSocialDexInfoDto getSocialDex(UUID accountId, LocalDateTime snapshotTime, Pageable pageable) {
+        Long registerCount = socialDexRepository.getRegisterCount(accountId, snapshotTime);
         Page<ResponseSocialDexInfoDto.AccountInfo> accountInfoPage = socialDexRepository.findDexParticipants(accountId, snapshotTime, pageable);
-        return accountInfoPage.map(ResponseSocialDexInfoDto.AccountInfo::convertSocialDexInfo);
+        Page<ResponseSocialDexInfoDto.SocialDexInfo> socialDexInfoPage = accountInfoPage.map(ResponseSocialDexInfoDto.AccountInfo::convertSocialDexInfo);
+
+        return new ResponseSocialDexInfoDto(registerCount, socialDexInfoPage);
     }
 }
