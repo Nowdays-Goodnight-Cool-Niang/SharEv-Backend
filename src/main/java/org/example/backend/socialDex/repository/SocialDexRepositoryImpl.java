@@ -78,13 +78,6 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(account.count())
                 .from(account)
-                .leftJoin(socialDex)
-                .on(
-                        socialDex.firstAccount.id.eq(account.id).and(socialDex.secondAccount.id.eq(accountId))
-                                .or(
-                                        socialDex.secondAccount.id.eq(account.id).and(socialDex.firstAccount.id.eq(accountId))
-                                )
-                )
                 .where(account.id.ne(accountId));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
