@@ -3,6 +3,8 @@ package org.example.backend.socialDex.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.backend.account.entity.Account;
+import org.example.backend.baseEntity.BaseTimeEntity;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -11,20 +13,21 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SocialDex {
+@EntityListeners(AuditingEntityListener.class)
+public class SocialDex extends BaseTimeEntity {
 
     @EmbeddedId
-    SocialDexId id;
+    private SocialDexId id;
 
     @MapsId("firstAccountId")
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "first_account_id")
-    Account firstAccount;
+    private Account firstAccount;
 
     @MapsId("secondAccountId")
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "second_account_id")
-    Account secondAccount;
+    private Account secondAccount;
 
     public SocialDex(Account firstAccount, Account secondAccount) {
         Account[] accounts = new Account[]{firstAccount, secondAccount};
