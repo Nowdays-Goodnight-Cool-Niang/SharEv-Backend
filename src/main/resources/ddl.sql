@@ -15,13 +15,17 @@ CREATE TABLE `accounts`
     `instagram_url`     VARCHAR(255)           NULL,
     `team_name`         VARCHAR(255)           NULL,
     `position`          VARCHAR(255)           NULL,
-    `introduction_text` VARCHAR(255)           NULL
+    `introduction_text` VARCHAR(255)           NULL,
+    `created_at`        timestamp              not NULL,
+    `updated_at`        timestamp              not NULL
 );
 
 CREATE TABLE `social_dex`
 (
     `first_account_id`  BINARY(16) NOT NULL,
     `second_account_id` BINARY(16) NOT NULL,
+    `created_at`        timestamp  not NULL,
+    `updated_at`        timestamp  not NULL,
     PRIMARY KEY (first_account_id, second_account_id),
     CONSTRAINT fk_first_account FOREIGN KEY (`first_account_id`) REFERENCES `accounts` (`account_id`),
     CONSTRAINT fk_second_account FOREIGN KEY (`second_account_id`) REFERENCES `accounts` (`account_id`)
