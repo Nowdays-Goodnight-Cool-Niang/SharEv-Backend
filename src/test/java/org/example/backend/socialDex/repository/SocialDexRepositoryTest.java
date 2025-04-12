@@ -135,12 +135,12 @@ class SocialDexRepositoryTest {
         Account secondAccount = new Account(2L, "2번 유저");
         secondAccount.setEmail("two@email.com");
 
-        em.persist(firstAccount);
-        em.persist(secondAccount);
+        em.persistAndFlush(firstAccount);
+        em.persistAndFlush(secondAccount);
 
         // when
         SocialDex socialDex = new SocialDex(firstAccount, secondAccount);
-        em.persist(socialDex);
+        em.persistAndFlush(socialDex);
 
         // then
         assertEquals(0L, socialDexRepository.getRegisterCount(secondAccount.getId(), secondAccount.getCreatedAt()));
