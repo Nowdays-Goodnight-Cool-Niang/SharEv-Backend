@@ -7,6 +7,7 @@ import org.example.backend.socialDex.dto.response.ResponseSocialDexDto;
 import org.example.backend.socialDex.dto.response.ResponseSocialDexInfoDto;
 import org.example.backend.socialDex.entity.SocialDex;
 import org.example.backend.socialDex.repository.SocialDexRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,9 +31,15 @@ public class SocialDexService {
         Account secondAccount = accountRepository.findById(secondAccountId)
                 .orElseThrow();
 
-        SocialDex socialDex = socialDexRepository.save(new SocialDex(firstAccount, secondAccount));
-
+        SocialDex socialDex = new SocialDex(firstAccount, secondAccount);
         SocialDex.SocialDexId socialDexId = socialDex.getId();
+
+        try {
+            socialDexRepository.save(socialDex);
+        } catch (DataIntegrityViolationException e) {
+            // ignore
+        }
+
         return new ResponseSocialDexDto(socialDexId.getFirstAccountId(), socialDexId.getSecondAccountId());
     }
 
