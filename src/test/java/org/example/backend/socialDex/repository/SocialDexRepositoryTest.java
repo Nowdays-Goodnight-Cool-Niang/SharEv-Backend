@@ -123,4 +123,27 @@ class SocialDexRepositoryTest {
         assertEquals(List.of("two@email.com", "four@email.com"), result.get().map(ResponseSocialDexInfoDto.AccountInfo::email).toList());
         assertEquals(List.of(false, true), result.get().map(ResponseSocialDexInfoDto.AccountInfo::registerFlag).toList());
     }
+
+    @Test
+    @DisplayName("도감에 등록된 인원수 확인")
+    void getRegisterCountTest() throws Exception {
+
+        // given
+        Account firstAccount = new Account(1L, "1번 유저");
+        firstAccount.setEmail("one@email.com");
+
+        Account secondAccount = new Account(2L, "2번 유저");
+        secondAccount.setEmail("two@email.com");
+
+        em.persist(firstAccount);
+        em.persist(secondAccount);
+
+        // when
+        SocialDex socialDex = new SocialDex(firstAccount, secondAccount);
+        em.persist(socialDex);
+
+        // then
+        assertEquals(0L, socialDexRepository.getRegisterCount(secondAccount.getId(), secondAccount.getCreatedAt()));
+        assertEquals(1L, socialDexRepository.getRegisterCount(secondAccount.getId(), socialDex.getCreatedAt()));
+    }
 }
