@@ -32,7 +32,7 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
                                         socialDex.secondAccount.id.eq(account.id).and(socialDex.firstAccount.id.eq(accountId))
                                 )
                 )
-                .where(account.id.ne(accountId), account.createdAt.loe(snapshotTime))
+                .where(account.id.ne(accountId), socialDex.createdAt.loe(snapshotTime))
                 .fetchOne();
     }
 
