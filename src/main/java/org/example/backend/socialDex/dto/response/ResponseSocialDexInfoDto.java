@@ -23,10 +23,10 @@ public record ResponseSocialDexInfoDto(Long registerCount, Page<SocialDexInfo> s
                 return this;
             }
 
-            return new NotRegisteredAccountInfo(name, false);
+            return new NotRegisteredAccountInfo(id, name, false);
         }
 
-        public record NotRegisteredAccountInfo(String name, boolean registerFlag) implements SocialDexInfo {
+        public record NotRegisteredAccountInfo(UUID id, String name, boolean registerFlag) implements SocialDexInfo {
         }
     }
 }
