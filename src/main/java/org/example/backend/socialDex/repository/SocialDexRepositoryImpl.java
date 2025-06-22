@@ -40,6 +40,7 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
 
         List<ResponseSocialDexInfoDto.AccountInfo> content = queryFactory
                 .select(new QResponseSocialDexInfoDto_AccountInfo(
+                        account.id,
                         account.name,
                         account.email,
                         account.linkedinUrl,
