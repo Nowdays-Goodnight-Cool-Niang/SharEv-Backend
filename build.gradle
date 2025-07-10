@@ -54,6 +54,9 @@ dependencies {
     implementation 'com.google.cloud:spring-cloud-gcp-starter-sql-mysql:6.2.3'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.session:spring-session-data-redis'
+
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
