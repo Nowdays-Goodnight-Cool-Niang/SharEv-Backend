@@ -75,7 +75,7 @@ jobs:
 
           gcloud compute instance-templates create-with-container "$NEW_TEMPLATE_NAME" \
             --project=${{ env.PROJECT_ID }} \
-            --region=${{ env.GAR_REGION }} \
+            --region=${{ env.GAR_LOCATION }} \
             --machine-type=${{ env.MACHINE_TYPE }} \
             --tags=${{ env.NETWORK_TAGS }} \
             --service-account=${{ env.GCP_SERVICE_ACCOUNT }} \
@@ -84,7 +84,7 @@ jobs:
           gcloud compute instance-groups managed rolling-action start-update ${{ env.INSTANCE_GROUP_NAME }} \
             --project=${{ env.PROJECT_ID }} \
             --version=template="$NEW_TEMPLATE_NAME" \
-            --region=${{ env.GAR_REGION }} \
+            --region=${{ env.GAR_LOCATION }} \
             --max-unavailable=0 \
             --max-surge=1
 
