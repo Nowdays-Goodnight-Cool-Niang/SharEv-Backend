@@ -27,8 +27,18 @@ jobs:
       - name: db 설정 로드
         run: echo "${{ secrets.PROD_PROPERTIES }}" > ./src/main/resources/application-prod.properties
 
-      - name: 테스트 및 빌드
-        run: ./gradlew clean build -Pprofile=prod
+      - name: Set up JDK 17 (Azul Zulu)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: 테스트
+        run: ./gradlew clean test -Pprofile=prod
 
       - name: Authenticate to Google Cloud
         id: 'auth'
@@ -45,10 +55,9 @@ jobs:
 
       - name: Build and Push Docker Image to Artifact Registry
         run: |
-          docker build -t ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker build -f Dockerfile -t ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
           docker push ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           
-          # 'latest' 태그도 함께 푸시하여 항상 최신 빌드를 가리키도록 함
           docker tag ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
           docker push ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
 
