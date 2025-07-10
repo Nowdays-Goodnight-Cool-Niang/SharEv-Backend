@@ -86,7 +86,7 @@ jobs:
             --version=template="$NEW_TEMPLATE_NAME" \
             --region=${{ env.GAR_LOCATION }} \
             --max-unavailable=0 \
-            --max-surge=1
+            --max-surge=3
 
       - name: Discord Notification (Success)
         if: success()
