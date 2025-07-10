@@ -77,7 +77,7 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.GAR_REGION }} \
             --machine-type=${{ env.MACHINE_TYPE }} \
-            --network-tags=${{ env.NETWORK_TAGS }} \
+            --tags=${{ env.NETWORK_TAGS }} \
             --service-account=${{ env.GCP_SERVICE_ACCOUNT }} \
             --container-image=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
