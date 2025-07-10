@@ -2,7 +2,7 @@ services:
   app:
     image: azul/zulu-openjdk:17.0.9
     ports:
-      - 8080:8080
+      - "8080:8080"
     depends_on:
       - mysql
     profiles:
@@ -22,4 +22,4 @@ services:
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
       - MYSQL_DATABASE=share_me
     ports:
-      - 3306:3306
+      - "3306:3306"

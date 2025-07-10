@@ -1,10 +1,11 @@
 package org.example.backend;
 
+import com.google.cloud.spring.autoconfigure.core.GcpContextAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {GcpContextAutoConfiguration.class})
 @EnableJpaAuditing
 public class BackendApplication {
 

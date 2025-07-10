@@ -49,6 +49,11 @@ dependencies {
     if (!project.hasProperty('docker')) {
         runtimeOnly 'org.springframework.boot:spring-boot-docker-compose'
     }
+
+    // production
+    implementation 'com.google.cloud:spring-cloud-gcp-starter-sql-mysql:6.2.3'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.session:spring-session-data-redis'
 }
 
 tasks.named('test') {
