@@ -73,6 +73,7 @@ jobs:
           avatarUrl: 'https://avatars.githubusercontent.com/u/9919?s=200&v=4'
           severity: info
           title: '✅ Spring 도커 이미지 배포 성공!'
+          description: '이미지 배포 완료.'
           details: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
 
       - name: Discord Notification (Failure)
@@ -84,4 +85,5 @@ jobs:
           avatarUrl: 'https://avatars.githubusercontent.com/u/9919?s=200&v=4'
           severity: error
           title: '❌ Spring 도커 이미지 배포 실패!'
+          description: '이미지 배포 실패.'
           details: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
