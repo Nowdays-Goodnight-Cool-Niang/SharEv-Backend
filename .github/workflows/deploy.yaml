@@ -3,9 +3,19 @@ on:
     branches:
       - main
 
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+  GAR_LOCATION: asia-northeast3 # Artifact Registry 리전
+  REPOSITORY: shareme-docker
+  IMAGE_NAME: shareme-backend
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write' # OIDC 인증을 위해 필수
 
     steps:
       - name: repository 로드
@@ -20,30 +30,24 @@ jobs:
       - name: 테스트 및 빌드
         run: ./gradlew clean build -Pprofile=prod
 
-      - name: 빌드된 파일 이름 변경
-        run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
-
-      - name: SCP로 파일 전송
-        uses: appleboy/scp-action@v0.1.7
+      - name: Authenticate to Google Cloud
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_PRIVATE_KEY }}
-          source: project.jar
-          target: "~/backend/new"
+          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
-      - name: SSH 접속
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_PRIVATE_KEY }}
-          script_stop: true
-          script: |
-            sudo rm -rf ~/backend/current
-            mkdir -p ~/backend/current
-            mv ~/backend/new/project.jar ~/backend/current/project.jar
-            cd ~/backend/current
-            sudo fuser -k -n tcp 8080 || true
-            nohup java -jar project.jar --server.port=8080 --spring.profiles.active=prod > ./output.log 2>&1 &
-            sudo rm -rf ~/backend/new
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker to use Google Cloud CLI
+        run: gcloud auth configure-docker ${GAR_LOCATION}-docker.pkg.dev
+
+      - name: Build and Push Docker Image to Artifact Registry
+        run: |
+          docker build -t ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker push ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          
+          # 'latest' 태그도 함께 푸시하여 항상 최신 빌드를 가리키도록 함
+          docker tag ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${GAR_LOCATION}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
