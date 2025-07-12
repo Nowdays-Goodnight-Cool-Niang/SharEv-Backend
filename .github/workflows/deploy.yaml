@@ -74,6 +74,9 @@ jobs:
           NEW_TEMPLATE_NAME="shareme-backend-template-$(echo ${{ github.sha }} | cut -c1-12)"
           echo "New Template Name: $NEW_TEMPLATE_NAME"
 
+          # Delete the template if it already exists from a previous failed run, ignore errors if it doesn't exist.
+          gcloud compute instance-templates delete "$NEW_TEMPLATE_NAME" --quiet || true
+
           # Construct the container metadata string with the new image
           METADATA_VALUE="spec:\n  containers:\n  - name: $NEW_TEMPLATE_NAME\n    image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}\n    stdin: false\n    tty: false\n  restartPolicy: Always"
 
