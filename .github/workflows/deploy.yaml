@@ -53,6 +53,9 @@ jobs:
         with:
           version: 'latest'
 
+      - name: Install gcloud beta components
+        run: gcloud components install beta -q
+
       - name: Configure Docker to use Google Cloud CLI
         run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
 
