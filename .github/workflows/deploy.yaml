@@ -96,7 +96,7 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --version=template="$NEW_TEMPLATE_NAME" \
             --region=${{ env.GAR_LOCATION }} \
-            --max-unavailable=0 \
+            --max-unavailable=1 \
             --max-surge=3
 
       - name: Discord Notification (Success)
