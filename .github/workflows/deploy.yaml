@@ -69,9 +69,10 @@ jobs:
           docker tag ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
           docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Deploy to Instance Group
+      - name: Deploy New Instance Template
         run: |
-          gcloud compute instance-groups managed rolling-action restart ${{ env.INSTANCE_GROUP_NAME }} \
+          gcloud compute instance-groups managed rolling-action start-update ${{ env.INSTANCE_GROUP_NAME }} \
+            --version=template=shareme-instance-template-v2 \
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.GAR_LOCATION }} \
             --max-unavailable=3
