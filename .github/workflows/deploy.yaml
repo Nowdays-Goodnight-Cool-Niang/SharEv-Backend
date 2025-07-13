@@ -74,7 +74,7 @@ jobs:
           gcloud compute instance-groups managed rolling-action restart ${{ env.INSTANCE_GROUP_NAME }} \
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.GAR_LOCATION }} \
-            --max-unavailable=20%
+            --max-unavailable=1
 
       - name: Discord Notification (Success)
         if: success()
