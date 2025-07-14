@@ -5,7 +5,6 @@ services:
       - "8080:8080"
     depends_on:
       - mysql
-      - redis
     profiles:
       - docker
     environment:
@@ -24,8 +23,3 @@ services:
       - MYSQL_DATABASE=share_me
     ports:
       - "3306:3306"
-
-  redis:
-    image: redis:7.2.5-alpine
-    ports:
-      - "6379:6379"
