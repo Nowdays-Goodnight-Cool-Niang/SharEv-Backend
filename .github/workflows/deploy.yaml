@@ -91,7 +91,7 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.GAR_LOCATION }} \
             --max-unavailable=0 \
-            --max-surge=1 \
+            --max-surge=3 \
             --minimal-action=replace
 
       - name: Discord Notification (Success)
