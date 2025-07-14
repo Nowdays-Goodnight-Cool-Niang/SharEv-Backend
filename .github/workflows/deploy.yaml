@@ -10,6 +10,7 @@ env:
   REPOSITORY: shareme-docker
   IMAGE_NAME: shareme-backend
   INSTANCE_GROUP_NAME: shareme-instance-group
+  HEALTH_CHECK_NAME: shareme-backend-health-check
   MACHINE_TYPE: e2-medium
   NETWORK_TAGS: shareme-backend,http-server,https-server,lb-health-check
   INSTANCE_TEMPLATE_NAME: shareme-inst-tmpl-${{ github.sha }}
@@ -75,6 +76,21 @@ jobs:
         run: |
           set -eo pipefail
 
+          echo "INFO: Checking for existing health check..."
+          if ! gcloud compute health-checks describe ${{ env.HEALTH_CHECK_NAME }} --project=${{ env.PROJECT_ID }} --global &>/dev/null; then
+            echo "INFO: Creating new health check '${{ env.HEALTH_CHECK_NAME }}'..."
+            gcloud compute health-checks create http ${{ env.HEALTH_CHECK_NAME }} \
+              --project=${{ env.PROJECT_ID }} \
+              --port=8080 \
+              --request-path=/api/actuator/health \
+              --check-interval=15s \
+              --timeout=10s \
+              --healthy-threshold=2 \
+              --unhealthy-threshold=3
+          else
+            echo "INFO: Health check '${{ env.HEALTH_CHECK_NAME }}' already exists."
+          fi
+
           echo "INFO: Creating new instance template '${{ env.INSTANCE_TEMPLATE_NAME }}'..."
           gcloud compute instance-templates create-with-container ${{ env.INSTANCE_TEMPLATE_NAME }} \
             --project=${{ env.PROJECT_ID }} \
@@ -90,7 +106,10 @@ jobs:
             --version=template=${{ env.INSTANCE_TEMPLATE_NAME }} \
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.GAR_LOCATION }} \
-            --max-unavailable=3
+            --max-unavailable=0 \
+            --max-surge=1 \
+            --health-check=${{ env.HEALTH_CHECK_NAME }} \
+            --health-check-initial-delay=300
 
       - name: Discord Notification (Success)
         if: success()
