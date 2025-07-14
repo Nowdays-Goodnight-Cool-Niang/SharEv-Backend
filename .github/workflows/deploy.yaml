@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - chore/connection
+      - main
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
