@@ -79,8 +79,8 @@ jobs:
 
           echo "INFO: Getting current instance template..."
           CURRENT_TEMPLATE_URL=$(gcloud compute instance-groups managed describe ${{ env.INSTANCE_GROUP_NAME }} \
-            --region=${{ env.GAR_LOCATION }} \
-            --format='get(version.instanceTemplate)')
+          --region=${{ env.GAR_LOCATION }} \
+          --format='get(instanceTemplate)')
 
           if [[ -z "$CURRENT_TEMPLATE_URL" ]]; then
             echo "::error::Failed to get current instance template from instance group '${{ env.INSTANCE_GROUP_NAME }}'. Please check if the group exists, has a template, and the service account has correct permissions."
