@@ -83,7 +83,8 @@ jobs:
             --network-interface="" \
             --tags=${{ env.NETWORK_TAGS }} \
             --service-account=${{ env.GCP_SERVICE_ACCOUNT }} \
-            --container-image=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            --container-image=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --scopes=https://www.googleapis.com/auth/cloud-platform
 
           echo "INFO: Starting rolling update for instance group '${{ env.INSTANCE_GROUP_NAME }}'..."
           gcloud compute instance-groups managed rolling-action start-update ${{ env.INSTANCE_GROUP_NAME }} \
