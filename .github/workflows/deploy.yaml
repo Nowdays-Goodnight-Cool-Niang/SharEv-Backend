@@ -10,6 +10,9 @@ env:
   REPOSITORY: shareme-docker
   IMAGE_NAME: shareme-backend
   INSTANCE_GROUP_NAME: shareme-instance-group
+  MACHINE_TYPE: e2-medium
+  NETWORK_TAGS: shareme-backend,http-server,https-server,lb-health-check
+  INSTANCE_TEMPLATE_NAME: shareme-inst-tmpl-${{ github.sha }}
 
 jobs:
   deploy:
@@ -50,6 +53,8 @@ jobs:
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: 'latest'
 
       - name: Configure Docker to use Google Cloud CLI
         run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
@@ -65,42 +70,35 @@ jobs:
           docker tag ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
           docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Deploy to Instance Group
+      - name: Deploy to GCP Compute Engine
+        id: deploy
         run: |
-          # 1. Get the name of the current template
-          SOURCE_TEMPLATE_NAME=$(gcloud compute instance-groups managed describe ${{ env.INSTANCE_GROUP_NAME }} --region=${{ env.GAR_LOCATION }} --format='value(instanceTemplate.basename())')
-          
-          # 2. Create a name for the new template
-          NEW_TEMPLATE_NAME="shareme-backend-template-$(echo ${{ github.sha }} | cut -c1-12)"
+          set -eo pipefail
 
-          echo "Source Template: $SOURCE_TEMPLATE_NAME"
-          echo "New Template: $NEW_TEMPLATE_NAME"
+          # Instance template이 존재하는지 확인
+          if ! gcloud compute instance-templates describe ${{ env.INSTANCE_TEMPLATE_NAME }} --project=${{ env.PROJECT_ID }} --quiet; then
+            echo "INFO: Creating new instance template '${{ env.INSTANCE_TEMPLATE_NAME }}'..."
+            gcloud compute instance-templates create-with-container ${{ env.INSTANCE_TEMPLATE_NAME }} \
+              --project=${{ env.PROJECT_ID }} \
+              --region=${{ env.GAR_LOCATION }} \
+              --machine-type=${{ env.MACHINE_TYPE }} \
+              --network-interface="" \
+              --tags=${{ env.NETWORK_TAGS }} \
+              --service-account=${{ env.GCP_SERVICE_ACCOUNT }} \
+              --container-image=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+              --scopes=https://www.googleapis.com/auth/cloud-platform
+          else
+            echo "INFO: Instance template '${{ env.INSTANCE_TEMPLATE_NAME }}' already exists. Skipping creation."
+          fi
 
-          # 3. Export the source template to a YAML file
-          gcloud compute instance-templates describe $SOURCE_TEMPLATE_NAME --region=${{ env.GAR_LOCATION }} --format=yaml > source_template.yaml
-
-          # 4. Create a new template config file by updating the image and removing output-only fields
-          NEW_IMAGE_PATH="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          cat source_template.yaml \
-            | sed "s|image: .*|$NEW_IMAGE_PATH|" \
-            | grep -v -e "^creationTimestamp:" -e "^id:" -e "^selfLink:" -e "^fingerprint:" -e "^name:" > new_template.yaml
-
-          echo "New template config being created:"
-          cat new_template.yaml
-
-          # 5. Create the new template from the modified YAML file
-          gcloud compute instance-templates create $NEW_TEMPLATE_NAME \
-            --project=${{ env.PROJECT_ID }} \
-            --region=${{ env.GAR_LOCATION }} \
-            --source-from-file=new_template.yaml
-
-          # 6. Start the rolling update with the new template
+          echo "INFO: Starting rolling update for instance group '${{ env.INSTANCE_GROUP_NAME }}'..."
           gcloud compute instance-groups managed rolling-action start-update ${{ env.INSTANCE_GROUP_NAME }} \
+            --version=template=${{ env.INSTANCE_TEMPLATE_NAME }} \
             --project=${{ env.PROJECT_ID }} \
-            --version=template="$NEW_TEMPLATE_NAME" \
             --region=${{ env.GAR_LOCATION }} \
             --max-unavailable=0 \
-            --max-surge=3
+            --max-surge=3 \
+            --minimal-action=replace
 
       - name: Discord Notification (Success)
         if: success()
