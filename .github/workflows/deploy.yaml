@@ -12,7 +12,7 @@ env:
   INSTANCE_GROUP_NAME: shareme-instance-group
   MACHINE_TYPE: e2-medium
   NETWORK_TAGS: shareme-backend,http-server,https-server,lb-health-check
-  INSTANCE_TEMPLATE_NAME: shareme-instance-template-${{ github.sha }}
+  INSTANCE_TEMPLATE_NAME: shareme-inst-tmpl-${{ github.sha }}
 
 jobs:
   deploy:
