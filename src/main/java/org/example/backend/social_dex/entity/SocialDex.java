@@ -12,7 +12,6 @@ import jakarta.persistence.MapsId;
 import java.io.Serializable;
 import java.util.Arrays;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,21 +39,32 @@ public class SocialDex extends BaseTimeEntity {
     private Participant secondParticipant;
 
     public SocialDex(Participant firstParticipant, Participant secondParticipant) {
-        Participant[] participants = new Participant[]{firstParticipant, secondParticipant};
-        Arrays.sort(participants);
+        this.id = new SocialDexId(firstParticipant.getId(), secondParticipant.getId());
 
-        this.id = new SocialDexId(participants[0].getId(), participants[1].getId());
-        this.firstParticipant = participants[0];
-        this.secondParticipant = participants[1];
+        if (this.id.firstParticipantId.equals(firstParticipant.getId())) {
+            this.firstParticipant = firstParticipant;
+            this.secondParticipant = secondParticipant;
+        } else {
+            this.firstParticipant = secondParticipant;
+            this.secondParticipant = firstParticipant;
+        }
     }
 
     @Embeddable
     @Getter
     @EqualsAndHashCode
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    @AllArgsConstructor
     public static class SocialDexId implements Serializable {
         private Long firstParticipantId;
         private Long secondParticipantId;
+
+        public SocialDexId(Long firstParticipantId, Long secondParticipantId) {
+            Long[] participantIds = {firstParticipantId, secondParticipantId};
+
+            Arrays.sort(participantIds);
+
+            this.firstParticipantId = participantIds[0];
+            this.secondParticipantId = participantIds[1];
+        }
     }
 }
