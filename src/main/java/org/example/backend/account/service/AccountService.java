@@ -9,8 +9,6 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -18,7 +16,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     @Transactional
-    public void updateAccountInfo(UUID accountId, String name, String email, String linkedinUrl, String githubUrl,
+    public void updateAccountInfo(Long accountId, String name, String email, String linkedinUrl, String githubUrl,
                                   String instagramUrl) {
 
         Account accountEntity = accountRepository.findById(accountId)

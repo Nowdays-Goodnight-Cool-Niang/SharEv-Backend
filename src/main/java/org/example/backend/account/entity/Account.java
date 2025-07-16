@@ -1,19 +1,22 @@
 package org.example.backend.account.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.backend.baseEntity.BaseTimeEntity;
+import org.example.backend.base_entity.BaseTimeEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -22,9 +25,9 @@ import java.util.UUID;
 public class Account extends BaseTimeEntity implements OAuth2User, Comparable<Account> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")
-    private UUID id;
+    private Long id;
 
     @Column
     private Long kakaoOauthId;
@@ -48,18 +51,6 @@ public class Account extends BaseTimeEntity implements OAuth2User, Comparable<Ac
     @Column
     @Setter
     private String instagramUrl;
-
-    @Column
-    @Setter
-    private String teamName;
-
-    @Column
-    @Setter
-    private String position;
-
-    @Column
-    @Setter
-    private String introductionText;
 
     public Account(Long kakaoOauthId, String name) {
         this.kakaoOauthId = kakaoOauthId;
