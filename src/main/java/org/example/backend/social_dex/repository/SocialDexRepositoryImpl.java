@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.example.backend.social_dex.dto.response.QResponseSocialDexInfoDto_ParticipantInfo;
-import org.example.backend.social_dex.dto.response.ResponseSocialDexInfoDto.ParticipantInfo;
+import org.example.backend.participant.dto.response.ParticipantProfile;
+import org.example.backend.participant.dto.response.QParticipantProfile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -42,12 +42,12 @@ public class SocialDexRepositoryImpl implements SocialDexRepositoryCustom {
                 .fetchOne();
     }
 
-    public Page<ParticipantInfo> findDexParticipants(UUID eventId, Long participantId,
-                                                     LocalDateTime snapshotTime,
-                                                     Pageable pageable) {
+    public Page<ParticipantProfile> findSocialDexParticipants(UUID eventId, Long participantId,
+                                                              LocalDateTime snapshotTime,
+                                                              Pageable pageable) {
 
-        List<ParticipantInfo> content = queryFactory
-                .select(new QResponseSocialDexInfoDto_ParticipantInfo(
+        List<ParticipantProfile> content = queryFactory
+                .select(new QParticipantProfile(
                         account.id,
                         account.name,
                         account.email,
