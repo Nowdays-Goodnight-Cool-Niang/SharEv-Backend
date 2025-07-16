@@ -36,10 +36,10 @@ public class Participant extends BaseTimeEntity {
     private Integer pinNumber;
 
     @Column
-    private String introduce;
+    private Integer iconNumber;
 
     @Column
-    private Integer iconNumber;
+    private String introduce;
 
     @Column
     private String reminderExperience;
