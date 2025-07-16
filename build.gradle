@@ -54,3 +54,32 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+def generatedDir = 'src/main/generated'
+
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(generatedDir))
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += [generatedDir]
+        }
+    }
+}
+
+tasks.register('cleanQClass', Delete) {
+    delete file(generatedDir)
+}
+
+// Deletes and regenerates all QueryDSL Q-classes.
+tasks.register('regenerateQClasses') {
+    group = 'build'
+    description = 'Deletes and regenerates all QueryDSL Q-classes.'
+    dependsOn 'cleanQClass', 'compileJava'
+}
+
+tasks.named('compileJava') {
+    mustRunAfter 'cleanQClass'
+}
