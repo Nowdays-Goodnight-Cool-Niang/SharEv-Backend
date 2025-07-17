@@ -1,7 +1,6 @@
 package org.example.backend.participant.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
-import org.example.backend.account.entity.Account;
 import org.example.backend.participant.entity.Participant;
 
 public record ParticipantProfile(Long participantId, String name, String email, String linkedinUrl,
@@ -16,9 +15,10 @@ public record ParticipantProfile(Long participantId, String name, String email, 
         // QueryProjection 명시를 위해 내용이 없는 생성자 구성, AllArgsConstructor 역할
     }
 
-    public ParticipantProfile(Account account, Participant participant, boolean registerFlag) {
-        this(participant.getId(), account.getName(), account.getEmail(), account.getLinkedinUrl(),
-                account.getGithubUrl(), account.getInstagramUrl(), participant.getIntroduce(),
+    public ParticipantProfile(Participant participant, boolean registerFlag) {
+        this(participant.getId(), participant.getAccount().getName(), participant.getAccount().getEmail(),
+                participant.getAccount().getLinkedinUrl(), participant.getAccount().getGithubUrl(),
+                participant.getAccount().getInstagramUrl(), participant.getIntroduce(),
                 participant.getReminderExperience(), participant.getWantAgainExperience(), registerFlag);
     }
 

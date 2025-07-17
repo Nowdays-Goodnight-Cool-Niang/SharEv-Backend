@@ -66,12 +66,9 @@ public class ParticipantService {
         Participant targetParticipant = participantRepository.findByEventIdAndPinNumber(eventId, pinNumber)
                 .orElseThrow();
 
-        Account targetAccount = accountRepository.findById(targetParticipant.getId())
-                .orElseThrow();
-
         boolean registerFlag = socialDexRepository.existsById(
                 new SocialDexId(participant.getId(), targetParticipant.getId()));
 
-        return new ParticipantProfile(targetAccount, targetParticipant, registerFlag);
+        return new ParticipantProfile(targetParticipant, registerFlag);
     }
 }
