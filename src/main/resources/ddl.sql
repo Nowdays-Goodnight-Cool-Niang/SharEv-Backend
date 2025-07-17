@@ -6,7 +6,7 @@ USE share_me;
 
 CREATE TABLE `accounts`
 (
-    `account_id`     BIGINT PRIMARY KEY NOT NULL,
+    `account_id`     BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `kakao_oauth_id` BIGINT UNIQUE      NOT NULL,
     `name`           VARCHAR(255)       NULL,
     `email`          VARCHAR(320)       NULL,
@@ -26,7 +26,7 @@ CREATE TABLE `events`
 
 CREATE TABLE `profiles`
 (
-    `profile_id`            BIGINT PRIMARY KEY NOT NULL,
+    `profile_id`            BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `event_id`              BINARY(16)         NOT NULL,
     `account_id`            BIGINT             NOT NULL,
     `pin_number`            INT                NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE `relations`
 
 CREATE TABLE `feedbacks`
 (
-    `feedback_id` BIGINT PRIMARY KEY NOT NULL,
+    `feedback_id` BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `feedback`    VARCHAR(255)       NULL,
     `created_at`  timestamp          NOT NULL,
     `updated_at`  timestamp          NOT NULL
