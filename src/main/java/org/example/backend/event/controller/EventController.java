@@ -49,7 +49,7 @@ public class EventController {
                                                              @AuthenticationPrincipal Account account,
                                                              @RequestBody RequestUpdateProfileInfoDto requestUpdateProfileInfoDto) {
         ResponseProfileInfoDto responseProfileInfoDto =
-                profileService.updateInfo(requestUpdateProfileInfoDto.eventId(), account.getId(),
+                profileService.updateInfo(eventId, account.getId(),
                         requestUpdateProfileInfoDto.introduce(),
                         requestUpdateProfileInfoDto.reminderExperience(),
                         requestUpdateProfileInfoDto.wantAgainExperience());
