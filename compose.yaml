@@ -2,7 +2,7 @@ services:
   app:
     image: azul/zulu-openjdk:17.0.9
     ports:
-      - 8080:8080
+      - "8080:8080"
     depends_on:
       - mysql
     profiles:
@@ -12,7 +12,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    command: sh -c "chmod +x ./gradlew && ./gradlew bootRun -Pdocker"
+    command: sh -c "chmod +x ./gradlew && ./gradlew bootJar -Pprofile=docker && java -jar build/libs/Backend-0.0.1-SNAPSHOT.jar"
 
   mysql:
     image: mysql:8.4.0
@@ -22,4 +22,4 @@ services:
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
       - MYSQL_DATABASE=share_me
     ports:
-      - 3306:3306
+      - "3306:3306"
