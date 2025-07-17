@@ -2,7 +2,9 @@ package org.example.backend.account.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
+import org.example.backend.account.entity.Feedback;
 import org.example.backend.account.repository.AccountRepository;
+import org.example.backend.account.repository.FeedbackRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final FeedbackRepository feedbackRepository;
 
     @Transactional
     public void updateAccountInfo(Long accountId, String name, String email, String linkedinUrl, String githubUrl,
@@ -33,7 +36,13 @@ public class AccountService {
     }
 
     @Transactional
-    public void delete(Account account) {
+    public void delete(Account account, String feedback) {
         accountRepository.delete(account);
+
+        if (feedback.isBlank()) {
+            return;
+        }
+
+        feedbackRepository.save(new Feedback(feedback));
     }
 }

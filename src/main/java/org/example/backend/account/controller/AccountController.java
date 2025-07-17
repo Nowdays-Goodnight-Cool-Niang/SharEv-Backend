@@ -3,6 +3,7 @@ package org.example.backend.account.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.backend.account.dto.request.RequestDeleteDto;
 import org.example.backend.account.dto.request.RequestUpdateInfoDto;
 import org.example.backend.account.dto.response.ResponseAccountInfo;
 import org.example.backend.account.entity.Account;
@@ -52,8 +53,9 @@ public class AccountController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> delete(@AuthenticationPrincipal Account account, HttpSession session) {
-        accountService.delete(account);
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal Account account,
+                                       @RequestBody RequestDeleteDto requestDeleteDto, HttpSession session) {
+        accountService.delete(account, requestDeleteDto.feedback());
 
         session.invalidate();
 
