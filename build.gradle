@@ -1,7 +1,16 @@
+buildscript {
+    ext {
+        restdocsApiSpecVersion = '0.19.2'
+        profile = (!project.hasProperty('profile') || !profile) ? 'none' : profile
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
+    id 'org.hidetake.swagger.generator' version '2.19.2'
 }
 
 group = 'org.example'
@@ -41,19 +50,26 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     testRuntimeOnly 'com.h2database:h2'
 
     // docker compose
-    if (!project.hasProperty('docker')) {
+    if ("${profile}" != 'docker') {
         runtimeOnly 'org.springframework.boot:spring-boot-docker-compose'
     }
+
+    // swagger
+    testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc"
+    testImplementation "com.epages:restdocs-api-spec-mockmvc:${restdocsApiSpecVersion}"
+    swaggerUI 'org.webjars:swagger-ui:5.15.1'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// === querydsl start ===
 
 def generatedDir = 'src/main/generated'
 
@@ -83,3 +99,55 @@ tasks.register('regenerateQClasses') {
 tasks.named('compileJava') {
     mustRunAfter 'cleanQClass'
 }
+
+// === querydsl end ===
+
+// === swagger start ===
+
+clean {
+    delete file("src/main/resources/static/docs/")
+}
+
+openapi3 {
+    server = "http://localhost:8080"
+    title = "share:v API"
+    description = "share:v API description"
+    version = "0.1.0"
+    format = "json"
+}
+
+swaggerSources {
+    sample {
+        setInputFile(file("${openapi3.outputDirectory}/openapi3.json"))
+    }
+}
+
+tasks.register("copySwaggerUISample") {
+    doLast {
+        def destinationDir
+
+        if ("${profile}" == 'docker') {
+            destinationDir = "${layout.buildDirectory.dir("resources/main/static/docs/").get()}"
+        } else {
+            destinationDir = "src/main/resources/static/docs/"
+        }
+
+        copy {
+            from("${generateSwaggerUISample.outputDir}")
+            into(destinationDir)
+        }
+    }
+}
+
+tasks.withType(GenerateSwaggerUI).configureEach {
+    dependsOn "openapi3"
+    finalizedBy copySwaggerUISample
+}
+
+bootJar {
+    if ("${profile}" != 'prod') {
+        dependsOn generateSwaggerUISample
+    }
+}
+
+// === swagger end ===
