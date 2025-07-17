@@ -55,8 +55,8 @@ public class RelationRepositoryImpl implements RelationRepositoryCustom {
                         account.githubUrl,
                         account.instagramUrl,
                         profile.introduce,
-                        profile.reminderExperience,
-                        profile.wantAgainExperience,
+                        profile.proudestExperience,
+                        profile.toughExperience,
                         new CaseBuilder()
                                 .when(relation.id.isNotNull())
                                 .then(true)

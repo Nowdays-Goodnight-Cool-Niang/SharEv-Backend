@@ -51,8 +51,8 @@ public class EventController {
         ResponseProfileInfoDto responseProfileInfoDto =
                 profileService.updateInfo(eventId, account.getId(),
                         requestUpdateProfileInfoDto.introduce(),
-                        requestUpdateProfileInfoDto.reminderExperience(),
-                        requestUpdateProfileInfoDto.wantAgainExperience());
+                        requestUpdateProfileInfoDto.proudestExperience(),
+                        requestUpdateProfileInfoDto.toughExperience());
 
         return ResponseEntity.ok(responseProfileInfoDto);
     }

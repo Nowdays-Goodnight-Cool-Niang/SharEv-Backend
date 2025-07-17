@@ -45,10 +45,10 @@ public class Profile extends BaseTimeEntity {
     private String introduce;
 
     @Column
-    private String reminderExperience;
+    private String proudestExperience;
 
     @Column
-    private String wantAgainExperience;
+    private String toughExperience;
 
     public Profile(Event event, Account account, Integer pinNumber, Integer iconNumber) {
         this.event = event;
@@ -57,9 +57,9 @@ public class Profile extends BaseTimeEntity {
         this.iconNumber = iconNumber;
     }
 
-    public void updateInfo(String introduce, String reminderExperience, String wantAgainExperience) {
+    public void updateInfo(String introduce, String proudestExperience, String toughExperience) {
         this.introduce = introduce;
-        this.reminderExperience = reminderExperience;
-        this.wantAgainExperience = wantAgainExperience;
+        this.proudestExperience = proudestExperience;
+        this.toughExperience = toughExperience;
     }
 }

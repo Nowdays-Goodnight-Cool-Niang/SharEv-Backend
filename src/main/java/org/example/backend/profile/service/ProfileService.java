@@ -44,15 +44,15 @@ public class ProfileService {
 
     @Transactional
     public ResponseProfileInfoDto updateInfo(UUID eventId, Long accountId, String introduce,
-                                             String reminderExperience,
-                                             String wantAgainExperience) {
+                                             String proudestExperience,
+                                             String toughExperience) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow();
 
-        profile.updateInfo(introduce, reminderExperience, wantAgainExperience);
+        profile.updateInfo(introduce, proudestExperience, toughExperience);
 
-        return new ResponseProfileInfoDto(profile.getIntroduce(), profile.getReminderExperience(),
-                profile.getWantAgainExperience());
+        return new ResponseProfileInfoDto(profile.getIntroduce(), profile.getProudestExperience(),
+                profile.getToughExperience());
     }
 
     public ResponseProfileDto getProfileByPinNumber(UUID eventId, Long accountId, Integer pinNumber) {
