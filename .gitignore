@@ -569,3 +569,6 @@ Temporary Items
 
 # querydsl
 src/main/generated
+
+# swagger
+src/main/resources/static/docs
