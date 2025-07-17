@@ -19,19 +19,15 @@ public class AccountService {
     public void updateAccountInfo(Long accountId, String name, String email, String linkedinUrl, String githubUrl,
                                   String instagramUrl) {
 
-        Account accountEntity = accountRepository.findById(accountId)
+        Account account = accountRepository.findById(accountId)
                 .orElseThrow();
 
-        accountEntity.setName(name);
-        accountEntity.setEmail(email);
-        accountEntity.setLinkedinUrl(linkedinUrl);
-        accountEntity.setGithubUrl(githubUrl);
-        accountEntity.setInstagramUrl(instagramUrl);
+        account.updateInfo(name, email, linkedinUrl, githubUrl, instagramUrl);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String clientRegistrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
         OAuth2AuthenticationToken oAuth2AuthenticationToken =
-                new OAuth2AuthenticationToken(accountEntity, accountEntity.getAuthorities(), clientRegistrationId);
+                new OAuth2AuthenticationToken(account, account.getAuthorities(), clientRegistrationId);
 
         SecurityContextHolder.getContext().setAuthentication(oAuth2AuthenticationToken);
     }

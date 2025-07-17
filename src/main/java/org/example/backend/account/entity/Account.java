@@ -12,7 +12,6 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.example.backend.base_entity.BaseTimeEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,7 +21,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "accounts")
-public class Account extends BaseTimeEntity implements OAuth2User, Comparable<Account> {
+public class Account extends BaseTimeEntity implements OAuth2User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,28 +32,31 @@ public class Account extends BaseTimeEntity implements OAuth2User, Comparable<Ac
     private Long kakaoOauthId;
 
     @Column
-    @Setter
     private String name;
 
     @Column
-    @Setter
     private String email;
 
     @Column
-    @Setter
     private String linkedinUrl;
 
     @Column
-    @Setter
     private String githubUrl;
 
     @Column
-    @Setter
     private String instagramUrl;
 
     public Account(Long kakaoOauthId, String name) {
         this.kakaoOauthId = kakaoOauthId;
         this.name = name;
+    }
+
+    public void updateInfo(String name, String email, String linkedinUrl, String githubUrl, String instagramUrl) {
+        this.name = name;
+        this.email = email;
+        this.linkedinUrl = linkedinUrl;
+        this.githubUrl = githubUrl;
+        this.instagramUrl = instagramUrl;
     }
 
     public boolean isAuthenticated() {
@@ -79,10 +81,5 @@ public class Account extends BaseTimeEntity implements OAuth2User, Comparable<Ac
     @Override
     public String getName() {
         return this.name;
-    }
-
-    @Override
-    public int compareTo(Account o) {
-        return this.id.compareTo(o.id);
     }
 }
