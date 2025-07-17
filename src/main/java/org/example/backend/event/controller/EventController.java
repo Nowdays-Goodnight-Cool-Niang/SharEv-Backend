@@ -5,14 +5,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
-import org.example.backend.participant.dto.request.RequestUpdateParticipantInfoDto;
-import org.example.backend.participant.dto.response.ParticipantProfileDto;
-import org.example.backend.participant.dto.response.ResponseParticipantInfoDto;
-import org.example.backend.participant.service.ParticipantService;
-import org.example.backend.social_dex.dto.request.RequestUpdateSocialDexDto;
-import org.example.backend.social_dex.dto.response.ResponseSocialDexDto;
-import org.example.backend.social_dex.dto.response.ResponseSocialDexParticipantProfileDto;
-import org.example.backend.social_dex.service.SocialDexService;
+import org.example.backend.profile.dto.request.RequestUpdateProfileInfoDto;
+import org.example.backend.profile.dto.response.ResponseProfileDto;
+import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
+import org.example.backend.profile.service.ProfileService;
+import org.example.backend.relation.dto.request.RequestUpdateRelationDto;
+import org.example.backend.relation.dto.response.ResponseRelationDto;
+import org.example.backend.relation.dto.response.ResponseRelationProfileDto;
+import org.example.backend.relation.service.RelationService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -32,67 +32,67 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class EventController {
 
-    private final ParticipantService participantService;
-    private final SocialDexService socialDexService;
+    private final ProfileService profileService;
+    private final RelationService relationService;
 
     @PostMapping("/{eventId}/participants")
     public ResponseEntity<Void> join(@PathVariable("eventId") UUID eventId,
                                      @AuthenticationPrincipal Account account) {
-        participantService.join(eventId, account.getId());
+        profileService.join(eventId, account.getId());
 
         return ResponseEntity.status(HTTPResponse.SC_CREATED)
                 .build();
     }
 
     @PatchMapping("/{eventId}/participants")
-    public ResponseEntity<ResponseParticipantInfoDto> updateInfo(@PathVariable("eventId") UUID eventId,
-                                                                 @AuthenticationPrincipal Account account,
-                                                                 @RequestBody RequestUpdateParticipantInfoDto requestUpdateParticipantInfoDto) {
-        ResponseParticipantInfoDto responseParticipantInfoDto =
-                participantService.updateInfo(requestUpdateParticipantInfoDto.eventId(), account.getId(),
-                        requestUpdateParticipantInfoDto.introduce(),
-                        requestUpdateParticipantInfoDto.reminderExperience(),
-                        requestUpdateParticipantInfoDto.wantAgainExperience());
+    public ResponseEntity<ResponseProfileInfoDto> updateInfo(@PathVariable("eventId") UUID eventId,
+                                                             @AuthenticationPrincipal Account account,
+                                                             @RequestBody RequestUpdateProfileInfoDto requestUpdateProfileInfoDto) {
+        ResponseProfileInfoDto responseProfileInfoDto =
+                profileService.updateInfo(requestUpdateProfileInfoDto.eventId(), account.getId(),
+                        requestUpdateProfileInfoDto.introduce(),
+                        requestUpdateProfileInfoDto.reminderExperience(),
+                        requestUpdateProfileInfoDto.wantAgainExperience());
 
-        return ResponseEntity.ok(responseParticipantInfoDto);
+        return ResponseEntity.ok(responseProfileInfoDto);
     }
 
     @GetMapping("/{eventId}/participants/{pinNumber}")
-    public ResponseEntity<ParticipantProfileDto> getParticipantProfile(@PathVariable("eventId") UUID eventId,
-                                                                       @AuthenticationPrincipal Account account,
-                                                                       @PathVariable(name = "pinNumber") Integer pinNumber) {
-        ParticipantProfileDto participantProfile =
-                participantService.getParticipantProfile(eventId, account.getId(), pinNumber);
+    public ResponseEntity<ResponseProfileDto> getParticipantProfile(@PathVariable("eventId") UUID eventId,
+                                                                    @AuthenticationPrincipal Account account,
+                                                                    @PathVariable(name = "pinNumber") Integer pinNumber) {
+        ResponseProfileDto participantProfile =
+                profileService.getParticipantProfile(eventId, account.getId(), pinNumber);
 
         return ResponseEntity.ok(participantProfile);
     }
 
     @Secured("ROLE_USER")
     @GetMapping("/{eventId}/participants")
-    public ResponseEntity<ParticipantProfileDto> getMyParticipantProfile(@PathVariable("eventId") UUID eventId,
-                                                                         @AuthenticationPrincipal Account account) {
-        ParticipantProfileDto myParticipantProfile = participantService.getMyParticipantProfile(eventId,
+    public ResponseEntity<ResponseProfileDto> getMyParticipantProfile(@PathVariable("eventId") UUID eventId,
+                                                                      @AuthenticationPrincipal Account account) {
+        ResponseProfileDto myParticipantProfile = profileService.getMyParticipantProfile(eventId,
                 account.getId());
 
         return ResponseEntity.ok(myParticipantProfile);
     }
 
     @PostMapping("/{eventId}/participants/social-dex")
-    public ResponseEntity<ResponseSocialDexDto> register(@PathVariable("eventId") UUID eventId,
-                                                         @AuthenticationPrincipal Account account,
-                                                         @RequestBody RequestUpdateSocialDexDto requestUpdateSocialDexDto) {
-        ResponseSocialDexDto responseSocialDexDto =
-                socialDexService.register(eventId, account.getId(), requestUpdateSocialDexDto.targetPinNumber());
+    public ResponseEntity<ResponseRelationDto> register(@PathVariable("eventId") UUID eventId,
+                                                        @AuthenticationPrincipal Account account,
+                                                        @RequestBody RequestUpdateRelationDto requestUpdateRelationDto) {
+        ResponseRelationDto responseRelationDto =
+                relationService.register(eventId, account.getId(), requestUpdateRelationDto.targetPinNumber());
 
-        return ResponseEntity.ok(responseSocialDexDto);
+        return ResponseEntity.ok(responseRelationDto);
     }
 
     @Secured("ROLE_USER")
     @GetMapping("/{eventId}/participants/social-dex")
-    public ResponseEntity<ResponseSocialDexParticipantProfileDto> getSocialDex(@PathVariable("eventId") UUID eventId,
-                                                                               @AuthenticationPrincipal Account account,
-                                                                               @RequestParam("snapshotTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime snapshotTime,
-                                                                               Pageable pageable) {
-        return ResponseEntity.ok(socialDexService.getSocialDex(eventId, account.getId(), snapshotTime, pageable));
+    public ResponseEntity<ResponseRelationProfileDto> getSocialDex(@PathVariable("eventId") UUID eventId,
+                                                                   @AuthenticationPrincipal Account account,
+                                                                   @RequestParam("snapshotTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime snapshotTime,
+                                                                   Pageable pageable) {
+        return ResponseEntity.ok(relationService.getSocialDex(eventId, account.getId(), snapshotTime, pageable));
     }
 }

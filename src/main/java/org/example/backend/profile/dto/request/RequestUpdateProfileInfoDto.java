@@ -1,8 +1,8 @@
-package org.example.backend.participant.dto.request;
+package org.example.backend.profile.dto.request;
 
 import java.util.UUID;
 
-public record RequestUpdateParticipantInfoDto(
+public record RequestUpdateProfileInfoDto(
         UUID eventId,
 
         String introduce,

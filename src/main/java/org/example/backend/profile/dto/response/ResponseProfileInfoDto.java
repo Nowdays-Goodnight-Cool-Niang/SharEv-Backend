@@ -1,6 +1,6 @@
-package org.example.backend.participant.dto.response;
+package org.example.backend.profile.dto.response;
 
-public record ResponseParticipantInfoDto(
+public record ResponseProfileInfoDto(
         String introduce,
 
         String reminderExperience,

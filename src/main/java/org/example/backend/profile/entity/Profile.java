@@ -1,4 +1,4 @@
-package org.example.backend.participant.entity;
+package org.example.backend.profile.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,12 +19,12 @@ import org.example.backend.event.entity.Event;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "participants")
-public class Participant extends BaseTimeEntity {
+@Table(name = "profiles")
+public class Profile extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "participant_id")
+    @Column(name = "profile_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,7 +50,7 @@ public class Participant extends BaseTimeEntity {
     @Column
     private String wantAgainExperience;
 
-    public Participant(Event event, Account account, Integer pinNumber, Integer iconNumber) {
+    public Profile(Event event, Account account, Integer pinNumber, Integer iconNumber) {
         this.event = event;
         this.account = account;
         this.pinNumber = pinNumber;
