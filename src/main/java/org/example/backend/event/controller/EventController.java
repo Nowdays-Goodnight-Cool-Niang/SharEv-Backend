@@ -52,7 +52,7 @@ public class EventController {
                 requestUpdateParticipantInfoDto.introduce(), requestUpdateParticipantInfoDto.reminderExperience(),
                 requestUpdateParticipantInfoDto.wantAgainExperience());
 
-        ResponseParticipantInfoDto responseParticipantInfoDto = participantService.getMyParticipantInfo(eventId,
+        ResponseParticipantInfoDto responseParticipantInfoDto = participantService.getParticipantInfo(eventId,
                 account.getId());
         return ResponseEntity.ok(responseParticipantInfoDto);
     }
@@ -72,7 +72,7 @@ public class EventController {
     public ResponseEntity<ResponseParticipantInfoDto> getMyParticipantInfo(@PathVariable("eventId") UUID eventId,
                                                                            @AuthenticationPrincipal Account account) {
         ResponseParticipantInfoDto responseParticipantInfoDto =
-                participantService.getMyParticipantInfo(eventId, account.getId());
+                participantService.getParticipantInfo(eventId, account.getId());
 
         return ResponseEntity.ok(responseParticipantInfoDto);
     }

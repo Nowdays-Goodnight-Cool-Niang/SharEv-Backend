@@ -51,7 +51,7 @@ public class ParticipantService {
         participant.updateInfo(introduce, reminderExperience, wantAgainExperience);
     }
 
-    public ResponseParticipantInfoDto getMyParticipantInfo(UUID eventId, Long accountId) {
+    public ResponseParticipantInfoDto getParticipantInfo(UUID eventId, Long accountId) {
         Participant participant = participantRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow();
 
