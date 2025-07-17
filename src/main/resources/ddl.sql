@@ -24,9 +24,9 @@ CREATE TABLE `events`
     `updated_at` timestamp              NOT NULL
 );
 
-CREATE TABLE `participants`
+CREATE TABLE `profiles`
 (
-    `participant_id`        BIGINT PRIMARY KEY NOT NULL,
+    `profile_id`            BIGINT PRIMARY KEY NOT NULL,
     `event_id`              BINARY(16)         NOT NULL,
     `account_id`            BIGINT             NOT NULL,
     `pin_number`            INT                NOT NULL,
@@ -41,15 +41,15 @@ CREATE TABLE `participants`
     INDEX idx_event_pin_number (`event_id`, `pin_number`)
 );
 
-CREATE TABLE `social_dex`
+CREATE TABLE `relations`
 (
-    `first_participant_id`  BIGINT    NOT NULL,
-    `second_participant_id` BIGINT    NOT NULL,
-    `created_at`            timestamp NOT NULL,
-    `updated_at`            timestamp NOT NULL,
-    PRIMARY KEY (first_participant_id, second_participant_id),
-    CONSTRAINT fk_first_participant FOREIGN KEY (`first_participant_id`) REFERENCES `participants` (`participant_id`),
-    CONSTRAINT fk_second_participant FOREIGN KEY (`second_participant_id`) REFERENCES `participants` (`participant_id`)
+    `first_profile_id`  BIGINT    NOT NULL,
+    `second_profile_id` BIGINT    NOT NULL,
+    `created_at`        timestamp NOT NULL,
+    `updated_at`        timestamp NOT NULL,
+    PRIMARY KEY (first_profile_id, second_profile_id),
+    CONSTRAINT fk_first_profile FOREIGN KEY (`first_profile_id`) REFERENCES `profiles` (`profile_id`),
+    CONSTRAINT fk_second_profile FOREIGN KEY (`second_profile_id`) REFERENCES `profiles` (`profile_id`)
 );
 
 CREATE TABLE `feedbacks`
