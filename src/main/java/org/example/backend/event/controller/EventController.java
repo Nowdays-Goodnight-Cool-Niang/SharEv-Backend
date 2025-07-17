@@ -48,19 +48,19 @@ public class EventController {
     public ResponseEntity<ResponseParticipantInfoDto> updateInfo(@PathVariable("eventId") UUID eventId,
                                                                  @AuthenticationPrincipal Account account,
                                                                  @RequestBody RequestUpdateParticipantInfoDto requestUpdateParticipantInfoDto) {
-        participantService.updateInfo(requestUpdateParticipantInfoDto.eventId(), account.getId(),
-                requestUpdateParticipantInfoDto.introduce(), requestUpdateParticipantInfoDto.reminderExperience(),
-                requestUpdateParticipantInfoDto.wantAgainExperience());
+        ResponseParticipantInfoDto responseParticipantInfoDto =
+                participantService.updateInfo(requestUpdateParticipantInfoDto.eventId(), account.getId(),
+                        requestUpdateParticipantInfoDto.introduce(),
+                        requestUpdateParticipantInfoDto.reminderExperience(),
+                        requestUpdateParticipantInfoDto.wantAgainExperience());
 
-        ResponseParticipantInfoDto responseParticipantInfoDto = participantService.getParticipantInfo(eventId,
-                account.getId());
         return ResponseEntity.ok(responseParticipantInfoDto);
     }
 
     @GetMapping("/{eventId}/participants/{pinNumber}")
-    public ResponseEntity<ParticipantProfileDto> getParticipantInfo(@PathVariable("eventId") UUID eventId,
-                                                                    @AuthenticationPrincipal Account account,
-                                                                    @PathVariable(name = "pinNumber") Integer pinNumber) {
+    public ResponseEntity<ParticipantProfileDto> getParticipantProfile(@PathVariable("eventId") UUID eventId,
+                                                                       @AuthenticationPrincipal Account account,
+                                                                       @PathVariable(name = "pinNumber") Integer pinNumber) {
         ParticipantProfileDto participantProfile =
                 participantService.getParticipantProfile(eventId, account.getId(), pinNumber);
 
@@ -69,12 +69,12 @@ public class EventController {
 
     @Secured("ROLE_USER")
     @GetMapping("/{eventId}/participants")
-    public ResponseEntity<ResponseParticipantInfoDto> getMyParticipantInfo(@PathVariable("eventId") UUID eventId,
-                                                                           @AuthenticationPrincipal Account account) {
-        ResponseParticipantInfoDto responseParticipantInfoDto =
-                participantService.getParticipantInfo(eventId, account.getId());
+    public ResponseEntity<ParticipantProfileDto> getMyParticipantProfile(@PathVariable("eventId") UUID eventId,
+                                                                         @AuthenticationPrincipal Account account) {
+        ParticipantProfileDto myParticipantProfile = participantService.getMyParticipantProfile(eventId,
+                account.getId());
 
-        return ResponseEntity.ok(responseParticipantInfoDto);
+        return ResponseEntity.ok(myParticipantProfile);
     }
 
     @PostMapping("/{eventId}/participants/social-dex")

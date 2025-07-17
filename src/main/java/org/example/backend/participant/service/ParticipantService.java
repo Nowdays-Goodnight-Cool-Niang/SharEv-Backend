@@ -43,17 +43,13 @@ public class ParticipantService {
     }
 
     @Transactional
-    public void updateInfo(UUID eventId, Long accountId, String introduce, String reminderExperience,
-                           String wantAgainExperience) {
+    public ResponseParticipantInfoDto updateInfo(UUID eventId, Long accountId, String introduce,
+                                                 String reminderExperience,
+                                                 String wantAgainExperience) {
         Participant participant = participantRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow();
 
         participant.updateInfo(introduce, reminderExperience, wantAgainExperience);
-    }
-
-    public ResponseParticipantInfoDto getParticipantInfo(UUID eventId, Long accountId) {
-        Participant participant = participantRepository.findByEventIdAndAccountId(eventId, accountId)
-                .orElseThrow();
 
         return new ResponseParticipantInfoDto(participant.getIntroduce(), participant.getReminderExperience(),
                 participant.getWantAgainExperience());
@@ -70,5 +66,12 @@ public class ParticipantService {
                 new SocialDexId(participant.getId(), targetParticipant.getId()));
 
         return new ParticipantProfile(targetParticipant, registerFlag);
+    }
+
+    public ParticipantProfileDto getMyParticipantProfile(UUID eventId, Long accountId) {
+        Participant participant = participantRepository.findByEventIdAndAccountId(eventId, accountId)
+                .orElseThrow();
+
+        return new ParticipantProfile(participant, false);
     }
 }
