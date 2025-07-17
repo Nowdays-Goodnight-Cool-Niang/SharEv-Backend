@@ -51,3 +51,11 @@ CREATE TABLE `social_dex`
     CONSTRAINT fk_first_participant FOREIGN KEY (`first_participant_id`) REFERENCES `participants` (`participant_id`),
     CONSTRAINT fk_second_participant FOREIGN KEY (`second_participant_id`) REFERENCES `participants` (`participant_id`)
 );
+
+CREATE TABLE `feedbacks`
+(
+    `feedback_id` BIGINT PRIMARY KEY NOT NULL,
+    `feedback`    VARCHAR(255)       NULL,
+    `created_at`  timestamp          NOT NULL,
+    `updated_at`  timestamp          NOT NULL
+);
