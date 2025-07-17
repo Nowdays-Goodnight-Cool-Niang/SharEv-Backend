@@ -26,16 +26,16 @@ CREATE TABLE `events`
 
 CREATE TABLE `profiles`
 (
-    `profile_id`            BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    `event_id`              BINARY(16)         NOT NULL,
-    `account_id`            BIGINT             NOT NULL,
-    `pin_number`            INT                NOT NULL,
-    `icon_number`           INT                NOT NULL,
-    `introduce`             VARCHAR(255)       NULL,
-    `reminder_experience`   VARCHAR(255)       NULL,
-    `want_again_experience` VARCHAR(255)       NULL,
-    `created_at`            timestamp          NOT NULL,
-    `updated_at`            timestamp          NOT NULL,
+    `profile_id`          BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `event_id`            BINARY(16)         NOT NULL,
+    `account_id`          BIGINT             NOT NULL,
+    `pin_number`          INT                NOT NULL,
+    `icon_number`         INT                NOT NULL,
+    `introduce`           VARCHAR(255)       NULL,
+    `proudest_experience` VARCHAR(255)       NULL,
+    `tough_experience`    VARCHAR(255)       NULL,
+    `created_at`          timestamp          NOT NULL,
+    `updated_at`          timestamp          NOT NULL,
     CONSTRAINT fk_event FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`),
     CONSTRAINT fk_account FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
     INDEX idx_event_pin_number (`event_id`, `pin_number`)
