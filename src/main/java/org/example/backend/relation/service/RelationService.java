@@ -39,8 +39,8 @@ public class RelationService {
         return new ResponseRelationDto(relationId.getFirstProfileId(), relationId.getSecondProfileId());
     }
 
-    public ResponseRelationProfileDto getSocialDex(UUID eventId, Long accountId, LocalDateTime snapshotTime,
-                                                   Pageable pageable) {
+    public ResponseRelationProfileDto getParticipants(UUID eventId, Long accountId, LocalDateTime snapshotTime,
+                                                      Pageable pageable) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow();
 

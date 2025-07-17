@@ -55,7 +55,7 @@ public class ProfileService {
                 profile.getWantAgainExperience());
     }
 
-    public ResponseProfileDto getParticipantProfile(UUID eventId, Long accountId, Integer pinNumber) {
+    public ResponseProfileDto getProfileByPinNumber(UUID eventId, Long accountId, Integer pinNumber) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow();
 
@@ -68,7 +68,7 @@ public class ProfileService {
         return new ProfileDto(targetProfile, registerFlag);
     }
 
-    public ResponseProfileDto getMyParticipantProfile(UUID eventId, Long accountId) {
+    public ResponseProfileDto getMyProfile(UUID eventId, Long accountId) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow();
 
