@@ -35,7 +35,7 @@ public class EventController {
     private final ProfileService profileService;
     private final RelationService relationService;
 
-    @PostMapping("/{eventId}/participants")
+    @PostMapping("/{eventId}/profiles")
     public ResponseEntity<Void> join(@PathVariable("eventId") UUID eventId,
                                      @AuthenticationPrincipal Account account) {
         profileService.join(eventId, account.getId());
@@ -44,7 +44,7 @@ public class EventController {
                 .build();
     }
 
-    @PatchMapping("/{eventId}/participants")
+    @PatchMapping("/{eventId}/profiles")
     public ResponseEntity<ResponseProfileInfoDto> updateInfo(@PathVariable("eventId") UUID eventId,
                                                              @AuthenticationPrincipal Account account,
                                                              @RequestBody RequestUpdateProfileInfoDto requestUpdateProfileInfoDto) {
@@ -57,7 +57,7 @@ public class EventController {
         return ResponseEntity.ok(responseProfileInfoDto);
     }
 
-    @GetMapping("/{eventId}/participants/{pinNumber}")
+    @GetMapping("/{eventId}/profiles/{pinNumber}")
     public ResponseEntity<ResponseProfileDto> getParticipantProfile(@PathVariable("eventId") UUID eventId,
                                                                     @AuthenticationPrincipal Account account,
                                                                     @PathVariable(name = "pinNumber") Integer pinNumber) {
@@ -68,7 +68,7 @@ public class EventController {
     }
 
     @Secured("ROLE_USER")
-    @GetMapping("/{eventId}/participants")
+    @GetMapping("/{eventId}/profiles")
     public ResponseEntity<ResponseProfileDto> getMyParticipantProfile(@PathVariable("eventId") UUID eventId,
                                                                       @AuthenticationPrincipal Account account) {
         ResponseProfileDto myParticipantProfile = profileService.getMyParticipantProfile(eventId,
@@ -77,7 +77,7 @@ public class EventController {
         return ResponseEntity.ok(myParticipantProfile);
     }
 
-    @PostMapping("/{eventId}/participants/social-dex")
+    @PostMapping("/{eventId}/participants")
     public ResponseEntity<ResponseRelationDto> register(@PathVariable("eventId") UUID eventId,
                                                         @AuthenticationPrincipal Account account,
                                                         @RequestBody RequestUpdateRelationDto requestUpdateRelationDto) {
@@ -88,7 +88,7 @@ public class EventController {
     }
 
     @Secured("ROLE_USER")
-    @GetMapping("/{eventId}/participants/social-dex")
+    @GetMapping("/{eventId}/participants")
     public ResponseEntity<ResponseRelationProfileDto> getSocialDex(@PathVariable("eventId") UUID eventId,
                                                                    @AuthenticationPrincipal Account account,
                                                                    @RequestParam("snapshotTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime snapshotTime,
