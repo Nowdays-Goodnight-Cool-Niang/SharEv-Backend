@@ -63,6 +63,14 @@ dependencies {
     testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc"
     testImplementation "com.epages:restdocs-api-spec-mockmvc:${restdocsApiSpecVersion}"
     swaggerUI 'org.webjars:swagger-ui:5.15.1'
+
+    // production
+    implementation 'com.google.cloud:spring-cloud-gcp-starter-sql-mysql:6.2.3'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.session:spring-session-data-redis'
+
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
