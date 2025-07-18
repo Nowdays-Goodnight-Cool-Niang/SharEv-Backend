@@ -55,7 +55,7 @@ dependencies {
     testRuntimeOnly 'com.h2database:h2'
 
     // docker compose
-    if ("${profile}" != 'docker') {
+    if ("${profile}" != 'dev') {
         runtimeOnly 'org.springframework.boot:spring-boot-docker-compose'
     }
 
@@ -134,7 +134,7 @@ tasks.register("copySwaggerUISample") {
     doLast {
         def destinationDir
 
-        if ("${profile}" == 'docker') {
+        if ("${profile}" == 'dev') {
             destinationDir = "${layout.buildDirectory.dir("resources/main/static/docs/").get()}"
         } else {
             destinationDir = "src/main/resources/static/docs/"

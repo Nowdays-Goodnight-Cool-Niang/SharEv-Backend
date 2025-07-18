@@ -1,18 +1,18 @@
 services:
   app:
-    image: azul/zulu-openjdk:17.0.9
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_PROFILE: dev
     ports:
       - "8080:8080"
     depends_on:
       - mysql
     profiles:
-      - docker
+      - dev
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    volumes:
-      - .:/app
-    working_dir: /app
-    command: sh -c "chmod +x ./gradlew && ./gradlew bootJar -Pprofile=docker && java -jar build/libs/Backend-0.0.1-SNAPSHOT.jar"
+      - SPRING_PROFILES_ACTIVE=dev
 
   mysql:
     image: mysql:8.4.0
