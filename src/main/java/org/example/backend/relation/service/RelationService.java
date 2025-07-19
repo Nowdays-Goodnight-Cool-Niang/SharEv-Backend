@@ -12,6 +12,7 @@ import org.example.backend.relation.dto.response.ResponseRelationProfileDto;
 import org.example.backend.relation.entity.Relation;
 import org.example.backend.relation.entity.Relation.RelationId;
 import org.example.backend.relation.repository.RelationRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,12 @@ public class RelationService {
                 .orElseThrow();
 
         Relation relation = new Relation(profile, targetProfile);
-        relationRepository.insertIgnore(relation);
+
+        try {
+            relationRepository.save(relation);
+        } catch (DataIntegrityViolationException e) {
+            // ignore
+        }
 
         RelationId relationId = relation.getId();
         return new ResponseRelationDto(relationId.getFirstProfileId(), relationId.getSecondProfileId());
