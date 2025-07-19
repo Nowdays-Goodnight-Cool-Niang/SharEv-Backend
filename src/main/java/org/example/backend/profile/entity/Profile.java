@@ -1,5 +1,6 @@
 package org.example.backend.profile.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -8,13 +9,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.base_entity.BaseTimeEntity;
 import org.example.backend.event.entity.Event;
+import org.example.backend.relation.entity.Relation;
 
 @Entity
 @Getter
@@ -49,6 +54,12 @@ public class Profile extends BaseTimeEntity {
 
     @Column
     private String toughExperience;
+
+    @OneToMany(mappedBy = "firstProfile", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private final List<Relation> relationFirsts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "secondProfile", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private final List<Relation> relationSeconds = new ArrayList<>();
 
     public Profile(Event event, Account account, Integer pinNumber, Integer iconNumber) {
         this.event = event;

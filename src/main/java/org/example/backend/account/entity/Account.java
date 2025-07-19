@@ -1,11 +1,14 @@
 package org.example.backend.account.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.backend.base_entity.BaseTimeEntity;
+import org.example.backend.profile.entity.Profile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -45,6 +49,9 @@ public class Account extends BaseTimeEntity implements OAuth2User {
 
     @Column
     private String instagramUrl;
+
+    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private final List<Profile> profiles = new ArrayList<>();
 
     public Account(Long kakaoOauthId, String name) {
         this.kakaoOauthId = kakaoOauthId;
