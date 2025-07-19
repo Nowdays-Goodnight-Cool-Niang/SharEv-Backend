@@ -15,7 +15,7 @@ public class WithCustomMockUserSecurityContextFactory implements WithSecurityCon
     public SecurityContext createSecurityContext(WithCustomMockUser annotation) {
         String role = annotation.role();
 
-        Account account = new Account(1L, "test");
+        Account account = new Account(1L, "test", "test@test.com");
 
         try {
             Class<Account> accountClass = Account.class;
