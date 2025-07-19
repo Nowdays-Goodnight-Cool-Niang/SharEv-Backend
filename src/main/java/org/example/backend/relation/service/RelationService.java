@@ -11,6 +11,7 @@ import org.example.backend.relation.dto.response.ResponseRelationDto;
 import org.example.backend.relation.dto.response.ResponseRelationProfileDto;
 import org.example.backend.relation.entity.Relation;
 import org.example.backend.relation.entity.Relation.RelationId;
+import org.example.backend.relation.exception.SelfRelationException;
 import org.example.backend.relation.repository.RelationRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,10 @@ public class RelationService {
                 .orElseThrow();
         Profile targetProfile = profileRepository.findByEventIdAndPinNumber(eventId, targetPinNumber)
                 .orElseThrow();
+
+        if (profile.getId().equals(targetProfile.getId())) {
+            throw new SelfRelationException();
+        }
 
         Relation relation = new Relation(profile, targetProfile);
 
