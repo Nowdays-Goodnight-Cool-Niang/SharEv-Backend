@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +26,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "accounts")
-public class Account extends BaseTimeEntity implements OAuth2User {
+public class Account extends BaseTimeEntity implements OAuth2User, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,9 +54,10 @@ public class Account extends BaseTimeEntity implements OAuth2User {
     @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private final List<Profile> profiles = new ArrayList<>();
 
-    public Account(Long kakaoOauthId, String name) {
+    public Account(Long kakaoOauthId, String name, String email) {
         this.kakaoOauthId = kakaoOauthId;
         this.name = name;
+        this.email = email;
     }
 
     public void updateInfo(String name, String email, String linkedinUrl, String githubUrl, String instagramUrl) {
