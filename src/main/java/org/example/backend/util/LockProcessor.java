@@ -19,10 +19,11 @@ public class LockProcessor {
 
     public void lock(String key, Consumer<String> consumer) {
         RLock lock = redissonClient.getLock(key);
+        boolean lockSuccessFlag = false;
 
         try {
-            boolean lockSuccess = lock.tryLock(WAIT_TIME, LEASE_TIME, TimeUnit.SECONDS);
-            if (!lockSuccess) {
+            lockSuccessFlag = lock.tryLock(WAIT_TIME, LEASE_TIME, TimeUnit.SECONDS);
+            if (!lockSuccessFlag) {
                 throw new LockOverWaitTimeException();
             }
 
@@ -32,7 +33,9 @@ public class LockProcessor {
             Thread.currentThread().interrupt();
             throw new LockInterruptedException();
         } finally {
-            lock.unlock();
+            if (lockSuccessFlag && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 }
