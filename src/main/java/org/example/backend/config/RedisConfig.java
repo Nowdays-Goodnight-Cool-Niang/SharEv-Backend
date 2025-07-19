@@ -16,7 +16,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @Profile("prod")
 @Configuration
 @EnableRedisHttpSession
-public class RedisSessionConfig {
+public class RedisConfig {
     @Value("${spring.data.redis.host}")
     private String redisSessionHost;
 
