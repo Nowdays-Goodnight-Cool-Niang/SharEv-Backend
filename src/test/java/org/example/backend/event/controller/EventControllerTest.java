@@ -171,7 +171,7 @@ class EventControllerTest extends ControllerTestSupport {
                                         fieldWithPath("introduce.version").type(NUMBER)
                                                 .description("소개 버전"),
                                         fieldWithPath("introduce.introduce").type(STRING)
-                                                .description("이메일"),
+                                                .description("자기소개"),
                                         fieldWithPath("introduce.proudestExperience").type(STRING)
                                                 .description("뿌듯했던 경험"),
                                         fieldWithPath("introduce.toughExperience").type(STRING)
@@ -229,7 +229,7 @@ class EventControllerTest extends ControllerTestSupport {
                                         fieldWithPath("introduce.version").type(NUMBER)
                                                 .description("소개 버전"),
                                         fieldWithPath("introduce.introduce").type(STRING)
-                                                .description("이메일"),
+                                                .description("자기소개"),
                                         fieldWithPath("introduce.proudestExperience").type(STRING)
                                                 .description("뿌듯했던 경험"),
                                         fieldWithPath("introduce.toughExperience").type(STRING)
@@ -352,7 +352,7 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .description("소개 버전"),
                                         fieldWithPath("relationProfiles.content[].introduce.introduce").optional()
                                                 .type(STRING)
-                                                .description("이메일"),
+                                                .description("자기소개"),
                                         fieldWithPath(
                                                 "relationProfiles.content[].introduce.proudestExperience").optional()
                                                 .type(STRING)
