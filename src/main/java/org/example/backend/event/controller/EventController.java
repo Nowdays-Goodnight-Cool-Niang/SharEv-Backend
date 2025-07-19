@@ -77,6 +77,7 @@ public class EventController {
         return ResponseEntity.ok(myProfile);
     }
 
+    @Secured("ROLE_USER")
     @PostMapping("/{eventId}/participants")
     public ResponseEntity<ResponseRelationDto> register(@PathVariable("eventId") UUID eventId,
                                                         @AuthenticationPrincipal Account account,
