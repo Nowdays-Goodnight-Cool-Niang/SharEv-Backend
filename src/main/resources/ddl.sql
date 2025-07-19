@@ -38,7 +38,8 @@ CREATE TABLE `profiles`
     `updated_at`          timestamp          NOT NULL,
     CONSTRAINT fk_event FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`),
     CONSTRAINT fk_account FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`),
-    INDEX idx_event_pin_number (`event_id`, `pin_number`)
+    INDEX idx_event_pin_number (`event_id`, `pin_number`),
+    INDEX idx_event_account (`event_id`, `account_id`)
 );
 
 CREATE TABLE `relations`
