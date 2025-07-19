@@ -76,10 +76,17 @@ dependencies {
     if ("${profile}" != 'prod') {
         implementation 'com.github.codemonstur:embedded-redis:1.4.3'
     }
+
+    // redisson
+    implementation 'org.redisson:redisson:3.50.0'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
 }
 
 // === querydsl start ===
