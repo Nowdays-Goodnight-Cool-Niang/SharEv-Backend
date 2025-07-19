@@ -1,6 +1,5 @@
 package org.example.backend.relation.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -31,12 +30,12 @@ public class Relation extends BaseTimeEntity {
     private RelationId id;
 
     @MapsId("firstProfileId")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "first_profile_id")
     private Profile firstProfile;
 
     @MapsId("secondProfileId")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "second_profile_id")
     private Profile secondProfile;
 
