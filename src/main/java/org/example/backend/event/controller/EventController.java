@@ -1,6 +1,7 @@
 package org.example.backend.event.controller;
 
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -79,7 +80,7 @@ public class EventController {
     @PostMapping("/{eventId}/participants")
     public ResponseEntity<ResponseRelationDto> register(@PathVariable("eventId") UUID eventId,
                                                         @AuthenticationPrincipal Account account,
-                                                        @RequestBody RequestUpdateRelationDto requestUpdateRelationDto) {
+                                                        @Valid @RequestBody RequestUpdateRelationDto requestUpdateRelationDto) {
         ResponseRelationDto responseRelationDto =
                 relationService.register(eventId, account.getId(), requestUpdateRelationDto.targetPinNumber());
 
