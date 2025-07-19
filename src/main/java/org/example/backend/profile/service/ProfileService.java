@@ -100,10 +100,10 @@ public class ProfileService {
                 .map(ResponsePinNumberOnlyDto::getPinNumber)
                 .collect(Collectors.toSet());
 
-        Set<Integer> availablePinNumbers = IntStream.rangeClosed(START_PIN_RANGE, END_PIN_RANGE)
-                .boxed()
+        Integer[] availablePinNumbers = IntStream.rangeClosed(START_PIN_RANGE, END_PIN_RANGE)
                 .filter(pinNumber -> !usingPinNumbers.contains(pinNumber))
-                .collect(Collectors.toSet());
+                .boxed()
+                .toArray(Integer[]::new);
 
         redisTemplate.opsForSet().add(eventPinKey, availablePinNumbers);
         redisTemplate.expire(eventPinKey, Duration.ofDays(EXPIRE_PIN_NUMBER_DAY));
