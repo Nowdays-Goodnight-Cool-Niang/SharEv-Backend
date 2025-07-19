@@ -30,6 +30,7 @@ public class ProfileService {
     private final EventRepository eventRepository;
     private final RandomNumberCalculator randomNumberCalculator;
 
+    @Transactional
     public void join(UUID eventId, Long accountId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow();
