@@ -42,7 +42,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: 테스트
-        run: ./gradlew clean test -Pprofile=prod
+        run: ./gradlew clean test
 
       - name: Authenticate to Google Cloud
         id: 'auth'
