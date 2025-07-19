@@ -1,8 +1,13 @@
 package org.example.backend.config;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.springframework.context.annotation.Bean;
@@ -21,12 +26,6 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -72,7 +71,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("docker")
+    @Profile("dev")
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
