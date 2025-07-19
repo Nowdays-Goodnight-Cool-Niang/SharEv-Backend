@@ -79,22 +79,22 @@ tasks.named('test') {
 
 // === querydsl start ===
 
-def generatedDir = 'src/main/generated'
+def qClassDir = 'src/main/generated'
 
 tasks.withType(JavaCompile).configureEach {
-    options.getGeneratedSourceOutputDirectory().set(file(generatedDir))
+    options.getGeneratedSourceOutputDirectory().set(file(qClassDir))
 }
 
 sourceSets {
     main {
         java {
-            srcDirs += [generatedDir]
+            srcDirs += [qClassDir]
         }
     }
 }
 
 tasks.register('cleanQClass', Delete) {
-    delete file(generatedDir)
+    delete file(qClassDir)
 }
 
 // Deletes and regenerates all QueryDSL Q-classes.
@@ -108,13 +108,13 @@ tasks.named('compileJava') {
     mustRunAfter 'cleanQClass'
 }
 
+clean {
+    delete file(qClassDir)
+}
+
 // === querydsl end ===
 
 // === swagger start ===
-
-clean {
-    delete file("src/main/resources/static/docs/")
-}
 
 openapi3 {
     server = "http://localhost:8080"
@@ -156,6 +156,10 @@ bootJar {
     if ("${profile}" != 'prod') {
         dependsOn generateSwaggerUISample
     }
+}
+
+clean {
+    delete file("src/main/resources/static/docs/")
 }
 
 // === swagger end ===
