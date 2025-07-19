@@ -1,5 +1,6 @@
 package org.example.backend.account.service;
 
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.account.entity.Feedback;
@@ -39,7 +40,7 @@ public class AccountService {
     public void delete(Account account, String feedback) {
         accountRepository.delete(account);
 
-        if (feedback.isBlank()) {
+        if (Objects.isNull(feedback) || feedback.isBlank()) {
             return;
         }
 
