@@ -1,7 +1,5 @@
 package org.example.backend.config;
 
-import static redis.embedded.Redis.DEFAULT_REDIS_PORT;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
@@ -16,33 +14,21 @@ public class EmbeddedRedisConfig {
     private static final String REDIS_SERVER_MAX_MEMORY = "maxmemory 512M";
     private RedisServer redisServer;
 
-    private boolean isPortInUse(int port) {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            return false;
-        } catch (IOException e) {
-            return true;
+    private int findAvailablePort() throws IOException {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
         }
-    }
-
-    private int findAvailablePort() {
-        for (int port = 10000; port <= 65535; port++) {
-            if (!isPortInUse(port)) {
-                return port;
-            }
-        }
-
-        throw new IllegalArgumentException("Not Found Available port: 10000 ~ 65535");
     }
 
     @PostConstruct
     public void startRedis() throws IOException {
-        int port = isPortInUse(DEFAULT_REDIS_PORT) ? findAvailablePort() : DEFAULT_REDIS_PORT;
+        int port = findAvailablePort();
         redisServer = RedisServer.newRedisServer()
                 .port(port)
                 .setting(REDIS_SERVER_MAX_MEMORY)
                 .build();
-
         redisServer.start();
+        System.setProperty("spring.data.redis.port", String.valueOf(port));
     }
 
     @PreDestroy
