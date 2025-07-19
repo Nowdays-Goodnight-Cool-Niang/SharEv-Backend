@@ -30,15 +30,23 @@ public record ProfileDto(Long participantId, String name, String email, String l
             return this;
         }
 
-        return new UnknownProfileDto(name);
+        return new UnknownProfileDto(name, introduce().proudestExperience());
     }
 
-    public record UnknownProfileDto(String name) implements ResponseProfileDto {
+    public record UnknownProfileDto(String name, Introduce introduce) implements ResponseProfileDto {
+
+        public UnknownProfileDto(String name, String proudestExperience) {
+            this(name, new Introduce(proudestExperience));
+        }
     }
 }
 
 record Introduce(Long version, String introduce, String proudestExperience, String toughExperience) {
     Introduce(String introduce, String proudestExperience, String toughExperience) {
         this(1L, introduce, proudestExperience, toughExperience);
+    }
+
+    Introduce(String proudestExperience) {
+        this(1L, null, proudestExperience, null);
     }
 }
