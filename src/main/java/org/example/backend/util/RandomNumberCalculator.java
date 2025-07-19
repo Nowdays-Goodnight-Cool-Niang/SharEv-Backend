@@ -1,13 +1,17 @@
 package org.example.backend.util;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RandomNumberCalculator {
-    private final Random random = new Random();
-
     public int getRandom(int startNumber, int endNumber) {
-        return random.nextInt(startNumber, endNumber + 1);
+
+        if (startNumber > endNumber) {
+            throw new RandomRangeException();
+        }
+
+        return ThreadLocalRandom.current()
+                .nextInt(startNumber, endNumber + 1);
     }
 }
