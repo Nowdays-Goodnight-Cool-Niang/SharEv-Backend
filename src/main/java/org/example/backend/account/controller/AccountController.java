@@ -55,7 +55,8 @@ public class AccountController {
     @DeleteMapping
     public ResponseEntity<Void> delete(@AuthenticationPrincipal Account account,
                                        @RequestBody RequestDeleteDto requestDeleteDto, HttpSession session) {
-        accountService.delete(account, requestDeleteDto.feedback());
+        accountService.delete(account);
+        accountService.saveFeedback(requestDeleteDto.feedback());
 
         session.invalidate();
 

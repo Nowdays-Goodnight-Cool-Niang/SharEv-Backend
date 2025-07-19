@@ -37,9 +37,12 @@ public class AccountService {
     }
 
     @Transactional
-    public void delete(Account account, String feedback) {
+    public void delete(Account account) {
         accountRepository.delete(account);
+    }
 
+    @Transactional
+    public void saveFeedback(String feedback) {
         if (Objects.isNull(feedback) || feedback.isBlank()) {
             return;
         }

@@ -124,7 +124,10 @@ class AccountControllerTest extends ControllerTestSupport {
                 .contentType(MediaType.APPLICATION_JSON);
 
         doNothing()
-                .when(accountService).delete(any(Account.class), anyString());
+                .when(accountService).delete(any(Account.class));
+
+        doNothing()
+                .when(accountService).saveFeedback(anyString());
 
         // when
         // then
