@@ -33,7 +33,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         String email = getEmail(kakaoUserInfo);
 
         return accountRepository.findByKakaoOauthId(kakaoOauthId)
-                .orElseGet(() -> new Account(kakaoOauthId, name, email));
+                .orElseGet(() -> accountRepository.save(new Account(kakaoOauthId, name, email)));
     }
 
     @SuppressWarnings("unchecked")
