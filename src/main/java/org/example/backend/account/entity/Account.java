@@ -50,7 +50,7 @@ public class Account extends BaseTimeEntity implements OAuth2User {
     @Column
     private String instagramUrl;
 
-    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private final List<Profile> profiles = new ArrayList<>();
 
     public Account(Long kakaoOauthId, String name) {
