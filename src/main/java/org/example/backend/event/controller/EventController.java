@@ -1,6 +1,5 @@
 package org.example.backend.event.controller;
 
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,6 +15,7 @@ import org.example.backend.relation.dto.response.ResponseRelationProfileDto;
 import org.example.backend.relation.service.RelationService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,7 +41,7 @@ public class EventController {
                                      @AuthenticationPrincipal Account account) {
         profileService.join(eventId, account.getId());
 
-        return ResponseEntity.status(HTTPResponse.SC_CREATED)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .build();
     }
 
