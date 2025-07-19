@@ -297,8 +297,8 @@ class EventControllerTest extends ControllerTestSupport {
                 new PageImpl<>(List.of(
                         new ProfileDto(22L, "훈여정", "test@hun.com", null, null, null, "훈여정입니다.", "GDG에 쓰일 코드를 작성한 경험",
                                 "swagger를 위한 테스트코드를 짜던 기억", false),
-                        new UnknownProfileDto("권나연"),
-                        new UnknownProfileDto("이유진")
+                        new UnknownProfileDto("권나연", "당근"),
+                        new UnknownProfileDto("이유진", "오늘의집")
                 )));
 
         doReturn(responseRelationProfileDto)
@@ -354,7 +354,7 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .type(STRING)
                                                 .description("자기소개"),
                                         fieldWithPath(
-                                                "relationProfiles.content[].introduce.proudestExperience").optional()
+                                                "relationProfiles.content[].introduce.proudestExperience")
                                                 .type(STRING)
                                                 .description("뿌듯했던 경험"),
                                         fieldWithPath(
