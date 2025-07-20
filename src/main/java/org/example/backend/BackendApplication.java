@@ -5,11 +5,9 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 import com.google.cloud.spring.autoconfigure.core.GcpContextAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 @SpringBootApplication(exclude = {GcpContextAutoConfiguration.class})
-@EnableJpaAuditing
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 public class BackendApplication {
 
