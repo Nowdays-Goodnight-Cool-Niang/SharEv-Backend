@@ -3,8 +3,6 @@ package org.example.backend.util;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
-import org.example.backend.exception.LockInterruptedException;
-import org.example.backend.exception.LockOverWaitTimeException;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
