@@ -27,6 +27,7 @@ import org.example.backend.WithCustomMockUser;
 import org.example.backend.profile.dto.request.RequestUpdateProfileInfoDto;
 import org.example.backend.profile.dto.response.ProfileDto;
 import org.example.backend.profile.dto.response.ProfileDto.UnknownProfileDto;
+import org.example.backend.profile.dto.response.ResponseParticipantFlagDto;
 import org.example.backend.profile.dto.response.ResponseProfileDto;
 import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
 import org.example.backend.relation.dto.request.RequestUpdateRelationDto;
@@ -374,6 +375,43 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .description("전체 페이지")
                                 )
                                 .responseSchema(schema(ResponseProfileDto.class.getSimpleName()))
+                                .build())));
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("행사 참여 유무 확인")
+    void isParticipant() throws Exception {
+
+        // given
+
+        doReturn(new ResponseParticipantFlagDto(false))
+                .when(profileService)
+                .isParticipant(any(UUID.class), anyLong());
+
+        RequestBuilder request = RestDocumentationRequestBuilders
+                .get("/events/{eventId}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON);
+
+        // when
+        // then
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+
+                .andDo(document("isParticipant",
+                        resource(ResourceSnippetParameters.builder()
+                                .summary("행사 참여 유무 확인")
+                                .description(
+                                        "행사에 참여했는지, 참여하지 않았는지 확인합니다.")
+                                .pathParameters(
+                                        parameterWithName("eventId").description("참여한 이벤트 id")
+                                )
+                                .responseFields(
+                                        fieldWithPath("isParticipant").type(BOOLEAN)
+                                                .description("행사 참여 유무")
+                                )
+                                .responseSchema(schema(ResponseParticipantFlagDto.class.getSimpleName()))
                                 .build())));
     }
 }
