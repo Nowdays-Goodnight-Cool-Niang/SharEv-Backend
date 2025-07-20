@@ -8,6 +8,8 @@ import static com.epages.restdocs.apispec.SimpleType.STRING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.RequestBuilder;
 
 class AccountControllerTest extends ControllerTestSupport {
@@ -34,9 +37,25 @@ class AccountControllerTest extends ControllerTestSupport {
     void updateAccountInfo() throws Exception {
 
         // given
-        doNothing()
+        doAnswer(invocation -> {
+            Long accountId = invocation.getArgument(0);
+            String name = invocation.getArgument(1);
+            String email = invocation.getArgument(2);
+            String linkedinUrl = invocation.getArgument(3);
+            String githubUrl = invocation.getArgument(4);
+            String instagramUrl = invocation.getArgument(5);
+
+            Account account = new Account(accountId, name, email);
+            ReflectionTestUtils.setField(account, "linkedinUrl", linkedinUrl);
+            ReflectionTestUtils.setField(account, "githubUrl", githubUrl);
+            ReflectionTestUtils.setField(account, "instagramUrl", instagramUrl);
+            ReflectionTestUtils.setField(account, "initialRoleGrantedFlag", true);
+
+            return account;
+        })
                 .when(accountService)
-                .updateAccountInfo(anyLong(), anyString(), anyString(), anyString(), anyString(), anyString());
+                .updateAccountInfo(anyLong(), anyString(), anyString(), nullable(String.class), nullable(String.class),
+                        nullable(String.class));
 
         RequestUpdateInfoDto requestUpdateInfoDto = new RequestUpdateInfoDto("김주호", "eora21@naver.com", null,
                 "https://github.com/eora21", null);
