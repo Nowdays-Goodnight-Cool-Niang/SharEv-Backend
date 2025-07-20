@@ -1,5 +1,6 @@
 package org.example.backend.advice;
 
+import java.util.Objects;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -8,13 +9,11 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Objects;
-
 @RestControllerAdvice
-public class UltimatumExceptionsAdvice {
+public class BindExceptionAdvice {
 
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<?> handleBindException(BindException exception) {
+    public ResponseEntity<MultiValueMap<String, String>> handleBindException(BindException exception) {
         MultiValueMap<String, String> errorMessages = new LinkedMultiValueMap<>();
 
         exception.getFieldErrors()
