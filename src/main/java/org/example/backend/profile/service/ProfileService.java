@@ -12,6 +12,7 @@ import org.example.backend.account.entity.Account;
 import org.example.backend.account.repository.AccountRepository;
 import org.example.backend.event.entity.Event;
 import org.example.backend.event.repository.EventRepository;
+import org.example.backend.event.util.EventKeyGenerator;
 import org.example.backend.profile.dto.response.ProfileDto;
 import org.example.backend.profile.dto.response.ResponseParticipantFlagDto;
 import org.example.backend.profile.dto.response.ResponsePinNumberOnlyDto;
@@ -23,6 +24,7 @@ import org.example.backend.relation.entity.Relation.RelationId;
 import org.example.backend.relation.repository.RelationRepository;
 import org.example.backend.util.LockProcessor;
 import org.example.backend.util.RandomNumberCalculator;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +37,6 @@ public class ProfileService {
     private static final int END_PIN_RANGE = 9_999;
     private static final int START_RANDOM_NUMBER = 1;
     private static final int END_RANDOM_NUMBER = 12;
-    private static final String EVENT_PIN_PREFIX = "event";
-    private static final String EVENT_PIN_SUFFIX = "pin-numbers";
     private static final Long EXPIRE_PIN_NUMBER_DAY = 3L;
 
     private final ProfileRepository profileRepository;
@@ -56,12 +56,14 @@ public class ProfileService {
 
         int pinNumber = getPinNumber(eventId);
 
-        profileRepository.save(new Profile(event, account, pinNumber,
-                randomNumberCalculator.getRandom(START_RANDOM_NUMBER, END_RANDOM_NUMBER)));
-    }
-
-    private static String calculateEventPinKey(UUID eventId) {
-        return String.join(":", EVENT_PIN_PREFIX, eventId.toString(), EVENT_PIN_SUFFIX);
+        try {
+            profileRepository.save(new Profile(event, account, pinNumber,
+                    randomNumberCalculator.getRandom(START_RANDOM_NUMBER, END_RANDOM_NUMBER)));
+        } catch (DataIntegrityViolationException e) {
+            String eventPinKey = EventKeyGenerator.calculateEventPinKey(eventId);
+            redisTemplate.opsForSet().add(eventPinKey, pinNumber);
+            throw new RuntimeException("이미 행사에 가입하셨습니다.");
+        }
     }
 
     private int getPinNumber(UUID eventId) {
@@ -74,7 +76,7 @@ public class ProfileService {
     }
 
     private Integer getUniquePinNumber(UUID eventId) {
-        String eventPinKey = calculateEventPinKey(eventId);
+        String eventPinKey = EventKeyGenerator.calculateEventPinKey(eventId);
 
         Integer pinNumber = (Integer) redisTemplate.opsForSet().pop(eventPinKey);
 
