@@ -17,13 +17,15 @@ public class AccountService {
     private final FeedbackRepository feedbackRepository;
 
     @Transactional
-    public void updateAccountInfo(Long accountId, String name, String email, String linkedinUrl,
-                                                       String githubUrl, String instagramUrl) {
+    public Account updateAccountInfo(Long accountId, String name, String email, String linkedinUrl,
+                                     String githubUrl, String instagramUrl) {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow();
 
         account.updateInfo(name, email, linkedinUrl, githubUrl, instagramUrl);
+
+        return account;
     }
 
     @Transactional

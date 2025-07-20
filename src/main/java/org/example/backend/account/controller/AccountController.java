@@ -44,19 +44,20 @@ public class AccountController {
                                                   @Valid @RequestBody RequestUpdateInfoDto requestUpdateInfoDto,
                                                   HttpSession session) {
 
-        accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto.name(),
+        Account newAccount = accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto.name(),
                 requestUpdateInfoDto.email(), requestUpdateInfoDto.linkedinUrl(), requestUpdateInfoDto.githubUrl(),
                 requestUpdateInfoDto.instagramUrl());
 
-        updateSessionInfo(account, session);
+        updateSessionInfo(newAccount, session);
 
         return ResponseEntity.ok().build();
     }
 
-    private static void updateSessionInfo(Account account, HttpSession session) {
+    private static void updateSessionInfo(Account newAccount, HttpSession session) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String clientRegistrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
-        Authentication newAuth = new OAuth2AuthenticationToken(account, account.getAuthorities(), clientRegistrationId);
+        Authentication newAuth = new OAuth2AuthenticationToken(newAccount, newAccount.getAuthorities(),
+                clientRegistrationId);
 
         SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(newAuth);
