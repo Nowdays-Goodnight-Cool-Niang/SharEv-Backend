@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.profile.dto.request.RequestUpdateProfileInfoDto;
+import org.example.backend.profile.dto.response.ResponseParticipantFlagDto;
 import org.example.backend.profile.dto.response.ResponseProfileDto;
 import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
 import org.example.backend.profile.service.ProfileService;
@@ -95,5 +96,13 @@ public class EventController {
                                                                       @RequestParam("snapshotTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime snapshotTime,
                                                                       Pageable pageable) {
         return ResponseEntity.ok(relationService.getParticipants(eventId, account.getId(), snapshotTime, pageable));
+    }
+
+    @Secured("ROLE_USER")
+    @GetMapping("/{eventId}")
+    public ResponseEntity<ResponseParticipantFlagDto> isParticipant(@PathVariable("eventId") UUID eventId,
+                                                                    @AuthenticationPrincipal Account account
+    ) {
+        return ResponseEntity.ok(profileService.isParticipant(eventId, account.getId()));
     }
 }

@@ -2,6 +2,7 @@ package org.example.backend.profile.service;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.example.backend.account.repository.AccountRepository;
 import org.example.backend.event.entity.Event;
 import org.example.backend.event.repository.EventRepository;
 import org.example.backend.profile.dto.response.ProfileDto;
+import org.example.backend.profile.dto.response.ResponseParticipantFlagDto;
 import org.example.backend.profile.dto.response.ResponsePinNumberOnlyDto;
 import org.example.backend.profile.dto.response.ResponseProfileDto;
 import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
@@ -140,5 +142,11 @@ public class ProfileService {
                 .orElseThrow();
 
         return new ProfileDto(profile, false);
+    }
+
+    public ResponseParticipantFlagDto isParticipant(UUID eventId, Long accountId) {
+        Optional<Profile> profileOptional = profileRepository.findByEventIdAndAccountId(eventId, accountId);
+
+        return new ResponseParticipantFlagDto(profileOptional.isPresent());
     }
 }
