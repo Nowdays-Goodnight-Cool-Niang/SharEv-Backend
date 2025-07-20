@@ -25,14 +25,14 @@ import java.util.UUID;
 import org.example.backend.ControllerTestSupport;
 import org.example.backend.WithCustomMockUser;
 import org.example.backend.profile.dto.request.RequestUpdateProfileInfoDto;
-import org.example.backend.profile.dto.response.ProfileDto;
-import org.example.backend.profile.dto.response.ProfileDto.UnknownProfileDto;
 import org.example.backend.profile.dto.response.ResponseParticipantFlagDto;
 import org.example.backend.profile.dto.response.ResponseProfileDto;
 import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
 import org.example.backend.relation.dto.request.RequestUpdateRelationDto;
+import org.example.backend.relation.dto.response.NonRelatedProfileDto;
+import org.example.backend.relation.dto.response.RelationProfileDto;
 import org.example.backend.relation.dto.response.ResponseRelationDto;
-import org.example.backend.relation.dto.response.ResponseRelationProfileDto;
+import org.example.backend.relation.dto.response.ResponseRelationInfoDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
@@ -131,15 +131,16 @@ class EventControllerTest extends ControllerTestSupport {
     void getProfileByPinNumber() throws Exception {
 
         // given
-        ProfileDto profileDto = new ProfileDto(21L, "김주호", "eora21@naver.com", null, "https://github.com/eora21", null,
+        ResponseProfileDto responseProfileDto = new ResponseProfileDto(21L, "김주호", "eora21@naver.com", null,
+                "https://github.com/eora21", null,
                 "자기소개", "뿌듯했던 경험", "힘들었던 경험", true);
 
-        doReturn(profileDto)
+        doReturn(responseProfileDto)
                 .when(profileService).getProfileByPinNumber(any(UUID.class), anyLong(), anyInt());
 
         RequestBuilder request = RestDocumentationRequestBuilders
                 .get("/events/{eventId}/profiles/{pinNumber}", UUID.randomUUID(), 2840)
-                .content(objectMapper.writeValueAsString(profileDto))
+                .content(objectMapper.writeValueAsString(responseProfileDto))
                 .contentType(MediaType.APPLICATION_JSON);
 
         // when
@@ -157,7 +158,7 @@ class EventControllerTest extends ControllerTestSupport {
                                         parameterWithName("pinNumber").description("상대방 PIN 번호")
                                 )
                                 .responseFields(
-                                        fieldWithPath("participantId").type(NUMBER)
+                                        fieldWithPath("profileId").type(NUMBER)
                                                 .description("참여 번호"),
                                         fieldWithPath("name").type(STRING)
                                                 .description("이름"),
@@ -169,18 +170,16 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .description("깃헙 url"),
                                         fieldWithPath("instagramUrl").type(STRING)
                                                 .description("인스타그램 url"),
-                                        fieldWithPath("introduce.version").type(NUMBER)
-                                                .description("소개 버전"),
-                                        fieldWithPath("introduce.introduce").type(STRING)
+                                        fieldWithPath("introduce").type(STRING)
                                                 .description("자기소개"),
-                                        fieldWithPath("introduce.proudestExperience").type(STRING)
+                                        fieldWithPath("proudestExperience").type(STRING)
                                                 .description("뿌듯했던 경험"),
-                                        fieldWithPath("introduce.toughExperience").type(STRING)
+                                        fieldWithPath("toughExperience").type(STRING)
                                                 .description("힘들었던 경험"),
                                         fieldWithPath("registerRequireFlag").type(BOOLEAN)
                                                 .description("도감 등록 필요 유무")
                                 )
-                                .responseSchema(schema(ProfileDto.class.getSimpleName()))
+                                .responseSchema(schema(ResponseProfileDto.class.getSimpleName()))
                                 .build())));
     }
 
@@ -190,15 +189,16 @@ class EventControllerTest extends ControllerTestSupport {
     void getMyProfile() throws Exception {
 
         // given
-        ProfileDto profileDto = new ProfileDto(21L, "김주호", "eora21@naver.com", null, "https://github.com/eora21", null,
+        ResponseProfileDto responseProfileDto = new ResponseProfileDto(21L, "김주호", "eora21@naver.com", null,
+                "https://github.com/eora21", null,
                 "자기소개", "뿌듯했던 경험", "힘들었던 경험", true);
 
-        doReturn(profileDto)
+        doReturn(responseProfileDto)
                 .when(profileService).getMyProfile(any(UUID.class), anyLong());
 
         RequestBuilder request = RestDocumentationRequestBuilders
                 .get("/events/{eventId}/profiles", UUID.randomUUID())
-                .content(objectMapper.writeValueAsString(profileDto))
+                .content(objectMapper.writeValueAsString(responseProfileDto))
                 .contentType(MediaType.APPLICATION_JSON);
 
         // when
@@ -215,7 +215,7 @@ class EventControllerTest extends ControllerTestSupport {
                                         parameterWithName("eventId").description("참여한 이벤트 id")
                                 )
                                 .responseFields(
-                                        fieldWithPath("participantId").type(NUMBER)
+                                        fieldWithPath("profileId").type(NUMBER)
                                                 .description("참여 번호"),
                                         fieldWithPath("name").type(STRING)
                                                 .description("이름"),
@@ -227,13 +227,11 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .description("깃헙 url"),
                                         fieldWithPath("instagramUrl").type(STRING)
                                                 .description("인스타그램 url"),
-                                        fieldWithPath("introduce.version").type(NUMBER)
-                                                .description("소개 버전"),
-                                        fieldWithPath("introduce.introduce").type(STRING)
+                                        fieldWithPath("introduce").type(STRING)
                                                 .description("자기소개"),
-                                        fieldWithPath("introduce.proudestExperience").type(STRING)
+                                        fieldWithPath("proudestExperience").type(STRING)
                                                 .description("뿌듯했던 경험"),
-                                        fieldWithPath("introduce.toughExperience").type(STRING)
+                                        fieldWithPath("toughExperience").type(STRING)
                                                 .description("힘들었던 경험"),
                                         fieldWithPath("registerRequireFlag").type(BOOLEAN)
                                                 .description("도감 등록 필요 유무")
@@ -294,15 +292,16 @@ class EventControllerTest extends ControllerTestSupport {
     void getParticipants() throws Exception {
 
         // given
-        ResponseRelationProfileDto responseRelationProfileDto = new ResponseRelationProfileDto(1L,
+        ResponseRelationInfoDto responseRelationInfoDto = new ResponseRelationInfoDto(1L,
                 new PageImpl<>(List.of(
-                        new ProfileDto(22L, "훈여정", "test@hun.com", null, null, null, "훈여정입니다.", "GDG에 쓰일 코드를 작성한 경험",
+                        new RelationProfileDto(22L, "훈여정", "test@hun.com", null, null, null, "훈여정입니다.",
+                                "GDG에 쓰일 코드를 작성한 경험",
                                 "swagger를 위한 테스트코드를 짜던 기억", false),
-                        new UnknownProfileDto("권나연", "당근"),
-                        new UnknownProfileDto("이유진", "오늘의집")
+                        new NonRelatedProfileDto("권나연", "당근"),
+                        new NonRelatedProfileDto("이유진", "오늘의집")
                 )));
 
-        doReturn(responseRelationProfileDto)
+        doReturn(responseRelationInfoDto)
                 .when(relationService)
                 .getParticipants(any(UUID.class), anyLong(), any(LocalDateTime.class), any(Pageable.class));
 
@@ -335,7 +334,7 @@ class EventControllerTest extends ControllerTestSupport {
                                 .responseFields(
                                         fieldWithPath("registerCount").type(NUMBER)
                                                 .description("도감에 등록된 사람 수"),
-                                        fieldWithPath("relationProfiles.content[].participantId").optional()
+                                        fieldWithPath("relationProfiles.content[].profileId").optional()
                                                 .type(NUMBER)
                                                 .description("참여 번호"),
                                         fieldWithPath("relationProfiles.content[].name").type(STRING)
@@ -348,23 +347,20 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .description("깃헙 url"),
                                         fieldWithPath("relationProfiles.content[].instagramUrl").optional().type(STRING)
                                                 .description("인스타그램 url"),
-                                        fieldWithPath("relationProfiles.content[].introduce.version").optional()
-                                                .type(NUMBER)
-                                                .description("소개 버전"),
-                                        fieldWithPath("relationProfiles.content[].introduce.introduce").optional()
+                                        fieldWithPath("relationProfiles.content[].introduce").optional()
                                                 .type(STRING)
                                                 .description("자기소개"),
                                         fieldWithPath(
-                                                "relationProfiles.content[].introduce.proudestExperience")
+                                                "relationProfiles.content[].proudestExperience")
                                                 .type(STRING)
                                                 .description("뿌듯했던 경험"),
                                         fieldWithPath(
-                                                "relationProfiles.content[].introduce.toughExperience").optional()
+                                                "relationProfiles.content[].toughExperience").optional()
                                                 .type(STRING)
                                                 .description("힘들었던 경험"),
-                                        fieldWithPath("relationProfiles.content[].registerRequireFlag").optional()
+                                        fieldWithPath("relationProfiles.content[].relationFlag").optional()
                                                 .type(BOOLEAN)
-                                                .description("도감 등록 필요 유무"),
+                                                .description("도감 등록 유무"),
                                         fieldWithPath("relationProfiles.page.size").type(NUMBER)
                                                 .description("페이지 사이즈"),
                                         fieldWithPath("relationProfiles.page.number").type(NUMBER)
@@ -384,7 +380,6 @@ class EventControllerTest extends ControllerTestSupport {
     void isParticipant() throws Exception {
 
         // given
-
         doReturn(new ResponseParticipantFlagDto(false))
                 .when(profileService)
                 .isParticipant(any(UUID.class), anyLong());
