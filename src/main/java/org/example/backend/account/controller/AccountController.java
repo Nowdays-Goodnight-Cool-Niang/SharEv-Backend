@@ -15,11 +15,13 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,11 +41,17 @@ public class AccountController {
 
     @PatchMapping
     public ResponseEntity<Void> updateAccountInfo(@AuthenticationPrincipal Account account,
-                                                  @Valid @RequestBody RequestUpdateInfoDto requestUpdateInfoDto) {
+                                                  @Valid @RequestBody RequestUpdateInfoDto requestUpdateInfoDto,
+                                                  HttpSession session) {
 
-        accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto.name(), requestUpdateInfoDto.email(),
-                requestUpdateInfoDto.linkedinUrl(), requestUpdateInfoDto.githubUrl(),
+        Authentication newAuth = accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto.name(),
+                requestUpdateInfoDto.email(), requestUpdateInfoDto.linkedinUrl(), requestUpdateInfoDto.githubUrl(),
                 requestUpdateInfoDto.instagramUrl());
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        context.setAuthentication(newAuth);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+
         return ResponseEntity.ok().build();
     }
 

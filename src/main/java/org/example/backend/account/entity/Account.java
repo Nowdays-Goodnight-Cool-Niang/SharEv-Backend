@@ -43,6 +43,9 @@ public class Account extends BaseTimeEntity implements OAuth2User, Serializable 
     private String email;
 
     @Column
+    private boolean initialRoleGrantedFlag;
+
+    @Column
     private String linkedinUrl;
 
     @Column
@@ -58,18 +61,20 @@ public class Account extends BaseTimeEntity implements OAuth2User, Serializable 
         this.kakaoOauthId = kakaoOauthId;
         this.name = name;
         this.email = email;
+        this.initialRoleGrantedFlag = false;
     }
 
     public void updateInfo(String name, String email, String linkedinUrl, String githubUrl, String instagramUrl) {
         this.name = name;
         this.email = email;
+        this.initialRoleGrantedFlag = true;
         this.linkedinUrl = linkedinUrl;
         this.githubUrl = githubUrl;
         this.instagramUrl = instagramUrl;
     }
 
     public boolean isAuthenticated() {
-        return !super.getCreatedAt().isEqual(super.getUpdatedAt());
+        return initialRoleGrantedFlag;
     }
 
     @Override

@@ -20,8 +20,8 @@ public class AccountService {
     private final FeedbackRepository feedbackRepository;
 
     @Transactional
-    public void updateAccountInfo(Long accountId, String name, String email, String linkedinUrl, String githubUrl,
-                                  String instagramUrl) {
+    public OAuth2AuthenticationToken updateAccountInfo(Long accountId, String name, String email, String linkedinUrl,
+                                                       String githubUrl, String instagramUrl) {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow();
@@ -30,10 +30,7 @@ public class AccountService {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String clientRegistrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
-        OAuth2AuthenticationToken oAuth2AuthenticationToken =
-                new OAuth2AuthenticationToken(account, account.getAuthorities(), clientRegistrationId);
-
-        SecurityContextHolder.getContext().setAuthentication(oAuth2AuthenticationToken);
+        return new OAuth2AuthenticationToken(account, account.getAuthorities(), clientRegistrationId);
     }
 
     @Transactional
