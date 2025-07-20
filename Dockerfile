@@ -8,13 +8,17 @@ ARG BUILD_PROFILE=prod
 COPY gradlew .
 COPY gradle ./gradle
 COPY build.gradle .
-COPY src ./src
+COPY settings.gradle .
 
 # 실행 권한 부여
 RUN chmod +x gradlew
 
+# 의존성만 먼저 다운로드하여 캐싱 활용
+RUN ./gradlew dependencies --no-daemon
+
+COPY src ./src
+
 # Gradle 빌드 명령을 BUILD_PROFILE에 따라 조건부로 실행
-# prod 프로필이면 테스트 스킵, 아니면 테스트 실행 (Swagger 생성을 위해)
 RUN if [ "$BUILD_PROFILE" = "prod" ]; then \
     ./gradlew clean build -x test --no-daemon -Pprofile=prod; \
 else \
@@ -32,6 +36,7 @@ EXPOSE 8080
 
 # SPRING_PROFILES_ACTIVE 환경 변수를 사용하여 프로필 동적 설정
 # 기본값은 prod로 유지하되, compose.yaml에서 오버라이드 가능
+ENV TZ=Asia/Seoul
 ENV SPRING_PROFILES_ACTIVE=prod
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
