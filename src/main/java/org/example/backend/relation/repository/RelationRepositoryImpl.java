@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.example.backend.profile.dto.response.ProfileDto;
-import org.example.backend.profile.dto.response.QProfileDto;
+import org.example.backend.relation.dto.response.QRelationProfileDto;
+import org.example.backend.relation.dto.response.RelationProfileDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -42,12 +42,12 @@ public class RelationRepositoryImpl implements RelationRepositoryCustom {
                 .fetchOne();
     }
 
-    public Page<ProfileDto> findRelationProfiles(UUID eventId, Long profileId,
-                                                 LocalDateTime snapshotTime,
-                                                 Pageable pageable) {
+    public Page<RelationProfileDto> findRelationProfiles(UUID eventId, Long profileId,
+                                                         LocalDateTime snapshotTime,
+                                                         Pageable pageable) {
 
-        List<ProfileDto> content = queryFactory
-                .select(new QProfileDto(
+        List<RelationProfileDto> content = queryFactory
+                .select(new QRelationProfileDto(
                         account.id,
                         account.name,
                         account.email,

@@ -3,11 +3,11 @@ package org.example.backend.relation.service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.example.backend.profile.dto.response.ProfileDto;
-import org.example.backend.profile.dto.response.ResponseProfileDto;
 import org.example.backend.profile.entity.Profile;
 import org.example.backend.profile.repository.ProfileRepository;
+import org.example.backend.relation.dto.response.RelationProfileDto;
 import org.example.backend.relation.dto.response.ResponseRelationDto;
+import org.example.backend.relation.dto.response.ResponseRelationInfoDto;
 import org.example.backend.relation.dto.response.ResponseRelationProfileDto;
 import org.example.backend.relation.entity.Relation;
 import org.example.backend.relation.entity.Relation.RelationId;
@@ -50,17 +50,17 @@ public class RelationService {
         return new ResponseRelationDto(relationId.getFirstProfileId(), relationId.getSecondProfileId());
     }
 
-    public ResponseRelationProfileDto getParticipants(UUID eventId, Long accountId, LocalDateTime snapshotTime,
-                                                      Pageable pageable) {
+    public ResponseRelationInfoDto getParticipants(UUID eventId, Long accountId, LocalDateTime snapshotTime,
+                                                   Pageable pageable) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow();
 
         Long registerCount = relationRepository.getRegisterCount(eventId, profile.getId(), snapshotTime);
-        Page<ProfileDto> accountInfoPage =
+        Page<RelationProfileDto> relationProfiles =
                 relationRepository.findRelationProfiles(eventId, profile.getId(), snapshotTime, pageable);
-        Page<ResponseProfileDto> socialDexInfoPage = accountInfoPage.map(
-                ProfileDto::convertResponseProfileDto);
+        Page<ResponseRelationProfileDto> responseRelationProfiles =
+                relationProfiles.map(RelationProfileDto::convertIfNonRelation);
 
-        return new ResponseRelationProfileDto(registerCount, socialDexInfoPage);
+        return new ResponseRelationInfoDto(registerCount, responseRelationProfiles);
     }
 }

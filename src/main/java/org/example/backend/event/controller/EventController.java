@@ -12,7 +12,7 @@ import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
 import org.example.backend.profile.service.ProfileService;
 import org.example.backend.relation.dto.request.RequestUpdateRelationDto;
 import org.example.backend.relation.dto.response.ResponseRelationDto;
-import org.example.backend.relation.dto.response.ResponseRelationProfileDto;
+import org.example.backend.relation.dto.response.ResponseRelationInfoDto;
 import org.example.backend.relation.service.RelationService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -91,10 +91,10 @@ public class EventController {
 
     @Secured("ROLE_USER")
     @GetMapping("/{eventId}/participants")
-    public ResponseEntity<ResponseRelationProfileDto> getParticipants(@PathVariable("eventId") UUID eventId,
-                                                                      @AuthenticationPrincipal Account account,
-                                                                      @RequestParam("snapshotTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime snapshotTime,
-                                                                      Pageable pageable) {
+    public ResponseEntity<ResponseRelationInfoDto> getParticipants(@PathVariable("eventId") UUID eventId,
+                                                                   @AuthenticationPrincipal Account account,
+                                                                   @RequestParam("snapshotTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime snapshotTime,
+                                                                   Pageable pageable) {
         return ResponseEntity.ok(relationService.getParticipants(eventId, account.getId(), snapshotTime, pageable));
     }
 

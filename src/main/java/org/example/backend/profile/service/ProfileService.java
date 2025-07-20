@@ -13,7 +13,6 @@ import org.example.backend.account.repository.AccountRepository;
 import org.example.backend.event.entity.Event;
 import org.example.backend.event.repository.EventRepository;
 import org.example.backend.event.util.EventKeyGenerator;
-import org.example.backend.profile.dto.response.ProfileDto;
 import org.example.backend.profile.dto.response.ResponseParticipantFlagDto;
 import org.example.backend.profile.dto.response.ResponsePinNumberOnlyDto;
 import org.example.backend.profile.dto.response.ResponseProfileDto;
@@ -139,14 +138,14 @@ public class ProfileService {
         boolean registerFlag = relationRepository.existsById(
                 new RelationId(profile.getId(), targetProfile.getId()));
 
-        return new ProfileDto(targetProfile, registerFlag);
+        return new ResponseProfileDto(targetProfile, registerFlag);
     }
 
     public ResponseProfileDto getMyProfile(UUID eventId, Long accountId) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow();
 
-        return new ProfileDto(profile, false);
+        return new ResponseProfileDto(profile, false);
     }
 
     public ResponseParticipantFlagDto isParticipant(UUID eventId, Long accountId) {
