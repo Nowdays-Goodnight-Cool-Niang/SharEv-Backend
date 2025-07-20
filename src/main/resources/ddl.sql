@@ -6,15 +6,16 @@ USE share_me;
 
 CREATE TABLE `accounts`
 (
-    `account_id`     BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    `kakao_oauth_id` BIGINT UNIQUE      NOT NULL,
-    `name`           VARCHAR(255)       NULL,
-    `email`          VARCHAR(320)       NULL,
-    `linkedin_url`   VARCHAR(255)       NULL,
-    `github_url`     VARCHAR(255)       NULL,
-    `instagram_url`  VARCHAR(255)       NULL,
-    `created_at`     timestamp          NOT NULL,
-    `updated_at`     timestamp          NOT NULL
+    `account_id`                BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `kakao_oauth_id`            BIGINT UNIQUE      NOT NULL,
+    `name`                      VARCHAR(255)       NULL,
+    `email`                     VARCHAR(320)       NULL,
+    `initial_role_granted_flag` boolean            NOT NULL,
+    `linkedin_url`              VARCHAR(255)       NULL,
+    `github_url`                VARCHAR(255)       NULL,
+    `instagram_url`             VARCHAR(255)       NULL,
+    `created_at`                timestamp          NOT NULL,
+    `updated_at`                timestamp          NOT NULL
 );
 
 CREATE TABLE `events`
