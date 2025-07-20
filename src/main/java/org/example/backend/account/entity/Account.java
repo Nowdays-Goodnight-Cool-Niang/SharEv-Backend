@@ -69,7 +69,7 @@ public class Account extends BaseTimeEntity implements OAuth2User, Serializable 
     }
 
     public boolean isAuthenticated() {
-        return this.name != null && this.email != null;
+        return !super.getCreatedAt().isEqual(super.getUpdatedAt());
     }
 
     @Override
