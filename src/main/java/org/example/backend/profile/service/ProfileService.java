@@ -19,6 +19,9 @@ import org.example.backend.profile.dto.response.ResponsePinNumberOnlyDto;
 import org.example.backend.profile.dto.response.ResponseProfileDto;
 import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
 import org.example.backend.profile.entity.Profile;
+import org.example.backend.profile.exception.AlreadyJoinException;
+import org.example.backend.profile.exception.CheckPinNumberException;
+import org.example.backend.profile.exception.GeneratePinNumberException;
 import org.example.backend.profile.repository.ProfileRepository;
 import org.example.backend.relation.entity.Relation.RelationId;
 import org.example.backend.relation.repository.RelationRepository;
@@ -62,14 +65,14 @@ public class ProfileService {
         } catch (DataIntegrityViolationException e) {
             String eventPinKey = EventKeyGenerator.calculateEventPinKey(eventId);
             redisTemplate.opsForSet().add(eventPinKey, pinNumber);
-            throw new RuntimeException("이미 행사에 가입하셨습니다.");
+            throw new AlreadyJoinException();
         }
     }
 
     private int getPinNumber(UUID eventId) {
         Integer pinNumber = getUniquePinNumber(eventId);
         if (Objects.isNull(pinNumber)) {
-            throw new RuntimeException("pin number 발급 도중 예외가 발생했습니다. 운영진에게 알려 주십시오.");
+            throw new GeneratePinNumberException();
         }
 
         return pinNumber;
@@ -93,7 +96,7 @@ public class ProfileService {
         Boolean keyExistFlag = redisTemplate.hasKey(eventPinKey);
 
         if (Objects.isNull(keyExistFlag)) {
-            throw new RuntimeException("pin number 확인 도중 예외가 발생했습니다. 운영진에게 알려 주십시오.");
+            throw new CheckPinNumberException();
         }
 
         if (keyExistFlag.equals(Boolean.TRUE)) {
