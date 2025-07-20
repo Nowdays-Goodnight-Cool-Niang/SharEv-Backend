@@ -3,6 +3,7 @@ package org.example.backend.account.repository;
 import java.time.LocalDateTime;
 import org.assertj.core.api.Assertions;
 import org.example.backend.account.entity.Account;
+import org.example.backend.config.JpaConfig;
 import org.example.backend.config.QuerydslConfig;
 import org.example.backend.event.entity.Event;
 import org.example.backend.event.repository.EventRepository;
@@ -18,7 +19,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
-@Import(QuerydslConfig.class)
+@Import({QuerydslConfig.class, JpaConfig.class})
 class AccountRepositoryTest {
 
     @Autowired

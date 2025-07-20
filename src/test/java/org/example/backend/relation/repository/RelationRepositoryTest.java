@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.example.backend.account.entity.Account;
+import org.example.backend.config.JpaConfig;
 import org.example.backend.config.QuerydslConfig;
 import org.example.backend.event.entity.Event;
 import org.example.backend.profile.entity.Profile;
@@ -21,7 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 @DataJpaTest
-@Import(QuerydslConfig.class)
+@Import({QuerydslConfig.class, JpaConfig.class})
 class RelationRepositoryTest {
 
     @Autowired
@@ -139,6 +140,6 @@ class RelationRepositoryTest {
         assertEquals(0L, relationRepository.getRegisterCount(event.getId(), secondProfile.getId(),
                 secondProfile.getCreatedAt()));
         assertEquals(1L,
-                relationRepository.getRegisterCount(event.getId(), secondProfile.getId(), relation.getCreatedAt()));
+                relationRepository.getRegisterCount(event.getId(), secondProfile.getId(), LocalDateTime.now()));
     }
 }
