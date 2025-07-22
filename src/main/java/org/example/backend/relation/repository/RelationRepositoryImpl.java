@@ -54,6 +54,7 @@ public class RelationRepositoryImpl implements RelationRepositoryCustom {
                         account.linkedinUrl,
                         account.githubUrl,
                         account.instagramUrl,
+                        profile.iconNumber,
                         profile.introduce,
                         profile.proudestExperience,
                         profile.toughExperience,

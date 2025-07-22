@@ -9,6 +9,7 @@ public record RelationProfileDto(
         String linkedinUrl,
         String githubUrl,
         String instagramUrl,
+        int iconNumber,
         String introduce,
         String proudestExperience,
         String toughExperience,
