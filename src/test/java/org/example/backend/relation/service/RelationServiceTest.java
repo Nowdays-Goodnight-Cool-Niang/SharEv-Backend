@@ -89,11 +89,12 @@ class RelationServiceTest {
                 .getRegisterCount(any(UUID.class), anyLong(), any(LocalDateTime.class));
 
         Page<RelationProfileDto> relationProfiles = new PageImpl<>(List.of(
-                new RelationProfileDto(2L, "김주호", "eora21@naver.com", null, null, null, "자기소개", "뿌듯했던 경험", "힘들었던 경험",
+                new RelationProfileDto(2L, "김주호", "eora21@naver.com", null, null, null, 1, "자기소개", "뿌듯했던 경험", "힘들었던 경험",
                         true),
-                new RelationProfileDto(3L, "권나연", "kny@test.com", null, null, null, "자기소개", "뿌듯했던 경험", "힘들었던 경험",
+                new RelationProfileDto(3L, "권나연", "kny@test.com", null, null, null, 2, "자기소개", "뿌듯했던 경험", "힘들었던 경험",
                         false),
-                new RelationProfileDto(4L, "이유진", "lyj@test.com", null, null, null, "자기소개", "뿌듯했던 경험", "힘들었던 경험", false)
+                new RelationProfileDto(4L, "이유진", "lyj@test.com", null, null, null, 3, "자기소개", "뿌듯했던 경험", "힘들었던 경험",
+                        false)
         ));
 
         doReturn(relationProfiles).when(relationRepository)
