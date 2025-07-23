@@ -57,6 +57,8 @@ public class SecurityConfig {
         });
 
         http.authorizeHttpRequests(authorizeRequests -> {
+            authorizeRequests.requestMatchers("/jmeter/*")
+                    .permitAll();
             authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
                     .permitAll();
             authorizeRequests.requestMatchers("/accounts")
