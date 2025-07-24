@@ -31,7 +31,6 @@ import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
 import org.example.backend.relation.dto.request.RequestUpdateRelationDto;
 import org.example.backend.relation.dto.response.NonRelatedProfileDto;
 import org.example.backend.relation.dto.response.RelationProfileDto;
-import org.example.backend.relation.dto.response.ResponseRelationDto;
 import org.example.backend.relation.dto.response.ResponseRelationInfoDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -132,8 +131,7 @@ class EventControllerTest extends ControllerTestSupport {
 
         // given
         ResponseProfileDto responseProfileDto = new ResponseProfileDto(21L, "김주호", "eora21@naver.com", null,
-                "https://github.com/eora21", null, 1,
-                "자기소개", "뿌듯했던 경험", "힘들었던 경험", true);
+                "https://github.com/eora21", null, 1111, 1, "자기소개", "뿌듯했던 경험", "힘들었던 경험", true);
 
         doReturn(responseProfileDto)
                 .when(profileService).getProfileByPinNumber(any(UUID.class), anyLong(), anyInt());
@@ -172,6 +170,8 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .description("인스타그램 url"),
                                         fieldWithPath("iconNumber").type(NUMBER)
                                                 .description("프로필 이미지 번호"),
+                                        fieldWithPath("pinNumber").type(NUMBER)
+                                                .description("상대방 PIN 번호"),
                                         fieldWithPath("introduce").type(STRING)
                                                 .description("자기소개"),
                                         fieldWithPath("proudestExperience").type(STRING)
@@ -192,8 +192,7 @@ class EventControllerTest extends ControllerTestSupport {
 
         // given
         ResponseProfileDto responseProfileDto = new ResponseProfileDto(21L, "김주호", "eora21@naver.com", null,
-                "https://github.com/eora21", null, 1,
-                "자기소개", "뿌듯했던 경험", "힘들었던 경험", true);
+                "https://github.com/eora21", null, 1111, 1, "자기소개", "뿌듯했던 경험", "힘들었던 경험", true);
 
         doReturn(responseProfileDto)
                 .when(profileService).getMyProfile(any(UUID.class), anyLong());
@@ -231,6 +230,8 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .description("인스타그램 url"),
                                         fieldWithPath("iconNumber").type(NUMBER)
                                                 .description("프로필 이미지 번호"),
+                                        fieldWithPath("pinNumber").type(NUMBER)
+                                                .description("본인 PIN 번호"),
                                         fieldWithPath("introduce").type(STRING)
                                                 .description("자기소개"),
                                         fieldWithPath("proudestExperience").type(STRING)
@@ -252,9 +253,7 @@ class EventControllerTest extends ControllerTestSupport {
         // given
         RequestUpdateRelationDto requestUpdateRelationDto = new RequestUpdateRelationDto(4285);
 
-        ResponseRelationDto responseRelationDto = new ResponseRelationDto(21L, 128L);
-
-        doReturn(responseRelationDto)
+        doNothing()
                 .when(relationService).register(any(UUID.class), anyLong(), anyInt());
 
         RequestBuilder request = RestDocumentationRequestBuilders
@@ -266,7 +265,7 @@ class EventControllerTest extends ControllerTestSupport {
         // then
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
 
                 .andDo(document("register",
                         resource(ResourceSnippetParameters.builder()
@@ -279,14 +278,7 @@ class EventControllerTest extends ControllerTestSupport {
                                         fieldWithPath("targetPinNumber").type(NUMBER)
                                                 .description("상대방 PIN 번호")
                                 )
-                                .responseFields(
-                                        fieldWithPath("firstProfileId").type(NUMBER)
-                                                .description("도감에 등록된 첫번째 프로필 번호"),
-                                        fieldWithPath("secondProfileId").type(NUMBER)
-                                                .description("도감에 등록된 두번째 프로필 번호, 첫번째 프로필 번호보다 큰 수입니다.")
-                                )
                                 .requestSchema(schema(RequestUpdateRelationDto.class.getSimpleName()))
-                                .responseSchema(schema(ResponseRelationDto.class.getSimpleName()))
                                 .build())));
     }
 

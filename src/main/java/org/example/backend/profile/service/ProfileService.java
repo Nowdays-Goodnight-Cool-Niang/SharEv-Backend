@@ -138,7 +138,7 @@ public class ProfileService {
         boolean registerFlag = relationRepository.existsById(
                 new RelationId(profile.getId(), targetProfile.getId()));
 
-        return new ResponseProfileDto(targetProfile, registerFlag);
+        return new ResponseProfileDto(targetProfile, !registerFlag);
     }
 
     public ResponseProfileDto getMyProfile(UUID eventId, Long accountId) {

@@ -11,7 +11,6 @@ import org.example.backend.profile.dto.response.ResponseProfileDto;
 import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
 import org.example.backend.profile.service.ProfileService;
 import org.example.backend.relation.dto.request.RequestUpdateRelationDto;
-import org.example.backend.relation.dto.response.ResponseRelationDto;
 import org.example.backend.relation.dto.response.ResponseRelationInfoDto;
 import org.example.backend.relation.service.RelationService;
 import org.springframework.data.domain.Pageable;
@@ -80,13 +79,14 @@ public class EventController {
 
     @Secured("ROLE_USER")
     @PostMapping("/{eventId}/participants")
-    public ResponseEntity<ResponseRelationDto> register(@PathVariable("eventId") UUID eventId,
-                                                        @AuthenticationPrincipal Account account,
-                                                        @Valid @RequestBody RequestUpdateRelationDto requestUpdateRelationDto) {
-        ResponseRelationDto responseRelationDto =
-                relationService.register(eventId, account.getId(), requestUpdateRelationDto.targetPinNumber());
+    public ResponseEntity<Void> register(@PathVariable("eventId") UUID eventId,
+                                         @AuthenticationPrincipal Account account,
+                                         @Valid @RequestBody RequestUpdateRelationDto requestUpdateRelationDto) {
 
-        return ResponseEntity.ok(responseRelationDto);
+        relationService.register(eventId, account.getId(), requestUpdateRelationDto.targetPinNumber());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .build();
     }
 
     @Secured("ROLE_USER")

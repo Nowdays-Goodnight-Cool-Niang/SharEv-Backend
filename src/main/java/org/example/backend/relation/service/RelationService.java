@@ -6,11 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.backend.profile.entity.Profile;
 import org.example.backend.profile.repository.ProfileRepository;
 import org.example.backend.relation.dto.response.RelationProfileDto;
-import org.example.backend.relation.dto.response.ResponseRelationDto;
 import org.example.backend.relation.dto.response.ResponseRelationInfoDto;
 import org.example.backend.relation.dto.response.ResponseRelationProfileDto;
 import org.example.backend.relation.entity.Relation;
-import org.example.backend.relation.entity.Relation.RelationId;
+import org.example.backend.relation.exception.AlreadyRegisterException;
 import org.example.backend.relation.exception.SelfRelationException;
 import org.example.backend.relation.repository.RelationRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -28,7 +27,7 @@ public class RelationService {
     private final ProfileRepository profileRepository;
 
     @Transactional
-    public ResponseRelationDto register(UUID eventId, Long accountId, Integer targetPinNumber) {
+    public void register(UUID eventId, Long accountId, Integer targetPinNumber) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
                 .orElseThrow();
         Profile targetProfile = profileRepository.findByEventIdAndPinNumber(eventId, targetPinNumber)
@@ -43,11 +42,8 @@ public class RelationService {
         try {
             relationRepository.save(relation);
         } catch (DataIntegrityViolationException e) {
-            // ignore
+            throw new AlreadyRegisterException();
         }
-
-        RelationId relationId = relation.getId();
-        return new ResponseRelationDto(relationId.getFirstProfileId(), relationId.getSecondProfileId());
     }
 
     public ResponseRelationInfoDto getParticipants(UUID eventId, Long accountId, LocalDateTime snapshotTime,
