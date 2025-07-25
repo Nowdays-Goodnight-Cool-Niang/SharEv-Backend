@@ -292,8 +292,8 @@ class EventControllerTest extends ControllerTestSupport {
                 new PageImpl<>(List.of(
                         new RelationProfileDto(22L, "훈여정", "test@hun.com", null, null, null, 1,
                                 "훈여정입니다.", "GDG에 쓰일 코드를 작성한 경험", "swagger를 위한 테스트코드를 짜던 기억", false),
-                        new NonRelatedProfileDto("권나연", "당근"),
-                        new NonRelatedProfileDto("이유진", "오늘의집")
+                        new NonRelatedProfileDto("권나연", 2, "당근"),
+                        new NonRelatedProfileDto("이유진", 3, "오늘의집")
                 )));
 
         doReturn(responseRelationInfoDto)
@@ -342,7 +342,7 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .description("깃헙 url"),
                                         fieldWithPath("relationProfiles.content[].instagramUrl").optional().type(STRING)
                                                 .description("인스타그램 url"),
-                                        fieldWithPath("relationProfiles.content[].iconNumber").type(NUMBER).optional()
+                                        fieldWithPath("relationProfiles.content[].iconNumber").type(NUMBER)
                                                 .description("프로필 이미지 번호"),
                                         fieldWithPath("relationProfiles.content[].introduce").optional()
                                                 .type(STRING)
