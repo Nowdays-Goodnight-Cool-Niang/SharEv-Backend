@@ -73,9 +73,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // embedded redis
-    if ("${profile}" != 'prod') {
-        implementation 'com.github.codemonstur:embedded-redis:1.4.3'
-    }
+    implementation 'com.github.codemonstur:embedded-redis:1.4.3'
 
     // redisson
     implementation 'org.redisson:redisson:3.50.0'
