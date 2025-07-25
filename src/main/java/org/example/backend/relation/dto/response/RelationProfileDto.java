@@ -26,6 +26,6 @@ public record RelationProfileDto(
             return this;
         }
 
-        return new NonRelatedProfileDto(name, proudestExperience);
+        return new NonRelatedProfileDto(name, iconNumber, proudestExperience);
     }
 }
