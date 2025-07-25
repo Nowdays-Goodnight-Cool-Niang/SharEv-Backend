@@ -156,6 +156,8 @@ class EventControllerTest extends ControllerTestSupport {
                                         parameterWithName("pinNumber").description("상대방 PIN 번호")
                                 )
                                 .responseFields(
+                                        fieldWithPath("type").type(STRING)
+                                                .description("타입"),
                                         fieldWithPath("profileId").type(NUMBER)
                                                 .description("참여 번호"),
                                         fieldWithPath("name").type(STRING)
@@ -216,6 +218,10 @@ class EventControllerTest extends ControllerTestSupport {
                                         parameterWithName("eventId").description("참여한 이벤트 id")
                                 )
                                 .responseFields(
+                                        fieldWithPath("type").type(STRING)
+                                                .description("타입"),
+                                        fieldWithPath("profileId").type(NUMBER)
+                                                .description("참여 번호"),
                                         fieldWithPath("profileId").type(NUMBER)
                                                 .description("참여 번호"),
                                         fieldWithPath("name").type(STRING)
@@ -329,6 +335,8 @@ class EventControllerTest extends ControllerTestSupport {
                                 .responseFields(
                                         fieldWithPath("registerCount").type(NUMBER)
                                                 .description("도감에 등록된 사람 수"),
+                                        fieldWithPath("relationProfiles.content[].type").type(STRING)
+                                                .description("타입"),
                                         fieldWithPath("relationProfiles.content[].profileId").optional()
                                                 .type(NUMBER)
                                                 .description("참여 번호"),
@@ -367,7 +375,7 @@ class EventControllerTest extends ControllerTestSupport {
                                         fieldWithPath("relationProfiles.page.totalPages").type(NUMBER)
                                                 .description("전체 페이지")
                                 )
-                                .responseSchema(schema(ResponseProfileDto.class.getSimpleName()))
+                                .responseSchema(schema(ResponseRelationInfoDto.class.getSimpleName()))
                                 .build())));
     }
 
