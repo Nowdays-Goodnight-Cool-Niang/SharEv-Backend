@@ -8,6 +8,7 @@ import org.example.backend.config.JpaConfig;
 import org.example.backend.config.QuerydslConfig;
 import org.example.backend.config.RedisConfig;
 import org.example.backend.config.RedissonConfig;
+import org.example.backend.jmeter.JmeterService;
 import org.example.backend.profile.service.ProfileService;
 import org.example.backend.relation.service.RelationService;
 import org.example.backend.util.LockProcessor;
@@ -49,6 +50,9 @@ public abstract class ControllerTestSupport {
 
     @MockitoBean
     protected CustomOauth2UserService customOauth2UserService;
+
+    @MockitoBean
+    protected JmeterService jmeterService;
 
     @MockitoBean
     protected LockProcessor lockProcessor;
