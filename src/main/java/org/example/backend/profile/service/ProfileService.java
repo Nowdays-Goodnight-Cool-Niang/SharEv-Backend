@@ -9,8 +9,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
+import org.example.backend.account.exception.AccountNotFoundException;
 import org.example.backend.account.repository.AccountRepository;
 import org.example.backend.event.entity.Event;
+import org.example.backend.event.exception.EventNotFoundException;
 import org.example.backend.event.repository.EventRepository;
 import org.example.backend.event.util.EventKeyGenerator;
 import org.example.backend.profile.dto.response.ResponseParticipantFlagDto;
@@ -21,6 +23,7 @@ import org.example.backend.profile.entity.Profile;
 import org.example.backend.profile.exception.AlreadyJoinException;
 import org.example.backend.profile.exception.CheckPinNumberException;
 import org.example.backend.profile.exception.GeneratePinNumberException;
+import org.example.backend.profile.exception.ProfileNotFoundException;
 import org.example.backend.profile.repository.ProfileRepository;
 import org.example.backend.relation.entity.Relation.RelationId;
 import org.example.backend.relation.repository.RelationRepository;
@@ -52,9 +55,9 @@ public class ProfileService {
     @Transactional
     public void join(UUID eventId, Long accountId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow();
+                .orElseThrow(EventNotFoundException::new);
         Account account = accountRepository.findById(accountId)
-                .orElseThrow();
+                .orElseThrow(AccountNotFoundException::new);
 
         int pinNumber = getPinNumber(eventId);
 
@@ -120,7 +123,7 @@ public class ProfileService {
                                              String proudestExperience,
                                              String toughExperience) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
-                .orElseThrow();
+                .orElseThrow(ProfileNotFoundException::new);
 
         profile.updateInfo(introduce, proudestExperience, toughExperience);
 
@@ -130,10 +133,10 @@ public class ProfileService {
 
     public ResponseProfileDto getProfileByPinNumber(UUID eventId, Long accountId, Integer pinNumber) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
-                .orElseThrow();
+                .orElseThrow(ProfileNotFoundException::new);
 
         Profile targetProfile = profileRepository.findByEventIdAndPinNumber(eventId, pinNumber)
-                .orElseThrow();
+                .orElseThrow(ProfileNotFoundException::new);
 
         boolean registerFlag = relationRepository.existsById(
                 new RelationId(profile.getId(), targetProfile.getId()));
@@ -143,7 +146,7 @@ public class ProfileService {
 
     public ResponseProfileDto getMyProfile(UUID eventId, Long accountId) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
-                .orElseThrow();
+                .orElseThrow(ProfileNotFoundException::new);
 
         return new ResponseProfileDto(profile, false);
     }
