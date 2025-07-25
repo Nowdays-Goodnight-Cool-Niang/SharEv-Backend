@@ -41,7 +41,7 @@ public class RelationService {
         Relation relation = new Relation(profile, targetProfile);
 
         try {
-            relationRepository.save(relation);
+            relationRepository.saveAndFlush(relation);
         } catch (DataIntegrityViolationException e) {
             throw new AlreadyRegisterException();
         }
