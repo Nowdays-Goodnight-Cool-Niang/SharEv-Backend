@@ -4,6 +4,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.account.entity.Account;
 import org.example.backend.account.entity.Feedback;
+import org.example.backend.account.exception.AccountNotFoundException;
 import org.example.backend.account.repository.AccountRepository;
 import org.example.backend.account.repository.FeedbackRepository;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class AccountService {
                                      String githubUrl, String instagramUrl) {
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow();
+                .orElseThrow(AccountNotFoundException::new);
 
         account.updateInfo(name, email, linkedinUrl, githubUrl, instagramUrl);
 

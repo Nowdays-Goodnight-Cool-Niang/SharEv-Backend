@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.profile.entity.Profile;
+import org.example.backend.profile.exception.ProfileNotFoundException;
 import org.example.backend.profile.repository.ProfileRepository;
 import org.example.backend.relation.dto.response.RelationProfileDto;
 import org.example.backend.relation.dto.response.ResponseRelationInfoDto;
@@ -29,9 +30,9 @@ public class RelationService {
     @Transactional
     public void register(UUID eventId, Long accountId, Integer targetPinNumber) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
-                .orElseThrow();
+                .orElseThrow(ProfileNotFoundException::new);
         Profile targetProfile = profileRepository.findByEventIdAndPinNumber(eventId, targetPinNumber)
-                .orElseThrow();
+                .orElseThrow(ProfileNotFoundException::new);
 
         if (profile.getId().equals(targetProfile.getId())) {
             throw new SelfRelationException();
@@ -49,7 +50,7 @@ public class RelationService {
     public ResponseRelationInfoDto getParticipants(UUID eventId, Long accountId, LocalDateTime snapshotTime,
                                                    Pageable pageable) {
         Profile profile = profileRepository.findByEventIdAndAccountId(eventId, accountId)
-                .orElseThrow();
+                .orElseThrow(ProfileNotFoundException::new);
 
         Long registerCount = relationRepository.getRegisterCount(eventId, profile.getId(), snapshotTime);
         Page<RelationProfileDto> relationProfiles =
