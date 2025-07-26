@@ -20,9 +20,9 @@ import org.example.backend.profile.dto.response.ResponsePinNumberOnlyDto;
 import org.example.backend.profile.dto.response.ResponseProfileDto;
 import org.example.backend.profile.dto.response.ResponseProfileInfoDto;
 import org.example.backend.profile.entity.Profile;
-import org.example.backend.profile.exception.AlreadyJoinException;
-import org.example.backend.profile.exception.CheckPinNumberException;
-import org.example.backend.profile.exception.GeneratePinNumberException;
+import org.example.backend.profile.exception.JoinAlreadyException;
+import org.example.backend.profile.exception.KeyBlankException;
+import org.example.backend.profile.exception.PinNumberGenerateException;
 import org.example.backend.profile.exception.ProfileNotFoundException;
 import org.example.backend.profile.repository.ProfileRepository;
 import org.example.backend.relation.entity.Relation.RelationId;
@@ -67,14 +67,14 @@ public class ProfileService {
         } catch (DataIntegrityViolationException e) {
             String eventPinKey = EventKeyGenerator.calculateEventPinKey(eventId);
             redisTemplate.opsForSet().add(eventPinKey, pinNumber);
-            throw new AlreadyJoinException();
+            throw new JoinAlreadyException();
         }
     }
 
     private int getPinNumber(UUID eventId) {
         Integer pinNumber = getUniquePinNumber(eventId);
         if (Objects.isNull(pinNumber)) {
-            throw new GeneratePinNumberException();
+            throw new PinNumberGenerateException();
         }
 
         return pinNumber;
@@ -98,7 +98,7 @@ public class ProfileService {
         Boolean keyExistFlag = redisTemplate.hasKey(eventPinKey);
 
         if (Objects.isNull(keyExistFlag)) {
-            throw new CheckPinNumberException();
+            throw new KeyBlankException();
         }
 
         if (keyExistFlag.equals(Boolean.TRUE)) {

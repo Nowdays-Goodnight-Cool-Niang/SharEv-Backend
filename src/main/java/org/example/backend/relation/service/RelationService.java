@@ -10,8 +10,8 @@ import org.example.backend.relation.dto.response.RelationProfileDto;
 import org.example.backend.relation.dto.response.ResponseRelationInfoDto;
 import org.example.backend.relation.dto.response.ResponseRelationProfileDto;
 import org.example.backend.relation.entity.Relation;
-import org.example.backend.relation.exception.AlreadyRegisterException;
-import org.example.backend.relation.exception.SelfRelationException;
+import org.example.backend.relation.exception.RegisterAlreadyException;
+import org.example.backend.relation.exception.RegisterMyselfException;
 import org.example.backend.relation.repository.RelationRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -35,7 +35,7 @@ public class RelationService {
                 .orElseThrow(ProfileNotFoundException::new);
 
         if (profile.getId().equals(targetProfile.getId())) {
-            throw new SelfRelationException();
+            throw new RegisterMyselfException();
         }
 
         Relation relation = new Relation(profile, targetProfile);
@@ -43,7 +43,7 @@ public class RelationService {
         try {
             relationRepository.saveAndFlush(relation);
         } catch (DataIntegrityViolationException e) {
-            throw new AlreadyRegisterException();
+            throw new RegisterAlreadyException();
         }
     }
 
