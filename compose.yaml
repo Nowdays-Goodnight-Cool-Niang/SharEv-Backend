@@ -6,9 +6,10 @@ services:
       args:
         BUILD_PROFILE: dev
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     profiles:
       - dev
     environment:
@@ -22,4 +23,12 @@ services:
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
       - MYSQL_DATABASE=share_me
     ports:
-      - "3306:3306"
+      - '3306:3306'
+    profiles:
+      - dev
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
