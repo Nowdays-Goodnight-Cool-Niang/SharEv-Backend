@@ -9,7 +9,7 @@ import org.example.backend.event.entity.Event;
 import org.example.backend.event.repository.EventRepository;
 import org.example.backend.event.util.EventKeyGenerator;
 import org.example.backend.profile.entity.Profile;
-import org.example.backend.profile.exception.AlreadyJoinException;
+import org.example.backend.profile.exception.JoinAlreadyException;
 import org.example.backend.profile.repository.ProfileRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,7 +71,7 @@ class ProfileServiceIntegrationTest {
         // when
         // then
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> profileService.join(event.getId(), kim.getId()));
-        org.junit.jupiter.api.Assertions.assertThrowsExactly(AlreadyJoinException.class,
+        org.junit.jupiter.api.Assertions.assertThrowsExactly(JoinAlreadyException.class,
                 () -> profileService.join(event.getId(), kim.getId()));
     }
 }

@@ -16,7 +16,7 @@ import org.example.backend.profile.entity.Profile;
 import org.example.backend.profile.repository.ProfileRepository;
 import org.example.backend.relation.dto.response.RelationProfileDto;
 import org.example.backend.relation.dto.response.ResponseRelationInfoDto;
-import org.example.backend.relation.exception.SelfRelationException;
+import org.example.backend.relation.exception.RegisterMyselfException;
 import org.example.backend.relation.repository.RelationRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -64,7 +64,7 @@ class RelationServiceTest {
 
         // when
         // then
-        Assertions.assertThrowsExactly(SelfRelationException.class, () ->
+        Assertions.assertThrowsExactly(RegisterMyselfException.class, () ->
                 relationService.register(event.getId(), account.getId(), profile.getPinNumber()));
     }
 
