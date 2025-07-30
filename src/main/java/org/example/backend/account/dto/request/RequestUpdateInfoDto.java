@@ -1,25 +1,29 @@
 package org.example.backend.account.dto.request;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import org.example.backend.valid.GithubUrl;
-import org.example.backend.valid.InstagramUrl;
-import org.example.backend.valid.LinkedinUrl;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.URL;
 
 public record RequestUpdateInfoDto(
-        @NotEmpty
+        @NotBlank
+        @Size(max = 255)
         String name,
 
         @Email
+        @Size(max = 320)
         String email,
 
-        @LinkedinUrl
+        @URL
+        @Size(max = 255)
         String linkedinUrl,
 
-        @GithubUrl
+        @URL
+        @Size(max = 255)
         String githubUrl,
 
-        @InstagramUrl
+        @URL
+        @Size(max = 255)
         String instagramUrl
 ) {
 }
