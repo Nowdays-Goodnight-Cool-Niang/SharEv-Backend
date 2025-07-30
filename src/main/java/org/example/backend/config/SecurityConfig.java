@@ -61,8 +61,6 @@ public class SecurityConfig {
                     .permitAll();
             authorizeRequests.requestMatchers("/accounts")
                     .authenticated();
-            authorizeRequests.requestMatchers(HttpMethod.GET)
-                    .permitAll();
             authorizeRequests.anyRequest()
                     .hasRole("USER");
         });
