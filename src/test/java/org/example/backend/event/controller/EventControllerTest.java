@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import org.example.backend.ControllerTestSupport;
 import org.example.backend.WithCustomMockUser;
+import org.example.backend.account.entity.Account;
 import org.example.backend.profile.dto.request.RequestUpdateProfileInfoDto;
 import org.example.backend.profile.dto.response.ResponseParticipantFlagDto;
 import org.example.backend.profile.dto.response.ResponseProfileDto;
@@ -130,6 +131,9 @@ class EventControllerTest extends ControllerTestSupport {
     void getProfileByPinNumber() throws Exception {
 
         // given
+        doReturn(true)
+                .when(profileService).hasCompletedProfile(any(Account.class), any(UUID.class));
+
         ResponseProfileDto responseProfileDto = new ResponseProfileDto(21L, "김주호", "eora21@naver.com", null,
                 "https://github.com/eora21", null, 1111, 1, "자기소개", "뿌듯했던 경험", "힘들었던 경험", true);
 
@@ -257,6 +261,9 @@ class EventControllerTest extends ControllerTestSupport {
     void register() throws Exception {
 
         // given
+        doReturn(true)
+                .when(profileService).hasCompletedProfile(any(Account.class), any(UUID.class));
+
         RequestUpdateRelationDto requestUpdateRelationDto = new RequestUpdateRelationDto(4285);
 
         doNothing()
@@ -294,6 +301,9 @@ class EventControllerTest extends ControllerTestSupport {
     void getParticipants() throws Exception {
 
         // given
+        doReturn(true)
+                .when(profileService).hasCompletedProfile(any(Account.class), any(UUID.class));
+
         ResponseRelationInfoDto responseRelationInfoDto = new ResponseRelationInfoDto(1L,
                 new PageImpl<>(List.of(
                         new RelationProfileDto(22L, "훈여정", "test@hun.com", null, null, null, 1,
