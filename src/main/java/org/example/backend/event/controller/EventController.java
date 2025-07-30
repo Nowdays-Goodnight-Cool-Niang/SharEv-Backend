@@ -18,6 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,6 +37,7 @@ public class EventController {
     private final ProfileService profileService;
     private final RelationService relationService;
 
+    @Secured("ROLE_USER")
     @PostMapping("/{eventId}/profiles")
     public ResponseEntity<Void> join(@PathVariable("eventId") UUID eventId,
                                      @AuthenticationPrincipal Account account) {
@@ -45,10 +47,11 @@ public class EventController {
                 .build();
     }
 
+    @Secured("ROLE_USER")
     @PatchMapping("/{eventId}/profiles")
     public ResponseEntity<ResponseProfileInfoDto> updateInfo(@PathVariable("eventId") UUID eventId,
                                                              @AuthenticationPrincipal Account account,
-                                                             @RequestBody RequestUpdateProfileInfoDto requestUpdateProfileInfoDto) {
+                                                             @Valid @RequestBody RequestUpdateProfileInfoDto requestUpdateProfileInfoDto) {
         ResponseProfileInfoDto responseProfileInfoDto =
                 profileService.updateInfo(eventId, account.getId(),
                         requestUpdateProfileInfoDto.introduce(),
@@ -58,6 +61,8 @@ public class EventController {
         return ResponseEntity.ok(responseProfileInfoDto);
     }
 
+    @Secured("ROLE_USER")
+    @PreAuthorize("@profileService.hasCompletedProfile(authentication.principal, #eventId)")
     @GetMapping("/{eventId}/profiles/{pinNumber}")
     public ResponseEntity<ResponseProfileDto> getProfileByPinNumber(@PathVariable("eventId") UUID eventId,
                                                                     @AuthenticationPrincipal Account account,
@@ -78,6 +83,7 @@ public class EventController {
     }
 
     @Secured("ROLE_USER")
+    @PreAuthorize("@profileService.hasCompletedProfile(authentication.principal, #eventId)")
     @PostMapping("/{eventId}/participants")
     public ResponseEntity<Void> register(@PathVariable("eventId") UUID eventId,
                                          @AuthenticationPrincipal Account account,
@@ -90,6 +96,7 @@ public class EventController {
     }
 
     @Secured("ROLE_USER")
+    @PreAuthorize("@profileService.hasCompletedProfile(authentication.principal, #eventId)")
     @GetMapping("/{eventId}/participants")
     public ResponseEntity<ResponseRelationInfoDto> getParticipants(@PathVariable("eventId") UUID eventId,
                                                                    @AuthenticationPrincipal Account account,

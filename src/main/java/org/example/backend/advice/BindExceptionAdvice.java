@@ -1,6 +1,7 @@
 package org.example.backend.advice;
 
 import java.util.Objects;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -20,6 +21,7 @@ public class BindExceptionAdvice {
                 .forEach(fieldError -> errorMessages.add(fieldError.getField(), getDefaultMessage(fieldError)));
 
         return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(errorMessages);
     }
 
