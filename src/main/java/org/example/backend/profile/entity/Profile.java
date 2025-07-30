@@ -21,6 +21,7 @@ import org.example.backend.account.entity.Account;
 import org.example.backend.base_entity.BaseTimeEntity;
 import org.example.backend.event.entity.Event;
 import org.example.backend.relation.entity.Relation;
+import org.springframework.util.StringUtils;
 
 @Entity
 @Getter
@@ -75,5 +76,11 @@ public class Profile extends BaseTimeEntity {
         this.introduce = introduce;
         this.proudestExperience = proudestExperience;
         this.toughExperience = toughExperience;
+    }
+
+    public boolean isCompleted() {
+        return StringUtils.hasText(introduce) &&
+                StringUtils.hasText(proudestExperience) &&
+                StringUtils.hasText(toughExperience);
     }
 }

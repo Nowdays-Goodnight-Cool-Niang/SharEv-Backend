@@ -9,6 +9,7 @@ public enum ExceptionCode {
     REGISTER_MYSELF("자기 자신을 도감에 등록할 수 없습니다."),
 
     PROFILE_NOT_FOUND("프로필이 존재하지 않습니다."),
+    PROFILE_UNCOMPLETED("프로필이 완성되지 않았습니다."),
     ACCOUNT_NOT_FOUND("사용자가 존재하지 않습니다."),
     EVENT_NOT_FOUND("이벤트가 존재하지 않습니다."),
 

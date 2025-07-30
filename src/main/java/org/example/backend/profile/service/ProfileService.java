@@ -24,6 +24,7 @@ import org.example.backend.profile.exception.JoinAlreadyException;
 import org.example.backend.profile.exception.KeyBlankException;
 import org.example.backend.profile.exception.PinNumberGenerateException;
 import org.example.backend.profile.exception.ProfileNotFoundException;
+import org.example.backend.profile.exception.ProfileUncompletedException;
 import org.example.backend.profile.repository.ProfileRepository;
 import org.example.backend.relation.entity.Relation.RelationId;
 import org.example.backend.relation.repository.RelationRepository;
@@ -155,5 +156,22 @@ public class ProfileService {
         Optional<Profile> profileOptional = profileRepository.findByEventIdAndAccountId(eventId, accountId);
 
         return new ResponseParticipantFlagDto(profileOptional.isPresent());
+    }
+
+    public boolean hasCompletedProfile(Account account, UUID eventId) {
+        Long accountId = account.getId();
+        Optional<Profile> optionalProfile = profileRepository.findByEventIdAndAccountId(eventId, accountId);
+
+        if (optionalProfile.isEmpty()) {
+            throw new ProfileNotFoundException();
+        }
+
+        Profile profile = optionalProfile.get();
+
+        if (profile.isCompleted()) {
+            return true;
+        }
+
+        throw new ProfileUncompletedException();
     }
 }
