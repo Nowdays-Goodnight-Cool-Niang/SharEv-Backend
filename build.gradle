@@ -77,6 +77,12 @@ dependencies {
 
     // redisson
     implementation 'org.redisson:redisson:3.50.0'
+
+    // logging
+    if ("${profile}" == 'prod') {
+        implementation 'org.springframework.cloud:spring-cloud-gcp-starter-logging'
+        implementation 'org.springframework.cloud:spring-cloud-gcp-starter-trace'
+    }
 }
 
 tasks.named('test') {
