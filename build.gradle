@@ -33,6 +33,12 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom 'com.google.cloud:spring-cloud-gcp-dependencies:6.2.3'
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -65,7 +71,7 @@ dependencies {
     swaggerUI 'org.webjars:swagger-ui:5.15.1'
 
     // production
-    implementation 'com.google.cloud:spring-cloud-gcp-starter-sql-mysql:6.2.3'
+    implementation 'com.google.cloud:spring-cloud-gcp-starter-sql-mysql'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.session:spring-session-data-redis'
 
@@ -80,8 +86,8 @@ dependencies {
 
     // logging
     if ("${profile}" == 'prod') {
-        implementation 'org.springframework.cloud:spring-cloud-gcp-starter-logging'
-        implementation 'org.springframework.cloud:spring-cloud-gcp-starter-trace'
+        implementation 'com.google.cloud:spring-cloud-gcp-starter-logging'
+        implementation 'com.google.cloud:spring-cloud-gcp-starter-trace'
     }
 }
 
