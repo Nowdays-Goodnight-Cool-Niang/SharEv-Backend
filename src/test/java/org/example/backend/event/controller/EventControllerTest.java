@@ -226,8 +226,6 @@ class EventControllerTest extends ControllerTestSupport {
                                                 .description("타입"),
                                         fieldWithPath("profileId").type(NUMBER)
                                                 .description("참여 번호"),
-                                        fieldWithPath("profileId").type(NUMBER)
-                                                .description("참여 번호"),
                                         fieldWithPath("name").type(STRING)
                                                 .description("이름"),
                                         fieldWithPath("email").type(STRING)
