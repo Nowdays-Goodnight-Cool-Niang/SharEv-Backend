@@ -86,8 +86,7 @@ dependencies {
 
     // logging
     if ("${profile}" == 'prod') {
-        implementation 'com.google.cloud:spring-cloud-gcp-starter-logging'
-        implementation 'com.google.cloud:spring-cloud-gcp-starter-trace'
+        implementation 'com.google.cloud:spring-cloud-gcp-starter'
     }
 }
 
