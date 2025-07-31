@@ -86,7 +86,7 @@ jobs:
               --tags=${{ env.NETWORK_TAGS }} \
               --service-account=${{ env.GCP_SERVICE_ACCOUNT }} \
               --container-image=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-              --scopes=https://www.googleapis.com/auth/cloud-platform
+              --scopes=https://www.googleapis.com/auth/cloud-platform \
               --metadata-from-file startup-script=scripts/install-ops-agent.sh
           else
             echo "INFO: Instance template '${{ env.INSTANCE_TEMPLATE_NAME }}' already exists. Skipping creation."
