@@ -96,7 +96,6 @@ public class EventController {
     }
 
     @Secured("ROLE_USER")
-    @PreAuthorize("@profileService.hasCompletedProfile(authentication.principal, #eventId)")
     @GetMapping("/{eventId}/participants")
     public ResponseEntity<ResponseRelationInfoDto> getParticipants(@PathVariable("eventId") UUID eventId,
                                                                    @AuthenticationPrincipal Account account,
