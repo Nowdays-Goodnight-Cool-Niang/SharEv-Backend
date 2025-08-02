@@ -119,7 +119,7 @@ public class AccountController {
         restTemplate.exchange("https://kapi.kakao.com/v1/user/unlink", HttpMethod.POST, entity, String.class);
     }
 
-    @GetMapping("authenticated")
+    @GetMapping("/authenticated")
     public ResponseEntity<Boolean> isAuthenticated(@AuthenticationPrincipal Account account) {
         return ResponseEntity.ok(account.isAuthenticated());
     }

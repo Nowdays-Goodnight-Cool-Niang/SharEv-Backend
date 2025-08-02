@@ -63,7 +63,7 @@ public class SecurityConfig {
                     .permitAll();
             authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
                     .permitAll();
-            authorizeRequests.requestMatchers("/accounts")
+            authorizeRequests.requestMatchers("/accounts/**")
                     .authenticated();
             authorizeRequests.anyRequest()
                     .hasRole("USER");
