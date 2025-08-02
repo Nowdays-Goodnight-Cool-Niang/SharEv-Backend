@@ -3,11 +3,9 @@ package org.example.backend.account.dto.response;
 import lombok.Getter;
 import org.example.backend.account.entity.Account;
 
-import java.util.UUID;
-
 @Getter
 public class ResponseAccountInfo {
-    private final UUID id;
+    private final Long id;
     private final String name;
     private final String email;
     private final String linkedinUrl;

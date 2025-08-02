@@ -565,4 +565,10 @@ Temporary Items
 # properties
 /src/main/resources/application*
 !/src/main/resources/application.properties
-!/src/main/resources/application-docker.properties
+!/src/main/resources/application-dev.properties
+
+# querydsl
+src/main/generated
+
+# swagger
+src/main/resources/static/docs

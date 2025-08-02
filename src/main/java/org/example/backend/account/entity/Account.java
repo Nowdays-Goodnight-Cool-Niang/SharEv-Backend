@@ -1,21 +1,23 @@
 package org.example.backend.account.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.example.backend.baseEntity.BaseTimeEntity;
+import org.example.backend.base_entity.BaseTimeEntity;
+import org.example.backend.profile.entity.Profile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -24,55 +26,55 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "accounts")
-public class Account extends BaseTimeEntity implements OAuth2User, Comparable<Account>, Serializable {
+public class Account extends BaseTimeEntity implements OAuth2User, Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")
-    private UUID id;
+    private Long id;
 
     @Column
     private Long kakaoOauthId;
 
     @Column
-    @Setter
     private String name;
 
     @Column
-    @Setter
     private String email;
 
     @Column
-    @Setter
+    private boolean initialRoleGrantedFlag;
+
+    @Column
     private String linkedinUrl;
 
     @Column
-    @Setter
     private String githubUrl;
 
     @Column
-    @Setter
     private String instagramUrl;
 
-    @Column
-    @Setter
-    private String teamName;
+    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private final List<Profile> profiles = new ArrayList<>();
 
-    @Column
-    @Setter
-    private String position;
-
-    @Column
-    @Setter
-    private String introductionText;
-
-    public Account(Long kakaoOauthId, String name) {
+    public Account(Long kakaoOauthId, String name, String email) {
         this.kakaoOauthId = kakaoOauthId;
         this.name = name;
+        this.email = email;
+        this.initialRoleGrantedFlag = false;
+    }
+
+    public void updateInfo(String name, String email, String linkedinUrl, String githubUrl, String instagramUrl) {
+        this.name = name;
+        this.email = email;
+        this.initialRoleGrantedFlag = true;
+        this.linkedinUrl = linkedinUrl;
+        this.githubUrl = githubUrl;
+        this.instagramUrl = instagramUrl;
     }
 
     public boolean isAuthenticated() {
-        return this.name != null && this.email != null;
+        return initialRoleGrantedFlag;
     }
 
     @Override
@@ -93,10 +95,5 @@ public class Account extends BaseTimeEntity implements OAuth2User, Comparable<Ac
     @Override
     public String getName() {
         return this.name;
-    }
-
-    @Override
-    public int compareTo(Account o) {
-        return this.id.compareTo(o.id);
     }
 }

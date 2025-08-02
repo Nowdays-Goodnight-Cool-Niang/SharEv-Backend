@@ -3,21 +3,32 @@ package org.example.backend.account.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.backend.account.dto.request.RequestDeleteDto;
 import org.example.backend.account.dto.request.RequestUpdateInfoDto;
-import org.example.backend.account.dto.response.ResponseAccountIdDto;
 import org.example.backend.account.dto.response.ResponseAccountInfo;
 import org.example.backend.account.entity.Account;
 import org.example.backend.account.service.AccountService;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
@@ -30,12 +41,27 @@ public class AccountController {
 
     @PatchMapping
     public ResponseEntity<Void> updateAccountInfo(@AuthenticationPrincipal Account account,
-                                                  @Valid @RequestBody RequestUpdateInfoDto requestUpdateInfoDto) {
+                                                  @Valid @RequestBody RequestUpdateInfoDto requestUpdateInfoDto,
+                                                  HttpSession session) {
 
-        accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto.name(), requestUpdateInfoDto.email(),
-                requestUpdateInfoDto.linkedinUrl(), requestUpdateInfoDto.githubUrl(),
+        Account newAccount = accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto.name(),
+                requestUpdateInfoDto.email(), requestUpdateInfoDto.linkedinUrl(), requestUpdateInfoDto.githubUrl(),
                 requestUpdateInfoDto.instagramUrl());
+
+        updateSessionInfo(newAccount, session);
+
         return ResponseEntity.ok().build();
+    }
+
+    private static void updateSessionInfo(Account newAccount, HttpSession session) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String clientRegistrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
+        Authentication newAuth = new OAuth2AuthenticationToken(newAccount, newAccount.getAuthorities(),
+                clientRegistrationId);
+
+        SecurityContext context = SecurityContextHolder.getContext();
+        context.setAuthentication(newAuth);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
     }
 
     @GetMapping
@@ -43,14 +69,11 @@ public class AccountController {
         return ResponseEntity.ok(new ResponseAccountInfo(account));
     }
 
-    @GetMapping("my-id")
-    public ResponseEntity<ResponseAccountIdDto> getMyId(@AuthenticationPrincipal Account account) {
-        return ResponseEntity.ok(new ResponseAccountIdDto(account.getId()));
-    }
-
     @DeleteMapping
-    public ResponseEntity<Void> delete(@AuthenticationPrincipal Account account, HttpSession session) {
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal Account account,
+                                       @RequestBody RequestDeleteDto requestDeleteDto, HttpSession session) {
         accountService.delete(account);
+        accountService.saveFeedback(requestDeleteDto.feedback());
 
         session.invalidate();
 
@@ -94,5 +117,10 @@ public class AccountController {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(headers);
 
         restTemplate.exchange("https://kapi.kakao.com/v1/user/unlink", HttpMethod.POST, entity, String.class);
+    }
+
+    @GetMapping("/authenticated")
+    public ResponseEntity<Boolean> isAuthenticated(@AuthenticationPrincipal Account account) {
+        return ResponseEntity.ok(account.isAuthenticated());
     }
 }
