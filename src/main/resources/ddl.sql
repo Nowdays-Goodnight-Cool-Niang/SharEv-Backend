@@ -25,9 +25,9 @@ CREATE TABLE `events`
     `updated_at` timestamp              NOT NULL
 );
 
-CREATE TABLE `profiles`
+CREATE TABLE `cards`
 (
-    `profile_id`          BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `card_id`             BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `event_id`            BINARY(16)         NOT NULL,
     `account_id`          BIGINT             NOT NULL,
     `pin_number`          INT                NOT NULL,
@@ -44,15 +44,16 @@ CREATE TABLE `profiles`
     INDEX idx_event_account (`event_id`, `account_id`)
 );
 
-CREATE TABLE `relations`
+CREATE TABLE card_connections
 (
-    `first_profile_id`  BIGINT    NOT NULL,
-    `second_profile_id` BIGINT    NOT NULL,
-    `created_at`        timestamp NOT NULL,
-    `updated_at`        timestamp NOT NULL,
-    PRIMARY KEY (first_profile_id, second_profile_id),
-    CONSTRAINT fk_first_profile FOREIGN KEY (`first_profile_id`) REFERENCES `profiles` (`profile_id`),
-    CONSTRAINT fk_second_profile FOREIGN KEY (`second_profile_id`) REFERENCES `profiles` (`profile_id`)
+    `my_card_id`    BIGINT    NOT NULL,
+    `other_card_id` BIGINT    NOT NULL,
+    `check_flag`    BOOLEAN   NOT NULL,
+    `created_at`    timestamp NOT NULL,
+    `updated_at`    timestamp NOT NULL,
+    PRIMARY KEY (my_card_id, other_card_id),
+    CONSTRAINT fk_first_profile FOREIGN KEY (my_card_id) REFERENCES `cards` (`card_id`),
+    CONSTRAINT fk_second_profile FOREIGN KEY (other_card_id) REFERENCES `cards` (`card_id`)
 );
 
 CREATE TABLE `feedbacks`
