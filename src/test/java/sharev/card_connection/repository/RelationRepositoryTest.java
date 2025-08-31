@@ -1,17 +1,17 @@
-//package org.example.backend.relation.repository;
+//package sharev.relation.repository;
 //
 //import static org.junit.jupiter.api.Assertions.assertEquals;
 //import static org.junit.jupiter.api.Assertions.assertNotNull;
 //
 //import java.time.LocalDateTime;
 //import java.util.List;
-//import org.example.backend.account.entity.Account;
-//import org.example.backend.config.JpaConfig;
-//import org.example.backend.config.QuerydslConfig;
-//import org.example.backend.event.entity.Event;
-//import org.example.backend.profile.entity.Profile;
-//import org.example.backend.relation.dto.response.RelationProfileDto;
-//import org.example.backend.relation.entity.Relation;
+//import sharev.account.entity.Account;
+//import sharev.config.JpaConfig;
+//import sharev.config.QuerydslConfig;
+//import sharev.event.entity.Event;
+//import sharev.profile.entity.Profile;
+//import sharev.relation.dto.response.RelationProfileDto;
+//import sharev.relation.entity.Relation;
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;

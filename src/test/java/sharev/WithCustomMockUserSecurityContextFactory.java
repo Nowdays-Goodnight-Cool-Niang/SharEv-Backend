@@ -1,8 +1,8 @@
-package org.example.backend;
+package sharev;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import org.example.backend.account.entity.Account;
+import sharev.account.entity.Account;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;

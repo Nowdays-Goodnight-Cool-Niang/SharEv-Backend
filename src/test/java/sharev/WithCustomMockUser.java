@@ -1,4 +1,4 @@
-package org.example.backend;
+package sharev;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

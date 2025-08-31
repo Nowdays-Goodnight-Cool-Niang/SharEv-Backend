@@ -1,16 +1,16 @@
-package org.example.backend.account.repository;
+package sharev.account.repository;
 
 import java.time.LocalDateTime;
 import org.assertj.core.api.Assertions;
-import org.example.backend.account.entity.Account;
-import org.example.backend.config.JpaConfig;
-import org.example.backend.config.QuerydslConfig;
-import org.example.backend.event.entity.Event;
-import org.example.backend.event.repository.EventRepository;
-import org.example.backend.profile.entity.Profile;
-import org.example.backend.profile.repository.ProfileRepository;
-import org.example.backend.relation.entity.Relation;
-import org.example.backend.relation.repository.RelationRepository;
+import sharev.account.entity.Account;
+import sharev.card.entity.Card;
+import sharev.card.repository.CardRepository;
+import sharev.card_connection.entity.CardConnection;
+import sharev.card_connection.repository.CardConnectionRepository;
+import sharev.config.JpaConfig;
+import sharev.config.QuerydslConfig;
+import sharev.event.entity.Event;
+import sharev.event.repository.EventRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +32,10 @@ class AccountRepositoryTest {
     EventRepository eventRepository;
 
     @Autowired
-    ProfileRepository profileRepository;
+    CardRepository cardRepository;
 
     @Autowired
-    RelationRepository relationRepository;
+    CardConnectionRepository cardConnectionRepository;
 
     @Test
     @DisplayName("탈퇴 시 연계 삭제")
@@ -48,13 +48,16 @@ class AccountRepositoryTest {
 
         Event event = em.persist(new Event());
 
-        Profile jooho = em.persist(new Profile(event, kim, 1, 1));
-        Profile nayeon = em.persist(new Profile(event, kwon, 2, 2));
-        Profile yujin = em.persist(new Profile(event, lee, 3, 3));
+        Card jooho = em.persist(new Card(event, kim, 1, 1));
+        Card nayeon = em.persist(new Card(event, kwon, 2, 2));
+        Card yujin = em.persist(new Card(event, lee, 3, 3));
 
-        em.persist(new Relation(jooho, nayeon));
-        em.persist(new Relation(jooho, yujin));
-        em.persist(new Relation(nayeon, yujin));
+        CardConnection.connect(jooho, nayeon)
+                .forEach(em::persist);
+        CardConnection.connect(jooho, yujin)
+                .forEach(em::persist);
+        CardConnection.connect(nayeon, yujin)
+                .forEach(em::persist);
 
         em.flush();
         em.clear();
@@ -70,13 +73,16 @@ class AccountRepositoryTest {
 
         Assertions.assertThat(eventRepository.findById(event.getId())).isPresent();
 
-        Assertions.assertThat(profileRepository.findAllByEventId(event.getId())).hasSize(2);
+        Assertions.assertThat(cardRepository.findAllByEventId(event.getId())).hasSize(2);
 
-        Assertions.assertThat(relationRepository.getRegisterCount(event.getId(), jooho.getId(), LocalDateTime.now()))
+        Assertions.assertThat(
+                        cardConnectionRepository.getRegisterCount(event.getId(), jooho.getId(), LocalDateTime.now()))
                 .isZero();
-        Assertions.assertThat(relationRepository.getRegisterCount(event.getId(), nayeon.getId(), LocalDateTime.now()))
+        Assertions.assertThat(
+                        cardConnectionRepository.getRegisterCount(event.getId(), nayeon.getId(), LocalDateTime.now()))
                 .isEqualTo(1L);
-        Assertions.assertThat(relationRepository.getRegisterCount(event.getId(), yujin.getId(), LocalDateTime.now()))
+        Assertions.assertThat(
+                        cardConnectionRepository.getRegisterCount(event.getId(), yujin.getId(), LocalDateTime.now()))
                 .isEqualTo(1L);
     }
 }

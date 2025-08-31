@@ -1,16 +1,16 @@
-package org.example.backend;
+package sharev;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.backend.account.service.AccountService;
-import org.example.backend.account.service.CustomOauth2UserService;
-import org.example.backend.config.EmbeddedRedisConfig;
-import org.example.backend.config.JpaConfig;
-import org.example.backend.config.QuerydslConfig;
-import org.example.backend.config.RedisConfig;
-import org.example.backend.config.RedissonConfig;
-import org.example.backend.profile.service.ProfileService;
-import org.example.backend.relation.service.RelationService;
-import org.example.backend.util.LockProcessor;
+import sharev.account.service.AccountService;
+import sharev.account.service.CustomOauth2UserService;
+import sharev.card.service.CardService;
+import sharev.card_connection.service.CardConnectionService;
+import sharev.config.EmbeddedRedisConfig;
+import sharev.config.JpaConfig;
+import sharev.config.QuerydslConfig;
+import sharev.config.RedisConfig;
+import sharev.config.RedissonConfig;
+import sharev.util.LockProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -42,10 +42,10 @@ public abstract class ControllerTestSupport {
     protected AccountService accountService;
 
     @MockitoBean
-    protected ProfileService profileService;
+    protected CardService cardService;
 
     @MockitoBean
-    protected RelationService relationService;
+    protected CardConnectionService cardConnectionService;
 
     @MockitoBean
     protected CustomOauth2UserService customOauth2UserService;

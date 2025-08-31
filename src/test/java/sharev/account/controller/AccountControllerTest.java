@@ -1,4 +1,4 @@
-package org.example.backend.account.controller;
+package sharev.account.controller;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
@@ -16,12 +16,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import org.example.backend.ControllerTestSupport;
-import org.example.backend.WithCustomMockUser;
-import org.example.backend.account.dto.request.RequestDeleteDto;
-import org.example.backend.account.dto.request.RequestUpdateInfoDto;
-import org.example.backend.account.dto.response.ResponseAccountInfo;
-import org.example.backend.account.entity.Account;
+import sharev.ControllerTestSupport;
+import sharev.WithCustomMockUser;
+import sharev.account.dto.request.RequestDeleteDto;
+import sharev.account.dto.request.RequestUpdateInfoDto;
+import sharev.account.dto.response.ResponseAccountInfo;
+import sharev.account.entity.Account;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;

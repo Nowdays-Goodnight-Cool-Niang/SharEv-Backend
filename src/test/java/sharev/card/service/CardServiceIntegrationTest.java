@@ -1,16 +1,16 @@
-package org.example.backend.profile.service;
+package sharev.card.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
-import org.example.backend.account.entity.Account;
-import org.example.backend.account.repository.AccountRepository;
-import org.example.backend.event.entity.Event;
-import org.example.backend.event.repository.EventRepository;
-import org.example.backend.event.util.EventKeyGenerator;
-import org.example.backend.profile.entity.Profile;
-import org.example.backend.profile.exception.JoinAlreadyException;
-import org.example.backend.profile.repository.ProfileRepository;
+import sharev.account.entity.Account;
+import sharev.account.repository.AccountRepository;
+import sharev.card.entity.Card;
+import sharev.card.exception.JoinAlreadyException;
+import sharev.card.repository.CardRepository;
+import sharev.event.entity.Event;
+import sharev.event.repository.EventRepository;
+import sharev.event.util.EventKeyGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-class ProfileServiceIntegrationTest {
+class CardServiceIntegrationTest {
 
     @Autowired
-    private ProfileService profileService;
+    private CardService cardService;
 
     @Autowired
-    private ProfileRepository profileRepository;
+    private CardRepository cardRepository;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -46,7 +46,7 @@ class ProfileServiceIntegrationTest {
         Account kim = accountRepository.save(new Account(1L, "김주호", "eora21@naver.com"));
 
         // when
-        profileService.join(event.getId(), kim.getId());
+        cardService.join(event.getId(), kim.getId());
 
         // then
         String eventKey = EventKeyGenerator.calculateEventPinKey(event.getId());
@@ -55,9 +55,9 @@ class ProfileServiceIntegrationTest {
         Set<Object> pinNumbers = redisTemplate.opsForSet().members(eventKey);
         assertThat(pinNumbers).isNotEmpty();
 
-        Profile profile = profileRepository.findByEventIdAndAccountId(event.getId(), kim.getId())
+        Card card = cardRepository.findByEventIdAndAccountId(event.getId(), kim.getId())
                 .orElseThrow();
-        assertThat(pinNumbers).doesNotContain(profile.getPinNumber());
+        assertThat(pinNumbers).doesNotContain(card.getPinNumber());
     }
 
     @DisplayName("중복하여 join 시 예외가 발생해야 한다")
@@ -70,8 +70,8 @@ class ProfileServiceIntegrationTest {
 
         // when
         // then
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> profileService.join(event.getId(), kim.getId()));
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> cardService.join(event.getId(), kim.getId()));
         org.junit.jupiter.api.Assertions.assertThrowsExactly(JoinAlreadyException.class,
-                () -> profileService.join(event.getId(), kim.getId()));
+                () -> cardService.join(event.getId(), kim.getId()));
     }
 }
