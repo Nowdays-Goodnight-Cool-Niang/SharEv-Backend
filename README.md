@@ -51,3 +51,56 @@ QR 기반의 디지털 명함 서비스로, 네트워킹을 더 간편하고 즐
 - [FE 구경하기](https://github.com/Nowdays-Goodnight-Cool-Niang/SharEv-Frontend)
 
 ## ERD
+```mermaid
+erDiagram
+	accounts {
+	BIGINT account_id PK
+	BIGINT kakao_oauth_id UK
+	VARCHAR name
+	VARCHAR email
+	BOOLEAN initial_role_granted_flag
+	VARCHAR linkedin_url
+	VARCHAR github_url
+	VARCHAR instagram_url
+	TIMESTAMP created_at
+	TIMESTAMP updated_at
+	}
+	
+	events {
+	    BINARY event_id PK
+	    TIMESTAMP created_at
+	    TIMESTAMP updated_at
+	}
+	
+	profiles {
+	    BIGINT profile_id PK
+	    BINARY event_id FK
+	    BIGINT account_id FK
+	    INT pin_number
+	    INT icon_number
+	    VARCHAR introduce
+	    VARCHAR proudest_experience
+	    VARCHAR tough_experience
+	    TIMESTAMP created_at
+	    TIMESTAMP updated_at
+	}
+	
+	relations {
+	    BIGINT first_profile_id PK, FK
+	    BIGINT second_profile_id PK, FK
+	    TIMESTAMP created_at
+	    TIMESTAMP updated_at
+	}
+	
+	feedbacks {
+	    BIGINT feedback_id PK
+	    VARCHAR feedback
+	    TIMESTAMP created_at
+	    TIMESTAMP updated_at
+	}
+	
+	accounts ||--o{ profiles : "has"
+	events ||--o{ profiles : "hosts"
+	profiles }o--|| relations : "is_first_profile"
+	profiles }o--|| relations : "is_second_profile"
+```
