@@ -1,4 +1,4 @@
-package sharev.card_connection.exception;
+package sharev.connection.exception;
 
 import sharev.exception.BadRequestException;
 import sharev.exception.ExceptionCode;

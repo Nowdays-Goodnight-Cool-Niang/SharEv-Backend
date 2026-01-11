@@ -1,6 +1,5 @@
 package sharev.card.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,26 +8,24 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.util.StringUtils;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import sharev.account.entity.Account;
 import sharev.base_entity.BaseTimeEntity;
-import sharev.card_connection.entity.CardConnection;
-import sharev.event.entity.Event;
+import sharev.card.exception.InvalidIntroduceTemplateException;
+import sharev.gathering.entity.Gathering;
+import sharev.gathering.entity.IntroduceTemplate;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "cards", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"event_id", "account_id"})
-})
+@Table(name = "cards")
 public class Card extends BaseTimeEntity {
 
     @Id
@@ -37,50 +34,41 @@ public class Card extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
-    private Event event;
+    @JoinColumn(name = "gathering_id")
+    private Gathering gathering;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
 
-    @OneToMany(mappedBy = "myCard", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private final List<CardConnection> myCardConnections = new ArrayList<>();
-
-    @OneToMany(mappedBy = "otherCard", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private final List<CardConnection> otherCardConnections = new ArrayList<>();
-
     @Column
     private Integer pinNumber;
 
     @Column
-    private Integer iconNumber;
+    private Integer templateVersion;
 
     @Column
-    private String introduce;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, String> introductionText;
 
-    @Column
-    private String proudestExperience;
-
-    @Column
-    private String toughExperience;
-
-    public Card(Event event, Account account, Integer pinNumber, Integer iconNumber) {
-        this.event = event;
+    public Card(Gathering gathering, Account account, Integer pinNumber) {
+        this.gathering = gathering;
         this.account = account;
         this.pinNumber = pinNumber;
-        this.iconNumber = iconNumber;
     }
 
-    public void updateInfo(String introduce, String proudestExperience, String toughExperience) {
-        this.introduce = introduce;
-        this.proudestExperience = proudestExperience;
-        this.toughExperience = toughExperience;
+    public void updateIntroductionText(IntroduceTemplate introduceTemplate, Integer templateVersion,
+                                       Map<String, String> introductionText) {
+
+        if (!introduceTemplate.validateIntroduce(templateVersion, introductionText)) {
+            throw new InvalidIntroduceTemplateException();
+        }
+
+        this.templateVersion = templateVersion;
+        this.introductionText = introductionText;
     }
 
     public boolean isCompleted() {
-        return StringUtils.hasText(introduce) &&
-                StringUtils.hasText(proudestExperience) &&
-                StringUtils.hasText(toughExperience);
+        return Objects.nonNull(this.pinNumber) && Objects.nonNull(this.introductionText);
     }
 }
