@@ -25,7 +25,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import sharev.account.entity.Account;
+import sharev.domain.account.entity.Account;
 
 @Configuration
 @EnableWebSecurity
