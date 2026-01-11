@@ -20,9 +20,9 @@ public class Feedback extends BaseTimeEntity {
     @Column(name = "feedback_id")
     private Long id;
 
-    private String feedback;
+    private String content;
 
-    public Feedback(String feedback) {
-        this.feedback = feedback;
+    public Feedback(String content) {
+        this.content = content;
     }
 }
