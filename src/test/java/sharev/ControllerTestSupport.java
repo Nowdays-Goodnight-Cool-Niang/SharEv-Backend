@@ -1,16 +1,6 @@
 package sharev;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import sharev.account.service.AccountService;
-import sharev.account.service.CustomOauth2UserService;
-import sharev.card.service.CardService;
-import sharev.card_connection.service.CardConnectionService;
-import sharev.config.EmbeddedRedisConfig;
-import sharev.config.JpaConfig;
-import sharev.config.QuerydslConfig;
-import sharev.config.RedisConfig;
-import sharev.config.RedissonConfig;
-import sharev.util.LockProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,6 +9,17 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import sharev.config.EmbeddedRedisConfig;
+import sharev.config.JpaConfig;
+import sharev.config.QuerydslConfig;
+import sharev.config.RedisConfig;
+import sharev.config.RedissonConfig;
+import sharev.domain.account.service.AccountService;
+import sharev.domain.account.service.CustomOauth2UserService;
+import sharev.domain.card.service.CardService;
+import sharev.domain.connection.service.ConnectionService;
+import sharev.domain.team.service.TeamService;
+import sharev.util.LockProcessor;
 
 @WebMvcTest
 @AutoConfigureMockMvc
@@ -45,7 +46,10 @@ public abstract class ControllerTestSupport {
     protected CardService cardService;
 
     @MockitoBean
-    protected CardConnectionService cardConnectionService;
+    protected ConnectionService connectionService;
+
+    @MockitoBean
+    protected TeamService teamService;
 
     @MockitoBean
     protected CustomOauth2UserService customOauth2UserService;

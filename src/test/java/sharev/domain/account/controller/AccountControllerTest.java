@@ -1,4 +1,4 @@
-package sharev.account.controller;
+package sharev.domain.account.controller;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
@@ -8,7 +8,6 @@ import static com.epages.restdocs.apispec.SimpleType.STRING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -16,18 +15,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import sharev.ControllerTestSupport;
-import sharev.WithCustomMockUser;
-import sharev.account.dto.request.RequestDeleteDto;
-import sharev.account.dto.request.RequestUpdateInfoDto;
-import sharev.account.dto.response.ResponseAccountInfo;
-import sharev.account.entity.Account;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.RequestBuilder;
+import sharev.ControllerTestSupport;
+import sharev.WithCustomMockUser;
+import sharev.domain.account.dto.request.RequestDeleteDto;
+import sharev.domain.account.dto.request.RequestUpdateInfoDto;
+import sharev.domain.account.dto.response.ResponseAccountInfo;
+import sharev.domain.account.entity.Account;
 
 class AccountControllerTest extends ControllerTestSupport {
 
@@ -41,24 +40,19 @@ class AccountControllerTest extends ControllerTestSupport {
             Long accountId = invocation.getArgument(0);
             String name = invocation.getArgument(1);
             String email = invocation.getArgument(2);
-            String linkedinUrl = invocation.getArgument(3);
-            String githubUrl = invocation.getArgument(4);
-            String instagramUrl = invocation.getArgument(5);
 
-            Account account = new Account(accountId, name, email);
-            ReflectionTestUtils.setField(account, "linkedinUrl", linkedinUrl);
-            ReflectionTestUtils.setField(account, "githubUrl", githubUrl);
-            ReflectionTestUtils.setField(account, "instagramUrl", instagramUrl);
-            ReflectionTestUtils.setField(account, "initialRoleGrantedFlag", true);
+            Account account = new Account(name, email);
+            ReflectionTestUtils.setField(account, "id", accountId);
 
             return account;
         })
                 .when(accountService)
-                .updateAccountInfo(anyLong(), anyString(), anyString(), nullable(String.class), nullable(String.class),
-                        nullable(String.class));
+                .updateAccountInfo(anyLong(), anyString(), anyString());
 
-        RequestUpdateInfoDto requestUpdateInfoDto = new RequestUpdateInfoDto("김주호", "eora21@naver.com", null,
-                "https://github.com/eora21", null);
+        RequestUpdateInfoDto requestUpdateInfoDto = new RequestUpdateInfoDto("김주호", "eora21@naver.com", 
+                "https://linkedin.com/in/kimjooho",
+                "https://github.com/eora21", 
+                "https://instagram.com/kimjooho");
 
         RequestBuilder request = RestDocumentationRequestBuilders
                 .patch("/accounts")
@@ -74,18 +68,18 @@ class AccountControllerTest extends ControllerTestSupport {
                 .andDo(document("updateAccountInfo",
                         resource(ResourceSnippetParameters.builder()
                                 .summary("회원 정보 업데이트")
-                                .description("자신의 정보를 갱신합니다.")
+                                .description("자신의 정보를 갱신합니다. 링크 URL은 현재 Link 엔티티로 저장되며, 추후 별도 엔드포인트를 통해 조회할 수 있습니다.")
                                 .requestFields(
                                         fieldWithPath("name").type(STRING)
                                                 .description("회원 이름"),
                                         fieldWithPath("email").type(STRING)
                                                 .description("이메일"),
                                         fieldWithPath("linkedinUrl").type(STRING).optional()
-                                                .description("링크드인 url"),
+                                                .description("링크드인 URL (선택사항)"),
                                         fieldWithPath("githubUrl").type(STRING).optional()
-                                                .description("깃헙 url"),
+                                                .description("깃헙 URL (선택사항)"),
                                         fieldWithPath("instagramUrl").type(STRING).optional()
-                                                .description("인스타그램 url")
+                                                .description("인스타그램 URL (선택사항)")
                                 )
                                 .requestSchema(schema(RequestUpdateInfoDto.class.getSimpleName()))
                                 .build())));
@@ -117,13 +111,7 @@ class AccountControllerTest extends ControllerTestSupport {
                                         fieldWithPath("name").type(STRING)
                                                 .description("회원 이름"),
                                         fieldWithPath("email").type(STRING)
-                                                .description("이메일"),
-                                        fieldWithPath("linkedinUrl").type(STRING).optional()
-                                                .description("링크드인 url"),
-                                        fieldWithPath("githubUrl").type(STRING).optional()
-                                                .description("깃헙 url"),
-                                        fieldWithPath("instagramUrl").type(STRING).optional()
-                                                .description("인스타그램 url")
+                                                .description("이메일")
                                 )
                                 .responseSchema(schema(ResponseAccountInfo.class.getSimpleName()))
                                 .build())));

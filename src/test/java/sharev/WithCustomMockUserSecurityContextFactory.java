@@ -2,12 +2,13 @@ package sharev;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import sharev.account.entity.Account;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
+import org.springframework.test.util.ReflectionTestUtils;
+import sharev.domain.account.entity.Account;
 
 public class WithCustomMockUserSecurityContextFactory implements WithSecurityContextFactory<WithCustomMockUser> {
 
@@ -15,16 +16,8 @@ public class WithCustomMockUserSecurityContextFactory implements WithSecurityCon
     public SecurityContext createSecurityContext(WithCustomMockUser annotation) {
         String role = annotation.role();
 
-        Account account = new Account(1L, "test", "test@test.com");
-
-        try {
-            Class<Account> accountClass = Account.class;
-            Field idField = accountClass.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(account, 1L);
-        } catch (Exception e) {
-            throw new RuntimeException("Account 리플렉션 중 문제 발생");
-        }
+        Account account = new Account("test", "test@test.com");
+        ReflectionTestUtils.setField(account, "id", 1L);
 
         OAuth2AuthenticationToken token =
                 new OAuth2AuthenticationToken(account, List.of(new SimpleGrantedAuthority(role)), "kakao");

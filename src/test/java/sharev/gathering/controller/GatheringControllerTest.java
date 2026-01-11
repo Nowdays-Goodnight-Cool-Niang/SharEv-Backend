@@ -1,4 +1,4 @@
-package sharev.event.controller;
+package sharev.gathering.controller;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
@@ -21,9 +21,9 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.RequestBuilder;
 import sharev.ControllerTestSupport;
 import sharev.WithCustomMockUser;
-import sharev.card.dto.response.ResponseParticipantFlagDto;
+import sharev.domain.card.dto.response.ResponseParticipantFlagDto;
 
-class EventControllerTest extends ControllerTestSupport {
+class GatheringControllerTest extends ControllerTestSupport {
 
     @Test
     @WithCustomMockUser
@@ -49,13 +49,15 @@ class EventControllerTest extends ControllerTestSupport {
                         resource(ResourceSnippetParameters.builder()
                                 .summary("행사 참여 유무 확인")
                                 .description(
-                                        "행사에 참여했는지, 참여하지 않았는지 확인합니다.")
+                                        "사용자가 특정 행사에 참여했는지 확인합니다. " +
+                                        "참여한 경우 true, 참여하지 않은 경우 false를 반환합니다. " +
+                                        "이 API는 행사 참여 여부를 확인하여 카드 작성 가능 여부를 판단하는 데 사용됩니다.")
                                 .pathParameters(
-                                        parameterWithName("eventId").description("참여한 이벤트 id")
+                                        parameterWithName("eventId").description("확인할 행사의 ID (UUID 형식)")
                                 )
                                 .responseFields(
                                         fieldWithPath("isParticipant").type(BOOLEAN)
-                                                .description("행사 참여 유무")
+                                                .description("행사 참여 유무 (true: 참여함, false: 참여하지 않음)")
                                 )
                                 .responseSchema(schema(ResponseParticipantFlagDto.class.getSimpleName()))
                                 .build())));
