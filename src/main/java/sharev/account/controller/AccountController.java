@@ -3,11 +3,6 @@ package sharev.account.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import sharev.account.dto.request.RequestDeleteDto;
-import sharev.account.dto.request.RequestUpdateInfoDto;
-import sharev.account.dto.response.ResponseAccountInfo;
-import sharev.account.entity.Account;
-import sharev.account.service.AccountService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,6 +25,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import sharev.account.dto.request.RequestDeleteDto;
+import sharev.account.dto.request.RequestUpdateInfoDto;
+import sharev.account.dto.response.ResponseAccountInfo;
+import sharev.account.entity.Account;
+import sharev.account.service.AccountService;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,8 +45,7 @@ public class AccountController {
                                                   HttpSession session) {
 
         Account newAccount = accountService.updateAccountInfo(account.getId(), requestUpdateInfoDto.name(),
-                requestUpdateInfoDto.email(), requestUpdateInfoDto.linkedinUrl(), requestUpdateInfoDto.githubUrl(),
-                requestUpdateInfoDto.instagramUrl());
+                requestUpdateInfoDto.email());
 
         updateSessionInfo(newAccount, session);
 
@@ -117,10 +116,5 @@ public class AccountController {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(headers);
 
         restTemplate.exchange("https://kapi.kakao.com/v1/user/unlink", HttpMethod.POST, entity, String.class);
-    }
-
-    @GetMapping("/authenticated")
-    public ResponseEntity<Boolean> isAuthenticated(@AuthenticationPrincipal Account account) {
-        return ResponseEntity.ok(account.isAuthenticated());
     }
 }

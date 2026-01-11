@@ -2,13 +2,13 @@ package sharev.account.service;
 
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sharev.account.entity.Account;
 import sharev.account.entity.Feedback;
 import sharev.account.exception.AccountNotFoundException;
 import sharev.account.repository.AccountRepository;
 import sharev.account.repository.FeedbackRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,13 +18,12 @@ public class AccountService {
     private final FeedbackRepository feedbackRepository;
 
     @Transactional
-    public Account updateAccountInfo(Long accountId, String name, String email, String linkedinUrl,
-                                     String githubUrl, String instagramUrl) {
+    public Account updateAccountInfo(Long accountId, String name, String email) {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(AccountNotFoundException::new);
 
-        account.updateInfo(name, email, linkedinUrl, githubUrl, instagramUrl);
+        account.updateInfo(name, email);
 
         return account;
     }
