@@ -59,6 +59,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorizeRequests -> {
             authorizeRequests.requestMatchers("/actuator/**")
                     .permitAll();
+            authorizeRequests.requestMatchers("/swagger-ui/**")
+                    .permitAll();
             authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
                     .permitAll();
             authorizeRequests.anyRequest()
