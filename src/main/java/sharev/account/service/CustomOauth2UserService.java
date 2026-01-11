@@ -3,20 +3,25 @@ package sharev.account.service;
 import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import sharev.account.entity.Account;
-import sharev.account.repository.AccountRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import sharev.account.entity.Account;
+import sharev.account.entity.OauthAccount;
+import sharev.account.entity.OauthAccount.OauthAccountId;
+import sharev.account.entity.OauthProvider;
+import sharev.account.repository.AccountRepository;
+import sharev.account.repository.OauthAccountRepository;
 
 @Service
 @RequiredArgsConstructor
 public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
+    private final OauthAccountRepository oauthAccountRepository;
     private final AccountRepository accountRepository;
 
     @Override
@@ -32,8 +37,16 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         String name = getNickname(kakaoUserInfo);
         String email = getEmail(kakaoUserInfo);
 
-        return accountRepository.findByKakaoOauthId(kakaoOauthId)
-                .orElseGet(() -> accountRepository.save(new Account(kakaoOauthId, name, email)));
+        OauthAccount oauthAccount = oauthAccountRepository.findById(
+                        new OauthAccountId(OauthProvider.KAKAO, kakaoOauthId.toString()))
+                .orElseGet(() -> {
+                    Account account = accountRepository.save(new Account(name, email));
+                    return oauthAccountRepository.save(
+                            new OauthAccount(OauthProvider.KAKAO, kakaoOauthId.toString(), account)
+                    );
+                });
+
+        return oauthAccount.getAccount();
     }
 
     @SuppressWarnings("unchecked")
