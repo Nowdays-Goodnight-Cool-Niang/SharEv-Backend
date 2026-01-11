@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import sharev.account.entity.Account;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -26,6 +25,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import sharev.account.entity.Account;
 
 @Configuration
 @EnableWebSecurity
@@ -61,10 +61,8 @@ public class SecurityConfig {
                     .permitAll();
             authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
                     .permitAll();
-            authorizeRequests.requestMatchers("/accounts/**")
-                    .authenticated();
             authorizeRequests.anyRequest()
-                    .hasRole("USER");
+                    .authenticated();
         });
 
         return http.build();
@@ -111,13 +109,10 @@ public class SecurityConfig {
     private static Map<String, Object> accountEntityToLoginResponse(Account account) {
         Map<String, Object> responseData = new HashMap<>();
 
-        responseData.put("isAuthenticated", account.isAuthenticated());
         responseData.put("id", account.getId());
         responseData.put("name", account.getName());
         responseData.put("email", account.getEmail());
-        responseData.put("linkedinUrl", account.getLinkedinUrl());
-        responseData.put("githubUrl", account.getGithubUrl());
-        responseData.put("instagramUrl", account.getInstagramUrl());
+
         return responseData;
     }
 
