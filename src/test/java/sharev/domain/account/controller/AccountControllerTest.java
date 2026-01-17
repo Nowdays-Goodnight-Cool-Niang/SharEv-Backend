@@ -49,10 +49,7 @@ class AccountControllerTest extends ControllerTestSupport {
                 .when(accountService)
                 .updateAccountInfo(anyLong(), anyString(), anyString());
 
-        RequestUpdateInfoDto requestUpdateInfoDto = new RequestUpdateInfoDto("김주호", "eora21@naver.com", 
-                "https://linkedin.com/in/kimjooho",
-                "https://github.com/eora21", 
-                "https://instagram.com/kimjooho");
+        RequestUpdateInfoDto requestUpdateInfoDto = new RequestUpdateInfoDto("김주호", "eora21@naver.com");
 
         RequestBuilder request = RestDocumentationRequestBuilders
                 .patch("/accounts")
@@ -68,18 +65,12 @@ class AccountControllerTest extends ControllerTestSupport {
                 .andDo(document("updateAccountInfo",
                         resource(ResourceSnippetParameters.builder()
                                 .summary("회원 정보 업데이트")
-                                .description("자신의 정보를 갱신합니다. 링크 URL은 현재 Link 엔티티로 저장되며, 추후 별도 엔드포인트를 통해 조회할 수 있습니다.")
+                                .description("자신의 정보를 갱신합니다.")
                                 .requestFields(
                                         fieldWithPath("name").type(STRING)
                                                 .description("회원 이름"),
                                         fieldWithPath("email").type(STRING)
-                                                .description("이메일"),
-                                        fieldWithPath("linkedinUrl").type(STRING).optional()
-                                                .description("링크드인 URL (선택사항)"),
-                                        fieldWithPath("githubUrl").type(STRING).optional()
-                                                .description("깃헙 URL (선택사항)"),
-                                        fieldWithPath("instagramUrl").type(STRING).optional()
-                                                .description("인스타그램 URL (선택사항)")
+                                                .description("이메일")
                                 )
                                 .requestSchema(schema(RequestUpdateInfoDto.class.getSimpleName()))
                                 .build())));
