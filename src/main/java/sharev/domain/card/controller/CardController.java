@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +32,6 @@ public class CardController {
 
     private final CardService cardService;
 
-    @Secured("ROLE_USER")
     @PostMapping
     public ResponseEntity<Void> join(@PathVariable UUID gatheringId,
                                      @AuthenticationPrincipal Account account) {
@@ -43,7 +41,6 @@ public class CardController {
                 .build();
     }
 
-    @Secured("ROLE_USER")
     @PatchMapping
     public ResponseEntity<ResponseUpdateCardInfoDto> updateInfo(@PathVariable UUID gatheringId,
                                                                 @AuthenticationPrincipal Account account,
@@ -56,7 +53,6 @@ public class CardController {
         return ResponseEntity.ok(responseUpdateCardInfoDto);
     }
 
-    @Secured("ROLE_USER")
     @PreAuthorize("@cardService.hasCompletedCard(authentication.principal, #gatheringId)")
     @GetMapping
     public ResponseEntity<Page<ResponseCardDto>> getAllCard(@PathVariable UUID gatheringId,
@@ -67,7 +63,6 @@ public class CardController {
         return ResponseEntity.ok(cardService.getAllCard(gatheringId, account.getId(), snapshotTime, pageable));
     }
 
-    @Secured("ROLE_USER")
     @PreAuthorize("@cardService.hasCompletedCard(authentication.principal, #gatheringId)")
     @GetMapping("/me")
     public ResponseEntity<ResponseCardDto> getMyCard(@PathVariable UUID gatheringId,
@@ -77,7 +72,6 @@ public class CardController {
         return ResponseEntity.ok(myCard);
     }
 
-    @Secured("ROLE_USER")
     @PreAuthorize("@cardService.hasCompletedCard(authentication.principal, #gatheringId)")
     @GetMapping("by-pin/{pinNumber}")
     public ResponseEntity<ResponseCardDto> getCardByPinNumber(@PathVariable UUID gatheringId,
