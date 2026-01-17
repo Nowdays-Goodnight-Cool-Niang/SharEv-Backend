@@ -8,7 +8,7 @@ import sharev.domain.card.dto.response.TempResponseCardDto;
 
 public interface CardRepositoryCustom {
 
-    Long searchConnectionCount(UUID eventId, Long profileId, LocalDateTime snapshotTime);
+    Long searchConnectionCount(UUID gatheringId, Long profileId, LocalDateTime snapshotTime);
 
     Page<TempResponseCardDto> searchTempCards(UUID gatheringId, Long accountId, LocalDateTime snapshotTime,
                                               Pageable pageable);
