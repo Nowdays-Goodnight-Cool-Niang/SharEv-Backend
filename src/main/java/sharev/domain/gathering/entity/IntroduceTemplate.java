@@ -62,7 +62,7 @@ public class IntroduceTemplate extends BaseTimeEntity {
         }
 
         HashSet<String> subtract = new HashSet<>(introduceFields);
-        subtract.removeAll(introduceFields);
+        subtract.removeAll(introduceTemplateFields);
 
         return subtract.isEmpty();
     }
