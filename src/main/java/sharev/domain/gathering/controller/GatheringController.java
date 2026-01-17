@@ -13,16 +13,16 @@ import sharev.domain.card.dto.response.ResponseParticipantFlagDto;
 import sharev.domain.card.service.CardService;
 
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/gatherings")
 @RequiredArgsConstructor
 public class GatheringController {
 
     private final CardService cardService;
 
-    @GetMapping("/{eventId}")
-    public ResponseEntity<ResponseParticipantFlagDto> isJoined(@PathVariable UUID eventId,
+    @GetMapping("/{gatheringId}")
+    public ResponseEntity<ResponseParticipantFlagDto> isJoined(@PathVariable UUID gatheringId,
                                                                @AuthenticationPrincipal Account account
     ) {
-        return ResponseEntity.ok(cardService.isJoined(eventId, account.getId()));
+        return ResponseEntity.ok(cardService.isJoined(gatheringId, account.getId()));
     }
 }
