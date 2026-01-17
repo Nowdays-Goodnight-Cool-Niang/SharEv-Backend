@@ -36,7 +36,7 @@ class GatheringControllerTest extends ControllerTestSupport {
                 .isJoined(any(UUID.class), anyLong());
 
         RequestBuilder request = RestDocumentationRequestBuilders
-                .get("/events/{eventId}", UUID.randomUUID())
+                .get("/gatherings/{gatheringId}", UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON);
 
         // when
@@ -50,10 +50,10 @@ class GatheringControllerTest extends ControllerTestSupport {
                                 .summary("행사 참여 유무 확인")
                                 .description(
                                         "사용자가 특정 행사에 참여했는지 확인합니다. " +
-                                        "참여한 경우 true, 참여하지 않은 경우 false를 반환합니다. " +
-                                        "이 API는 행사 참여 여부를 확인하여 카드 작성 가능 여부를 판단하는 데 사용됩니다.")
+                                                "참여한 경우 true, 참여하지 않은 경우 false를 반환합니다. " +
+                                                "이 API는 행사 참여 여부를 확인하여 카드 작성 가능 여부를 판단하는 데 사용됩니다.")
                                 .pathParameters(
-                                        parameterWithName("eventId").description("확인할 행사의 ID (UUID 형식)")
+                                        parameterWithName("gatheringId").description("확인할 행사의 ID (UUID 형식)")
                                 )
                                 .responseFields(
                                         fieldWithPath("isParticipant").type(BOOLEAN)
