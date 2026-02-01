@@ -34,14 +34,14 @@ public class IntroduceTemplate extends BaseTimeEntity {
     @JoinColumn(name = "gathering_id")
     private Gathering gathering;
 
-    @Column
-    private Integer version;
+    @Column(nullable = false)
+    private int version;
 
     @Column
     @JdbcTypeCode(SqlTypes.JSON)
     private IntroduceTemplateContent content;
 
-    public IntroduceTemplate(Gathering gathering, Integer templateVersion,
+    public IntroduceTemplate(Gathering gathering, int templateVersion,
                              IntroduceTemplateContent content) {
         this.gathering = gathering;
         this.version = templateVersion;
