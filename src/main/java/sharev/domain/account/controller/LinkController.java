@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sharev.domain.account.dto.request.RequestCreateLinkDto;
@@ -25,7 +26,7 @@ public class LinkController {
 
     @PostMapping
     public ResponseEntity<ResponseCreateLinkDto> addLink(@AuthenticationPrincipal Account account,
-                                                         RequestCreateLinkDto requestCreateLinkDto) {
+                                                         @RequestBody RequestCreateLinkDto requestCreateLinkDto) {
 
         ResponseCreateLinkDto responseCreateLinkDto = linkService.addLink(account, requestCreateLinkDto.url());
 
@@ -40,7 +41,7 @@ public class LinkController {
 
     @DeleteMapping
     public ResponseEntity<Void> deleteLink(@AuthenticationPrincipal Account account,
-                                           RequestDeleteLinkDto requestDeleteLinkDto) {
+                                           @RequestBody RequestDeleteLinkDto requestDeleteLinkDto) {
 
         linkService.removeLink(account, requestDeleteLinkDto.linkId());
 
