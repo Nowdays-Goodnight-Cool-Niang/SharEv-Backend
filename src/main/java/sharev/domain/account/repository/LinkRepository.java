@@ -8,4 +8,6 @@ import sharev.domain.account.entity.Link;
 public interface LinkRepository extends JpaRepository<Link, Long> {
 
     List<Link> findAllByAccountIdIn(Collection<Long> accountIds);
+
+    List<Link> findAllByAccountId(Long accountId);
 }

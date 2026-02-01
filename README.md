@@ -58,54 +58,114 @@ QR 기반의 행사용 명함 서비스로, 더 쉽고 즐겁게 네트워킹 �
 ## ERD
 ```mermaid
 erDiagram
-	accounts {
-	BIGINT account_id PK
-	BIGINT kakao_oauth_id UK
-	VARCHAR name
-	VARCHAR email
-	BOOLEAN initial_role_granted_flag
-	VARCHAR linkedin_url
-	VARCHAR github_url
-	VARCHAR instagram_url
-	TIMESTAMP created_at
-	TIMESTAMP updated_at
-	}
-	
-	events {
-	    BINARY event_id PK
-	    TIMESTAMP created_at
-	    TIMESTAMP updated_at
-	}
-	
-	profiles {
-	    BIGINT profile_id PK
-	    BINARY event_id FK
-	    BIGINT account_id FK
-	    INT pin_number
-	    INT icon_number
-	    VARCHAR introduce
-	    VARCHAR proudest_experience
-	    VARCHAR tough_experience
-	    TIMESTAMP created_at
-	    TIMESTAMP updated_at
-	}
-	
-	relations {
-	    BIGINT first_profile_id PK, FK
-	    BIGINT second_profile_id PK, FK
-	    TIMESTAMP created_at
-	    TIMESTAMP updated_at
-	}
-	
-	feedbacks {
-	    BIGINT feedback_id PK
-	    VARCHAR feedback
-	    TIMESTAMP created_at
-	    TIMESTAMP updated_at
-	}
-	
-	accounts ||--o{ profiles : "has"
-	events ||--o{ profiles : "hosts"
-	profiles }o--|| relations : "is_first_profile"
-	profiles }o--|| relations : "is_second_profile"
+    accounts {
+        bigint account_id PK
+        role_type role
+        text name
+        text email
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    oauth_accounts {
+        oauth_provider provider PK
+        text subject_identifier PK
+        bigint account_id FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    teams {
+        bigint team_id PK
+        team_certification certification
+        text title
+        text content
+        boolean activate_flag
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    members {
+        bigint member_id PK
+        bigint team_id FK
+        bigint account_id FK
+        member_status status
+        member_role role
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    gatherings {
+        uuid gathering_id PK
+        visible_type visible
+        bigint team_id FK
+        text title
+        text content
+        timestamptz start_at
+        timestamptz end_at
+        text place
+        text image_url
+        text gathering_url
+        text contact
+        timestamptz deleted_at
+        timestamptz register_start_at
+        timestamptz register_end_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    introduce_templates {
+        bigint introduce_template_id PK
+        uuid gathering_id FK
+        int version
+        jsonb content
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    cards {
+        bigint card_id PK
+        uuid gathering_id FK
+        bigint account_id FK
+        int pin_number
+        int template_version
+        jsonb introduction_text
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    connections {
+        bigint connection_id PK
+        bigint my_card_id FK
+        bigint other_card_id FK
+        card_connection_status status
+        text memo
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    links {
+        bigint link_id PK
+        bigint account_id FK
+        text link_url
+    }
+
+    feedbacks {
+        bigint feedback_id PK
+        text content
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    accounts ||--o{ oauth_accounts : "has"
+    accounts ||--o{ members : "belongs to"
+    accounts ||--o{ cards : "creates"
+    accounts ||--o{ links : "owns"
+    teams ||--o{ members : "has"
+    teams ||--o{ gatherings : "hosts"
+    gatherings ||--o{ introduce_templates : "defines"
+    gatherings ||--o{ cards : "contains"
+    introduce_templates ||--o{ cards : "structures"
+    cards ||--o{ connections : "originates (my_card)"
+    cards ||--o{ connections : "targets (other_card)"
 ```
