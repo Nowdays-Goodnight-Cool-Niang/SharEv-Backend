@@ -18,6 +18,7 @@ import sharev.exception.AccessDeniedException;
 public class LinkService {
     private final LinkRepository linkRepository;
 
+    @Transactional
     public ResponseCreateLinkDto addLink(Account account, String url) {
         Link link = linkRepository.save(new Link(account, url));
         return new ResponseCreateLinkDto(link.getId(), link.getLinkUrl());
@@ -29,6 +30,7 @@ public class LinkService {
                 .toList();
     }
 
+    @Transactional
     public void removeLink(Account account, Long linkId) {
         Link link = linkRepository.findById(linkId)
                 .orElseThrow(LinkNotFoundException::new);
