@@ -8,24 +8,23 @@ services:
     ports:
       - '8080:8080'
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     profiles:
       - dev
     environment:
       - SPRING_PROFILES_ACTIVE=dev
 
-  mysql:
-    image: mysql:8.4.0
-    volumes:
-      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+  postgres:
+    image: postgres:16-alpine
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=true
-      - MYSQL_DATABASE=share_me
+      - POSTGRES_DB=share_me
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
-      - '3306:3306'
+      - '5432:5432'
     healthcheck:
-      test: [ 'CMD', 'mysqladmin', 'ping', '-h', 'localhost' ]
+      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
       timeout: 20s
       retries: 10
       interval: 10s
