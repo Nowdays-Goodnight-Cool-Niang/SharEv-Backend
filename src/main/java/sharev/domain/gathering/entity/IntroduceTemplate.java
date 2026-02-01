@@ -67,17 +67,11 @@ public class IntroduceTemplate extends BaseTimeEntity {
         return subtract.isEmpty();
     }
 
-    public static IntroduceTemplate updateContent(IntroduceTemplate introduceTemplate,
-                                                  IntroduceTemplateContent introduceTemplateContent) {
-
-        IntroduceTemplateContent originTemplateContent = introduceTemplate.content;
-
-        if (originTemplateContent.hasSameFields(introduceTemplateContent.fieldPlaceholders())) {
-            introduceTemplate.content = introduceTemplateContent;
-            return introduceTemplate;
+    public void updateContent(IntroduceTemplateContent newContent) {
+        if (!this.content.hasSameFields(newContent.fieldPlaceholders())) {
+            throw new IllegalArgumentException("필드 구조가 다르면 업데이트할 수 없소");
         }
 
-        return new IntroduceTemplate(introduceTemplate.gathering, introduceTemplate.version + 1,
-                introduceTemplateContent);
+        this.content = newContent;
     }
 }
