@@ -52,10 +52,12 @@ public class TeamService {
     }
 
     @Transactional
-    public void updateTeamInfo(Long teamId, String title) {
+    public String updateTeamInfo(Long teamId, String title) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(TeamNotFoundException::new);
 
         team.updateTitle(title);
+
+        return team.getTitle();
     }
 }
