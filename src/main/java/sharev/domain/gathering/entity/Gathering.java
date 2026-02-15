@@ -14,7 +14,9 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 import org.hibernate.annotations.UuidGenerator.Style;
 import sharev.base_entity.BaseTimeEntity;
 import sharev.domain.team.entity.Team;
@@ -31,8 +33,9 @@ public class Gathering extends BaseTimeEntity {
     @Column(name = "gathering_id")
     private UUID id;
 
-    @Column
+    @Column(columnDefinition = "visible_type")
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private GatheringVisibleType visible;
 
     @ManyToOne(fetch = FetchType.LAZY)

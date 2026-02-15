@@ -17,6 +17,8 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import sharev.base_entity.BaseTimeEntity;
@@ -33,8 +35,9 @@ public class Account extends BaseTimeEntity implements OAuth2User {
     @Column(name = "account_id")
     private Long id;
 
-    @Column
+    @Column(columnDefinition = "role_type")
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private AccountRoleType role;
 
     @Column
