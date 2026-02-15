@@ -155,8 +155,6 @@ class TeamControllerTest extends ControllerTestSupport {
         String updateTitle = "수정된 팀 이름";
         RequestUpdateTeamDto requestDto = new RequestUpdateTeamDto(updateTitle);
 
-        doReturn(updateTitle).when(teamService).updateTeamInfo(anyLong(), anyString());
-
         RequestBuilder request = RestDocumentationRequestBuilders
                 .patch("/teams/{teamId}", teamId)
                 .content(objectMapper.writeValueAsString(requestDto))
@@ -176,7 +174,6 @@ class TeamControllerTest extends ControllerTestSupport {
         RequestUpdateTeamDto requestDto = new RequestUpdateTeamDto(updateTitle);
 
         doReturn(false).when(memberService).isAdmin(any(Account.class), anyLong());
-        doReturn(updateTitle).when(teamService).updateTeamInfo(anyLong(), anyString());
 
         RequestBuilder request = RestDocumentationRequestBuilders
                 .patch("/teams/{teamId}", teamId)
@@ -210,11 +207,13 @@ class TeamControllerTest extends ControllerTestSupport {
                 .andDo(document("updateTeamInfo",
                         resource(ResourceSnippetParameters.builder()
                                 .summary("팀 정보 수정")
-                                .description("팀 정보를 수정합니다. 팀 멤버만 수정할 수 있습니다.")
+                                .description("팀 정보를 수정합니다. 팀 관리자만 수정할 수 있습니다.")
                                 .pathParameters(
                                         parameterWithName("teamId").description("팀 ID"))
                                 .requestFields(
                                         fieldWithPath("title").type(STRING).description("팀 이름"))
+                                .responseFields(
+                                        fieldWithPath("title").type(STRING).description("수정된 팀 이름"))
                                 .requestSchema(schema(RequestUpdateTeamDto.class.getSimpleName()))
                                 .build())));
     }
