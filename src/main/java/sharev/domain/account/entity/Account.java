@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,6 +31,9 @@ import sharev.domain.card.entity.Card;
 @Table(name = "accounts")
 public class Account extends BaseTimeEntity implements OAuth2User {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")
@@ -48,11 +52,11 @@ public class Account extends BaseTimeEntity implements OAuth2User {
 
     // TODO: 양방향 제거하기
     @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private final List<Card> cards = new ArrayList<>();
+    private transient List<Card> cards = new ArrayList<>();
 
     // TODO: 양방향 제거하기
     @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private final List<Link> links = new ArrayList<>();
+    private transient List<Link> links = new ArrayList<>();
 
     public Account(String name, String email) {
         this.role = AccountRoleType.USER;
