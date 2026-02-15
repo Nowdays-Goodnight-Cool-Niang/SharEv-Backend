@@ -18,6 +18,7 @@ import sharev.domain.account.service.AccountService;
 import sharev.domain.account.service.CustomOauth2UserService;
 import sharev.domain.card.service.CardService;
 import sharev.domain.connection.service.ConnectionService;
+import sharev.domain.member.service.MemberService;
 import sharev.domain.team.service.TeamService;
 import sharev.util.LockProcessor;
 
@@ -56,4 +57,7 @@ public abstract class ControllerTestSupport {
 
     @MockitoBean
     protected LockProcessor lockProcessor;
+
+    @MockitoBean
+    protected MemberService memberService;
 }
