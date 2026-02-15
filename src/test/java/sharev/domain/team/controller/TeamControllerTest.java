@@ -6,7 +6,9 @@ import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static com.epages.restdocs.apispec.Schema.schema;
 import static com.epages.restdocs.apispec.SimpleType.NUMBER;
 import static com.epages.restdocs.apispec.SimpleType.STRING;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -23,8 +25,11 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.RequestBuilder;
 import sharev.ControllerTestSupport;
 import sharev.WithCustomMockUser;
+import sharev.domain.account.entity.Account;
+import sharev.domain.member.entity.MemberRoleType;
 import sharev.domain.team.dto.request.RequestCreateTeamDto;
 import sharev.domain.team.dto.request.RequestUpdateTeamDto;
+import sharev.domain.team.dto.response.ResponseTeamDetailInfoDto;
 import sharev.domain.team.dto.response.ResponseTeamInfoDto;
 
 class TeamControllerTest extends ControllerTestSupport {
@@ -60,8 +65,8 @@ class TeamControllerTest extends ControllerTestSupport {
     @DisplayName("내 팀 목록 조회")
     void getMyTeams() throws Exception {
         List<ResponseTeamInfoDto> teams = List.of(
-                new ResponseTeamInfoDto(1L, "개발팀", "개발 관련 팀", LocalDateTime.now(), 5),
-                new ResponseTeamInfoDto(2L, "기획팀", "기획 관련 팀", LocalDateTime.now(), 3)
+                new ResponseTeamInfoDto(1L, "개발팀", "개발 관련 팀", LocalDateTime.now(), MemberRoleType.COMMON, 5),
+                new ResponseTeamInfoDto(2L, "기획팀", "기획 관련 팀", LocalDateTime.now(), MemberRoleType.COMMON, 3)
         );
 
         doReturn(teams).when(teamService).getMyTeams(any());
@@ -82,8 +87,102 @@ class TeamControllerTest extends ControllerTestSupport {
                                         fieldWithPath("[].title").type(STRING).description("팀 이름"),
                                         fieldWithPath("[].content").type(STRING).description("팀 설명").optional(),
                                         fieldWithPath("[].createdAt").type(STRING).description("생성일시"),
+                                        fieldWithPath("[].memberRoleType").type(STRING).description("권한"),
                                         fieldWithPath("[].headcount").type(NUMBER).description("팀 인원 수"))
                                 .build())));
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("팀 상세 조회 실패 - 팀 미존재 혹은 속하지 않음")
+    void getTeamDetailFail() throws Exception {
+        Long teamId = 1L;
+
+        RequestBuilder request = RestDocumentationRequestBuilders
+                .get("/teams/{teamId}", teamId)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("팀 상세 조회")
+    void getTeamDetail() throws Exception {
+        Long teamId = 1L;
+
+        ResponseTeamDetailInfoDto response = new ResponseTeamDetailInfoDto(
+                1L, "개발팀", "개발 관련 팀", LocalDateTime.now(), 2,
+                List.of(),
+                List.of()
+        );
+
+        doReturn(true).when(teamService).isMember(any(Account.class), anyLong());
+        doReturn(response).when(teamService).getTeamDetail(anyLong());
+
+        RequestBuilder request = RestDocumentationRequestBuilders
+                .get("/teams/{teamId}", teamId)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("getTeamDetail",
+                        resource(ResourceSnippetParameters.builder()
+                                .summary("팀 상세 조회")
+                                .description("팀 상세 정보를 조회합니다. 팀 멤버만 조회할 수 있습니다.")
+                                .pathParameters(
+                                        parameterWithName("teamId").description("팀 ID"))
+                                .responseFields(
+                                        fieldWithPath("id").type(NUMBER).description("팀 ID"),
+                                        fieldWithPath("title").type(STRING).description("팀 이름"),
+                                        fieldWithPath("content").type(STRING).description("팀 설명").optional(),
+                                        fieldWithPath("createdAt").type(STRING).description("생성일시"),
+                                        fieldWithPath("headcount").type(NUMBER).description("팀 인원 수"),
+                                        fieldWithPath("gatherings").type("ARRAY").description("행사 목록"),
+                                        fieldWithPath("members").type("ARRAY").description("멤버 목록"))
+                                .responseSchema(schema(ResponseTeamDetailInfoDto.class.getSimpleName()))
+                                .build())));
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("팀 정보 수정 실패 - 팀 미존재 혹은 속하지 않음")
+    void updateTeamInfoTeamFail() throws Exception {
+        Long teamId = 1L;
+        String updateTitle = "수정된 팀 이름";
+        RequestUpdateTeamDto requestDto = new RequestUpdateTeamDto(updateTitle);
+
+        RequestBuilder request = RestDocumentationRequestBuilders
+                .patch("/teams/{teamId}", teamId)
+                .content(objectMapper.writeValueAsString(requestDto))
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("팀 정보 수정 실패 - 권한 없음")
+    void updateTeamInfoRoleFail() throws Exception {
+        Long teamId = 1L;
+        String updateTitle = "수정된 팀 이름";
+        RequestUpdateTeamDto requestDto = new RequestUpdateTeamDto(updateTitle);
+
+        doReturn(false).when(memberService).isAdmin(any(Account.class), anyLong());
+
+        RequestBuilder request = RestDocumentationRequestBuilders
+                .patch("/teams/{teamId}", teamId)
+                .content(objectMapper.writeValueAsString(requestDto))
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -91,10 +190,11 @@ class TeamControllerTest extends ControllerTestSupport {
     @DisplayName("팀 정보 수정")
     void updateTeamInfo() throws Exception {
         Long teamId = 1L;
-        RequestUpdateTeamDto requestDto = new RequestUpdateTeamDto("수정된 팀 이름");
+        String updateTitle = "수정된 팀 이름";
+        RequestUpdateTeamDto requestDto = new RequestUpdateTeamDto(updateTitle);
 
-        doReturn(true).when(teamService).isMember(any(), anyLong());
-        doNothing().when(teamService).updateTeamInfo(anyLong(), anyString());
+        doReturn(true).when(memberService).isAdmin(any(Account.class), anyLong());
+        doReturn(updateTitle).when(teamService).updateTeamInfo(anyLong(), anyString());
 
         RequestBuilder request = RestDocumentationRequestBuilders
                 .patch("/teams/{teamId}", teamId)
@@ -107,11 +207,13 @@ class TeamControllerTest extends ControllerTestSupport {
                 .andDo(document("updateTeamInfo",
                         resource(ResourceSnippetParameters.builder()
                                 .summary("팀 정보 수정")
-                                .description("팀 정보를 수정합니다. 팀 멤버만 수정할 수 있습니다.")
+                                .description("팀 정보를 수정합니다. 팀 관리자만 수정할 수 있습니다.")
                                 .pathParameters(
                                         parameterWithName("teamId").description("팀 ID"))
                                 .requestFields(
                                         fieldWithPath("title").type(STRING).description("팀 이름"))
+                                .responseFields(
+                                        fieldWithPath("title").type(STRING).description("수정된 팀 이름"))
                                 .requestSchema(schema(RequestUpdateTeamDto.class.getSimpleName()))
                                 .build())));
     }

@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import sharev.domain.account.entity.Account;
 import sharev.domain.team.dto.request.RequestCreateTeamDto;
 import sharev.domain.team.dto.request.RequestUpdateTeamDto;
+import sharev.domain.team.dto.response.ResponseTeamDetailInfoDto;
 import sharev.domain.team.dto.response.ResponseTeamInfoDto;
+import sharev.domain.team.dto.response.ResponseTeamUpdateInfoDto;
 import sharev.domain.team.service.TeamService;
 
 @RestController
@@ -39,14 +41,18 @@ public class TeamController {
         return ResponseEntity.ok(teamService.getMyTeams(account));
     }
 
-    // TODO: GET /{teamId} 팀 상세 정보(행사 목록, 멤버 목록, 팀명)
+    @GetMapping("/{teamId}")
+    @PreAuthorize("@teamService.isMember(authentication.principal, #teamId)")
+    public ResponseEntity<ResponseTeamDetailInfoDto> getTeamDetail(@PathVariable Long teamId) {
+        return ResponseEntity.ok(teamService.getTeamDetail(teamId));
+    }
 
     @PatchMapping("/{teamId}")
-    @PreAuthorize("@teamService.isMember(authentication.principal, #teamId)")
-    public ResponseEntity<Void> updateTeamInfo(@PathVariable Long teamId,
-                                               @RequestBody RequestUpdateTeamDto requestUpdateTeamDto) {
-        teamService.updateTeamInfo(teamId, requestUpdateTeamDto.title());
-        return ResponseEntity.ok()
-                .build();
+    @PreAuthorize("@memberService.isAdmin(authentication.principal, #teamId)")
+    public ResponseEntity<ResponseTeamUpdateInfoDto> updateTeamInfo(@PathVariable Long teamId,
+                                                                    @RequestBody RequestUpdateTeamDto updateTeamDto) {
+
+        String updateTitle = teamService.updateTeamInfo(teamId, updateTeamDto.title());
+        return ResponseEntity.ok(new ResponseTeamUpdateInfoDto(updateTitle));
     }
 }

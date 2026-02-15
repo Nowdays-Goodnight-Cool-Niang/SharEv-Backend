@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.annotations.UuidGenerator.Style;
 import sharev.base_entity.BaseTimeEntity;
@@ -22,6 +23,7 @@ import sharev.domain.team.entity.Team;
 @Getter
 @NoArgsConstructor
 @Table(name = "gatherings")
+@SQLRestriction("deleted_at IS NULL")
 public class Gathering extends BaseTimeEntity {
 
     @Id
