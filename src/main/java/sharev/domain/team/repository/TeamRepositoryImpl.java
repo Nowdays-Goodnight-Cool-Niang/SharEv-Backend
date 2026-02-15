@@ -24,6 +24,7 @@ public class TeamRepositoryImpl implements TeamRepositoryCustom {
                         team.title,
                         team.content,
                         team.createdAt,
+                        member.role,
                         JPAExpressions
                                 .select(teamMember.count().intValue())
                                 .from(teamMember)
