@@ -160,7 +160,7 @@ public class CardService {
 
     private ResponseCardDto calculateResponseCardDto(UUID gatheringId, Card card) {
         Account account = card.getAccount();
-        List<String> linkUrls = account.getLinks().stream()
+        List<String> linkUrls = linkRepository.findAllByAccountId(account.getId()).stream()
                 .map(Link::getLinkUrl)
                 .toList();
 

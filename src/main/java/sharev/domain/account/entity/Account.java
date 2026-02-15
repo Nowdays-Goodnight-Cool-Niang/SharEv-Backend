@@ -1,6 +1,5 @@
 package sharev.domain.account.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,11 +7,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +21,6 @@ import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import sharev.base_entity.BaseTimeEntity;
-import sharev.domain.card.entity.Card;
 
 @Entity
 @Getter
@@ -50,14 +46,6 @@ public class Account extends BaseTimeEntity implements OAuth2User, Serializable 
 
     @Column
     private String email;
-
-    // TODO: 양방향 제거하기
-    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private transient List<Card> cards = new ArrayList<>();
-
-    // TODO: 양방향 제거하기
-    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private transient List<Link> links = new ArrayList<>();
 
     public Account(String name, String email) {
         this.role = AccountRoleType.USER;
