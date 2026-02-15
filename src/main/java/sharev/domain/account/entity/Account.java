@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +30,7 @@ import sharev.domain.card.entity.Card;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "accounts")
-public class Account extends BaseTimeEntity implements OAuth2User {
+public class Account extends BaseTimeEntity implements OAuth2User, Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
