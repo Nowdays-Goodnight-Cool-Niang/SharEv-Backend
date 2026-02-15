@@ -11,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -38,7 +40,8 @@ public class OauthAccount {
     public static class OauthAccountId implements Serializable {
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "provider")
+        @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+        @Column(name = "provider", columnDefinition = "oauth_provider")
         private OauthProvider provider;
 
         @Column(name = "subject_identifier")

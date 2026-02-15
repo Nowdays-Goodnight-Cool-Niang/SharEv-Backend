@@ -16,6 +16,8 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import sharev.base_entity.BaseTimeEntity;
 import sharev.domain.card.entity.Card;
@@ -40,8 +42,9 @@ public class Connection extends BaseTimeEntity {
     @JoinColumn(name = "other_card_id")
     private Card otherCard;
 
-    @Column
+    @Column(columnDefinition = "card_connection_status")
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private ConnectionStatusType status;
 
     @Column

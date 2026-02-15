@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sharev.domain.account.entity.Account;
 import sharev.domain.account.entity.OauthAccount;
 import sharev.domain.account.entity.OauthAccount.OauthAccountId;
@@ -25,6 +26,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final AccountRepository accountRepository;
 
     @Override
+    @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = defaultOAuth2UserService.loadUser(userRequest);
         Map<String, Object> kakaoUserInfo = oAuth2User.getAttribute("kakao_account");
@@ -46,7 +48,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                     );
                 });
 
-        return oauthAccount.getAccount();
+        return accountRepository.findById(oauthAccount.getAccount().getId())
+                .orElseThrow(() -> new OAuth2AuthenticationException("계정을 찾을 수 없습니다."));
     }
 
     @SuppressWarnings("unchecked")

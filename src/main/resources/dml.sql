@@ -332,3 +332,14 @@ VALUES (1, '서비스가 매우 유용합니다. 계속 발전시켜 주세요!'
        (3, '카드 교환 기능이 편리합니다. 감사합니다!', NOW(), NOW()),
        (4, '이벤트 등록 프로세스를 더 간단하게 만들어 주세요.', NOW(), NOW()),
        (5, '전반적으로 만족스럽습니다. 좋은 서비스입니다!', NOW(), NOW());
+
+-- ============================================
+-- IDENTITY 시퀀스 재설정
+-- ============================================
+SELECT setval(pg_get_serial_sequence('accounts', 'account_id'), (SELECT MAX(account_id) FROM accounts));
+SELECT setval(pg_get_serial_sequence('teams', 'team_id'), (SELECT MAX(team_id) FROM teams));
+SELECT setval(pg_get_serial_sequence('members', 'member_id'), (SELECT MAX(member_id) FROM members));
+SELECT setval(pg_get_serial_sequence('introduce_templates', 'introduce_template_id'), (SELECT MAX(introduce_template_id) FROM introduce_templates));
+SELECT setval(pg_get_serial_sequence('cards', 'card_id'), (SELECT MAX(card_id) FROM cards));
+SELECT setval(pg_get_serial_sequence('connections', 'connection_id'), (SELECT MAX(connection_id) FROM connections));
+SELECT setval(pg_get_serial_sequence('feedbacks', 'feedback_id'), (SELECT MAX(feedback_id) FROM feedbacks));

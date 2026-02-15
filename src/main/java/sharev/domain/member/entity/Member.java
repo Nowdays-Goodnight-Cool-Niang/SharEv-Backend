@@ -14,6 +14,8 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import sharev.base_entity.BaseTimeEntity;
 import sharev.domain.account.entity.Account;
 import sharev.domain.team.entity.Team;
@@ -37,12 +39,14 @@ public class Member extends BaseTimeEntity {
     @JoinColumn(name = "account_id")
     private Account account;
 
-    @Column
+    @Column(columnDefinition = "member_status")
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private MemberStatusType status;
 
-    @Column
+    @Column(columnDefinition = "member_role")
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private MemberRoleType role;
 
     public Member(Team team, Account account, MemberStatusType status, MemberRoleType role) {

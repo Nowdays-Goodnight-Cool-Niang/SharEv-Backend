@@ -11,6 +11,8 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import sharev.base_entity.BaseTimeEntity;
 
 @Entity
@@ -24,8 +26,9 @@ public class Team extends BaseTimeEntity {
     @Column(name = "team_id")
     private Long id;
 
-    @Column
+    @Column(columnDefinition = "team_certification")
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private CertificationType certification;
 
     @Column(unique = true)
