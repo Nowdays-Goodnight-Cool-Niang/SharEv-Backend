@@ -17,11 +17,15 @@ public enum ExceptionCode {
     INTRODUCE_TEMPLATE_NOT_FOUND("자기소개 템플릿이 존재하지 않습니다."),
     TEAM_NOT_FOUND("팀이 존재하지 않습니다."),
     INVALID_INTRODUCE_TEMPLATE("작성된 소개문이 템플릿과 일치하지 않습니다."),
+    LINK_NOT_FOUND("링크가 존재하지 않습니다."),
 
     LOCK_INTERRUPTED("예상치 못 한 오류가 발생했습니다. 운영진에게 문의해주세요."),
     LOCK_OVER_WAIT_TIME("예상치 못 한 오류가 발생했습니다. 운영진에게 문의해주세요."),
     KEY_BLANK("pin number 확인 도중 예외가 발생했습니다. 운영진에게 알려 주십시오."),
-    PIN_NUMBER_GENERATE("pin number 발급 도중 예외가 발생했습니다. 운영진에게 알려 주십시오.");
+    PIN_NUMBER_GENERATE("pin number 발급 도중 예외가 발생했습니다. 운영진에게 알려 주십시오."),
+
+    ACCESS_DENIED("권한이 존재하지 않습니다"),
+    ;
 
     public final String message;
 }

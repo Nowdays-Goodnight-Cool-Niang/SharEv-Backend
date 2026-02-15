@@ -33,4 +33,9 @@ public class Link {
 
 //    @Column
 //    private Long totalClickCount;
+
+    public Link(Account account, String linkUrl) {
+        this.account = account;
+        this.linkUrl = linkUrl;
+    }
 }

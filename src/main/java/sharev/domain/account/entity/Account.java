@@ -43,9 +43,11 @@ public class Account extends BaseTimeEntity implements OAuth2User {
     @Column
     private String email;
 
+    // TODO: 양방향 제거하기
     @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private final List<Card> cards = new ArrayList<>();
 
+    // TODO: 양방향 제거하기
     @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private final List<Link> links = new ArrayList<>();
 
