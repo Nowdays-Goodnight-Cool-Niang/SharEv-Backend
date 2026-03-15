@@ -22,7 +22,7 @@ COPY src ./src
 RUN if [ "$BUILD_PROFILE" = "prod" ]; then \
     ./gradlew clean build -x test --no-daemon -Pprofile=prod; \
 else \
-    ./gradlew clean build --no-daemon -Pprofile=${BUILD_PROFILE}; \
+    ./gradlew clean build generateSwaggerUISample --no-daemon -Pprofile=${BUILD_PROFILE}; \
 fi
 
 # 런타임 스테이지: 최종 이미지
