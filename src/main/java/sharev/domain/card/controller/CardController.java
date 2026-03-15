@@ -26,7 +26,7 @@ import sharev.domain.card.dto.response.ResponseUpdateCardInfoDto;
 import sharev.domain.card.service.CardService;
 
 @RestController
-@RequestMapping("/gathering/{gatheringId}/cards")
+@RequestMapping("/gatherings/{gatheringId}/cards")
 @RequiredArgsConstructor
 public class CardController {
 
