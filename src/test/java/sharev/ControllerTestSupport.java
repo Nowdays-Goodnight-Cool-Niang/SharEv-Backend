@@ -19,6 +19,7 @@ import sharev.domain.account.service.CustomOauth2UserService;
 import sharev.domain.account.service.LinkService;
 import sharev.domain.card.service.CardService;
 import sharev.domain.connection.service.ConnectionService;
+import sharev.domain.gathering.service.GatheringService;
 import sharev.domain.gathering.service.IntroduceTemplateService;
 import sharev.domain.member.service.MemberService;
 import sharev.domain.team.service.TeamService;
@@ -68,4 +69,7 @@ public abstract class ControllerTestSupport {
 
     @MockitoBean
     protected IntroduceTemplateService introduceTemplateService;
+
+    @MockitoBean
+    protected GatheringService gatheringService;
 }
