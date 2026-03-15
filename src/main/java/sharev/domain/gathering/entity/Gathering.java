@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
@@ -23,7 +24,7 @@ import sharev.domain.team.entity.Team;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "gatherings")
 @SQLRestriction("deleted_at IS NULL")
 public class Gathering extends BaseTimeEntity {
@@ -74,4 +75,43 @@ public class Gathering extends BaseTimeEntity {
 
     @Column
     private LocalDateTime registerEndAt;
+
+    public Gathering(Team team, GatheringVisibleType visible, String title, String content,
+                     LocalDateTime startAt, LocalDateTime endAt, String place,
+                     String imageUrl, String gatheringUrl, String contact,
+                     LocalDateTime registerStartAt, LocalDateTime registerEndAt) {
+        this.team = team;
+        this.visible = visible;
+        this.title = title;
+        this.content = content;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.place = place;
+        this.imageUrl = imageUrl;
+        this.gatheringUrl = gatheringUrl;
+        this.contact = contact;
+        this.registerStartAt = registerStartAt;
+        this.registerEndAt = registerEndAt;
+    }
+
+    public void update(GatheringVisibleType visible, String title, String content,
+                       LocalDateTime startAt, LocalDateTime endAt, String place,
+                       String imageUrl, String gatheringUrl, String contact,
+                       LocalDateTime registerStartAt, LocalDateTime registerEndAt) {
+        this.visible = visible;
+        this.title = title;
+        this.content = content;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.place = place;
+        this.imageUrl = imageUrl;
+        this.gatheringUrl = gatheringUrl;
+        this.contact = contact;
+        this.registerStartAt = registerStartAt;
+        this.registerEndAt = registerEndAt;
+    }
+
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }
