@@ -49,7 +49,7 @@ class CardControllerTest extends ControllerTestSupport {
         doNothing().when(cardService).join(any(UUID.class), anyLong());
 
         RequestBuilder request = RestDocumentationRequestBuilders
-                .post("/gathering/{gatheringId}/cards", gatheringId)
+                .post("/gatherings/{gatheringId}/cards", gatheringId)
                 .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(request)
@@ -84,7 +84,7 @@ class CardControllerTest extends ControllerTestSupport {
         doReturn(responseDto).when(cardService).updateInfo(any(UUID.class), anyLong(), anyInt(), anyMap());
 
         RequestBuilder request = RestDocumentationRequestBuilders
-                .patch("/gathering/{gatheringId}/cards", gatheringId)
+                .patch("/gatherings/{gatheringId}/cards", gatheringId)
                 .content(objectMapper.writeValueAsString(requestDto))
                 .contentType(MediaType.APPLICATION_JSON);
 
@@ -147,7 +147,7 @@ class CardControllerTest extends ControllerTestSupport {
         doReturn(page).when(cardService).getAllCard(any(UUID.class), anyLong(), any(LocalDateTime.class), any());
 
         RequestBuilder request = RestDocumentationRequestBuilders
-                .get("/gathering/{gatheringId}/cards", gatheringId)
+                .get("/gatherings/{gatheringId}/cards", gatheringId)
                 .param("snapshotTime", "2025-01-15T10:30:00")
                 .param("page", "0")
                 .param("size", "20")
@@ -221,7 +221,7 @@ class CardControllerTest extends ControllerTestSupport {
         doReturn(myCard).when(cardService).getMyCard(any(UUID.class), anyLong());
 
         RequestBuilder request = RestDocumentationRequestBuilders
-                .get("/gathering/{gatheringId}/cards/me", gatheringId)
+                .get("/gatherings/{gatheringId}/cards/me", gatheringId)
                 .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(request)
@@ -280,7 +280,7 @@ class CardControllerTest extends ControllerTestSupport {
         doReturn(card).when(cardService).getCardByPinNumber(any(UUID.class), anyLong(), anyInt());
 
         RequestBuilder request = RestDocumentationRequestBuilders
-                .get("/gathering/{gatheringId}/cards/by-pin/{pinNumber}", gatheringId, 2840)
+                .get("/gatherings/{gatheringId}/cards/by-pin/{pinNumber}", gatheringId, 2840)
                 .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(request)
