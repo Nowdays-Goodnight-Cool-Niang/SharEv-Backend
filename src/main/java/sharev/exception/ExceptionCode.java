@@ -25,6 +25,12 @@ public enum ExceptionCode {
     PIN_NUMBER_GENERATE("pin number 발급 도중 예외가 발생했습니다. 운영진에게 알려 주십시오."),
 
     ACCESS_DENIED("권한이 존재하지 않습니다"),
+
+    MEMBER_NOT_FOUND("멤버를 찾을 수 없습니다."),
+    MEMBER_ALREADY_EXISTS("이미 팀에 존재하는 멤버입니다."),
+    MEMBER_NOT_INVITED("초대 상태가 아닙니다."),
+    CANNOT_REMOVE_SELF("본인을 제거할 수 없습니다. 탈퇴를 이용해주세요."),
+    CANNOT_REMOVE_LAST_ADMIN("마지막 관리자는 제거할 수 없습니다."),
     ;
 
     public final String message;

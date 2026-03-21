@@ -55,4 +55,12 @@ public class Member extends BaseTimeEntity {
         this.status = status;
         this.role = role;
     }
+
+    public void updateRole(MemberRoleType role) {
+        this.role = role;
+    }
+
+    public void activate() {
+        this.status = MemberStatusType.ACTIVATE;
+    }
 }
