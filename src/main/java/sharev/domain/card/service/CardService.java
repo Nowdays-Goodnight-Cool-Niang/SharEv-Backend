@@ -158,6 +158,13 @@ public class CardService {
         return calculateResponseCardDto(gatheringId, card);
     }
 
+    public int getMyPinNumber(UUID gatheringId, Long accountId) {
+        Card card = cardRepository.findByGatheringIdAndAccountId(gatheringId, accountId)
+                .orElseThrow(CardNotFoundException::new);
+
+        return card.getPinNumber();
+    }
+
     private ResponseCardDto calculateResponseCardDto(UUID gatheringId, Card card) {
         Account account = card.getAccount();
         List<String> linkUrls = linkRepository.findAllByAccountId(account.getId()).stream()

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sharev.domain.account.entity.Account;
 import sharev.domain.card.dto.request.RequestUpdateCardInfoDto;
 import sharev.domain.card.dto.response.ResponseCardDto;
+import sharev.domain.card.dto.response.ResponseMyPinNumberDto;
 import sharev.domain.card.dto.response.ResponseUpdateCardInfoDto;
 import sharev.domain.card.service.CardService;
 
@@ -70,6 +71,15 @@ public class CardController {
         ResponseCardDto myCard = cardService.getMyCard(gatheringId, account.getId());
 
         return ResponseEntity.ok(myCard);
+    }
+
+    @PreAuthorize("@cardService.hasCompletedCard(authentication.principal, #gatheringId)")
+    @GetMapping("/me/pin")
+    public ResponseEntity<ResponseMyPinNumberDto> getMyPinNumber(@PathVariable UUID gatheringId,
+                                                                @AuthenticationPrincipal Account account) {
+        int pinNumber = cardService.getMyPinNumber(gatheringId, account.getId());
+
+        return ResponseEntity.ok(new ResponseMyPinNumberDto(pinNumber));
     }
 
     @PreAuthorize("@cardService.hasCompletedCard(authentication.principal, #gatheringId)")
