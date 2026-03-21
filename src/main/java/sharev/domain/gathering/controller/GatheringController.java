@@ -75,6 +75,7 @@ public class GatheringController {
     }
 
     @GetMapping("/gatherings/{gatheringId}/template")
+    @PreAuthorize("@cardService.isParticipant(authentication.principal, #gatheringId)")
     public ResponseEntity<ResponseIntroduceTemplateDto> getTemplate(@PathVariable UUID gatheringId) {
         return ResponseEntity.ok(gatheringService.getLatestTemplate(gatheringId));
     }

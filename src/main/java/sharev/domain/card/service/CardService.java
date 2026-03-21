@@ -191,6 +191,10 @@ public class CardService {
         return new ResponseParticipantFlagDto(profileOptional.isPresent());
     }
 
+    public boolean isParticipant(Account account, UUID gatheringId) {
+        return cardRepository.findByGatheringIdAndAccountId(gatheringId, account.getId()).isPresent();
+    }
+
     public boolean hasCompletedCard(Account account, UUID gatheringId) {
         Long accountId = account.getId();
         Card card = cardRepository.findByGatheringIdAndAccountId(gatheringId, accountId)
