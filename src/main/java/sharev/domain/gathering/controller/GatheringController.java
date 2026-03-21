@@ -21,6 +21,7 @@ import sharev.domain.card.service.CardService;
 import sharev.domain.gathering.dto.request.RequestCreateGatheringDto;
 import sharev.domain.gathering.dto.request.RequestUpdateGatheringDto;
 import sharev.domain.gathering.dto.response.ResponseGatheringDetailDto;
+import sharev.domain.gathering.dto.response.ResponseIntroduceTemplateDto;
 import sharev.domain.gathering.service.GatheringService;
 
 @RestController
@@ -71,5 +72,10 @@ public class GatheringController {
                                                 @PathVariable UUID gatheringId) {
         gatheringService.delete(teamId, gatheringId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/gatherings/{gatheringId}/template")
+    public ResponseEntity<ResponseIntroduceTemplateDto> getTemplate(@PathVariable UUID gatheringId) {
+        return ResponseEntity.ok(gatheringService.getLatestTemplate(gatheringId));
     }
 }

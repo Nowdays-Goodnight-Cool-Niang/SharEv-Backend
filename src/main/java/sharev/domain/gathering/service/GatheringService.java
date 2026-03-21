@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import sharev.domain.gathering.dto.request.RequestCreateGatheringDto;
 import sharev.domain.gathering.dto.request.RequestUpdateGatheringDto;
 import sharev.domain.gathering.dto.response.ResponseGatheringDetailDto;
+import sharev.domain.gathering.dto.response.ResponseIntroduceTemplateDto;
+import sharev.domain.gathering.exception.IntroduceTemplateNotFoundException;
 import sharev.domain.gathering.entity.Gathering;
 import sharev.domain.gathering.entity.IntroduceTemplate;
 import sharev.domain.gathering.entity.IntroduceTemplateContent;
@@ -76,6 +78,14 @@ public class GatheringService {
     public void delete(Long teamId, UUID gatheringId) {
         Gathering gathering = getGatheringWithTeamValidation(teamId, gatheringId);
         gathering.softDelete();
+    }
+
+    public ResponseIntroduceTemplateDto getLatestTemplate(UUID gatheringId) {
+        IntroduceTemplate template = introduceTemplateRepository
+                .findTopByGatheringIdOrderByVersionDesc(gatheringId)
+                .orElseThrow(IntroduceTemplateNotFoundException::new);
+
+        return new ResponseIntroduceTemplateDto(template);
     }
 
     private Gathering getGatheringWithTeamValidation(Long teamId, UUID gatheringId) {
