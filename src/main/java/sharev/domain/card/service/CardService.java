@@ -158,6 +158,13 @@ public class CardService {
         return calculateResponseCardDto(gatheringId, card);
     }
 
+    public int getMyPinNumber(UUID gatheringId, Long accountId) {
+        Card card = cardRepository.findByGatheringIdAndAccountId(gatheringId, accountId)
+                .orElseThrow(CardNotFoundException::new);
+
+        return card.getPinNumber();
+    }
+
     private ResponseCardDto calculateResponseCardDto(UUID gatheringId, Card card) {
         Account account = card.getAccount();
         List<String> linkUrls = linkRepository.findAllByAccountId(account.getId()).stream()
@@ -182,6 +189,10 @@ public class CardService {
         Optional<Card> profileOptional = cardRepository.findByGatheringIdAndAccountId(gatheringId, accountId);
 
         return new ResponseParticipantFlagDto(profileOptional.isPresent());
+    }
+
+    public boolean isParticipant(Account account, UUID gatheringId) {
+        return cardRepository.findByGatheringIdAndAccountId(gatheringId, account.getId()).isPresent();
     }
 
     public boolean hasCompletedCard(Account account, UUID gatheringId) {

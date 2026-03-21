@@ -33,6 +33,7 @@ import sharev.ControllerTestSupport;
 import sharev.WithCustomMockUser;
 import sharev.domain.card.dto.request.RequestUpdateCardInfoDto;
 import sharev.domain.card.dto.response.ResponseCardDto;
+import sharev.domain.card.dto.response.ResponseMyPinNumberDto;
 import sharev.domain.card.dto.response.ResponseUpdateCardInfoDto;
 import sharev.util.Type;
 
@@ -262,6 +263,37 @@ class CardControllerTest extends ControllerTestSupport {
                                                         "key는 템플릿 변수명, value는 작성한 값. " +
                                                         "예: {\"introduce\": \"백엔드\", \"proudestExperience\": \"해커톤 우승\"}"))
                                 .responseSchema(schema(ResponseCardDto.class.getSimpleName()))
+                                .build())));
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("내 PIN 번호 조회")
+    void getMyPinNumber() throws Exception {
+        UUID gatheringId = UUID.randomUUID();
+
+        doReturn(true).when(cardService).hasCompletedCard(any(), any(UUID.class));
+        doReturn(1234).when(cardService).getMyPinNumber(any(UUID.class), anyLong());
+
+        RequestBuilder request = RestDocumentationRequestBuilders
+                .get("/gatherings/{gatheringId}/cards/me/pin", gatheringId)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("getMyPinNumber",
+                        resource(ResourceSnippetParameters.builder()
+                                .summary("내 PIN 번호 조회")
+                                .description("본인 카드의 PIN 번호를 조회합니다. " +
+                                        "PIN 번호는 1000~9999 범위의 4자리 정수입니다. " +
+                                        "카드가 완성되지 않은 경우 400 에러가 반환됩니다.")
+                                .pathParameters(
+                                        parameterWithName("gatheringId").description("행사 ID (UUID 형식)"))
+                                .responseFields(
+                                        fieldWithPath("pinNumber").type(NUMBER)
+                                                .description("PIN 번호 (1000~9999 범위 정수)"))
+                                .responseSchema(schema(ResponseMyPinNumberDto.class.getSimpleName()))
                                 .build())));
     }
 
