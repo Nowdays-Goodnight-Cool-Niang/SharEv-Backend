@@ -103,8 +103,7 @@ public class MemberService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(TeamNotFoundException::new);
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(MemberNotFoundException::new);
+        Member member = findMemberInTeam(memberId, team);
 
         if (role != MemberRoleType.ADMIN) {
             validateNotLastAdmin(team, member);
@@ -118,8 +117,7 @@ public class MemberService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(TeamNotFoundException::new);
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(MemberNotFoundException::new);
+        Member member = findMemberInTeam(memberId, team);
 
         if (member.getAccount().getId().equals(account.getId())) {
             throw new CannotRemoveSelfException();
@@ -128,6 +126,17 @@ public class MemberService {
         validateNotLastAdmin(team, member);
 
         memberRepository.delete(member);
+    }
+
+    private Member findMemberInTeam(Long memberId, Team team) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        if (!member.getTeam().getId().equals(team.getId())) {
+            throw new MemberNotFoundException();
+        }
+
+        return member;
     }
 
     private void validateNotLastAdmin(Team team, Member member) {
