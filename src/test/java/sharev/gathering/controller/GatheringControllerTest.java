@@ -5,12 +5,14 @@ import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithNam
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static com.epages.restdocs.apispec.Schema.schema;
 import static com.epages.restdocs.apispec.SimpleType.BOOLEAN;
+import static com.epages.restdocs.apispec.SimpleType.NUMBER;
 import static com.epages.restdocs.apispec.SimpleType.STRING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,6 +32,7 @@ import sharev.domain.card.dto.response.ResponseParticipantFlagDto;
 import sharev.domain.gathering.dto.request.RequestCreateGatheringDto;
 import sharev.domain.gathering.dto.request.RequestUpdateGatheringDto;
 import sharev.domain.gathering.dto.response.ResponseGatheringDetailDto;
+import sharev.domain.gathering.dto.response.ResponseIntroduceTemplateDto;
 import sharev.domain.gathering.entity.GatheringVisibleType;
 
 class GatheringControllerTest extends ControllerTestSupport {
@@ -404,6 +407,50 @@ class GatheringControllerTest extends ControllerTestSupport {
                                 .pathParameters(
                                         parameterWithName("teamId").description("팀 ID"),
                                         parameterWithName("gatheringId").description("행사 ID (UUID)"))
+                                .build())));
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("행사 템플릿 조회")
+    void getTemplate() throws Exception {
+        UUID gatheringId = UUID.randomUUID();
+
+        ResponseIntroduceTemplateDto response = new ResponseIntroduceTemplateDto(
+                1,
+                "안녕하세요. 저는 ${introduce} 개발자입니다. 가장 뿌듯했던 경험은 ${proudestExperience} 입니다.",
+                java.util.Map.of("introduce", "직무를 입력하세요", "proudestExperience", "경험을 입력하세요")
+        );
+
+        doReturn(response).when(gatheringService).getLatestTemplate(any(UUID.class));
+
+        RequestBuilder request = RestDocumentationRequestBuilders
+                .get("/gatherings/{gatheringId}/template", gatheringId)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("getTemplate",
+                        resource(ResourceSnippetParameters.builder()
+                                .summary("행사 템플릿 조회")
+                                .description("행사의 최신 자기소개 템플릿을 조회합니다. " +
+                                        "카드 작성 시 이 템플릿의 version과 fieldPlaceholders를 참고하여 introductionText를 구성합니다. " +
+                                        "text 내의 ${변수명} 패턴이 입력 필드가 되며, " +
+                                        "fieldPlaceholders의 key는 변수명, value는 placeholder 텍스트입니다.")
+                                .pathParameters(
+                                        parameterWithName("gatheringId").description("행사 ID (UUID 형식)"))
+                                .responseFields(
+                                        fieldWithPath("version").type(NUMBER)
+                                                .description("템플릿 버전. 카드 수정 시 이 값을 version 필드에 전달합니다."),
+                                        fieldWithPath("text").type(STRING)
+                                                .description("템플릿 원문. ${변수명} 패턴을 파싱하여 입력 필드를 구성합니다. " +
+                                                        "예: \"안녕하세요. 저는 ${introduce} 개발자입니다.\""),
+                                        subsectionWithPath("fieldPlaceholders").type("OBJECT")
+                                                .description("필드별 placeholder (동적 Map<String, String>). " +
+                                                        "key는 템플릿 변수명, value는 입력 힌트 텍스트. " +
+                                                        "예: {\"introduce\": \"직무를 입력하세요\"}"))
+                                .responseSchema(schema(ResponseIntroduceTemplateDto.class.getSimpleName()))
                                 .build())));
     }
 
