@@ -70,7 +70,7 @@ public class AccountController {
 
     @DeleteMapping
     public ResponseEntity<Void> delete(@AuthenticationPrincipal Account account,
-                                       @RequestBody RequestDeleteDto requestDeleteDto, HttpSession session) {
+                                       @Valid @RequestBody RequestDeleteDto requestDeleteDto, HttpSession session) {
         accountService.delete(account);
         accountService.saveFeedback(requestDeleteDto.feedback());
 

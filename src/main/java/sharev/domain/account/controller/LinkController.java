@@ -7,12 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sharev.domain.account.dto.request.RequestCreateLinkDto;
-import sharev.domain.account.dto.request.RequestDeleteLinkDto;
 import sharev.domain.account.dto.response.ResponseCreateLinkDto;
 import sharev.domain.account.dto.response.ResponseLinkDto;
 import sharev.domain.account.entity.Account;
@@ -39,11 +39,11 @@ public class LinkController {
         return ResponseEntity.ok(linkService.getAllLinks(account));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{linkId}")
     public ResponseEntity<Void> deleteLink(@AuthenticationPrincipal Account account,
-                                           @RequestBody RequestDeleteLinkDto requestDeleteLinkDto) {
+                                           @PathVariable Long linkId) {
 
-        linkService.removeLink(account, requestDeleteLinkDto.linkId());
+        linkService.removeLink(account, linkId);
 
         return ResponseEntity.noContent()
                 .build();
