@@ -422,6 +422,7 @@ class GatheringControllerTest extends ControllerTestSupport {
                 java.util.Map.of("introduce", "직무를 입력하세요", "proudestExperience", "경험을 입력하세요")
         );
 
+        doReturn(true).when(cardService).isParticipant(any(Account.class), any(UUID.class));
         doReturn(response).when(gatheringService).getLatestTemplate(any(UUID.class));
 
         RequestBuilder request = RestDocumentationRequestBuilders
