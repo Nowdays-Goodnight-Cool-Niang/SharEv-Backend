@@ -17,9 +17,9 @@ import sharev.domain.team.dto.response.ResponseTeamDetailInfoDto;
 import sharev.domain.team.dto.response.ResponseTeamInfoDto;
 import sharev.domain.team.dto.response.TempTeamMemberInfoDto;
 import sharev.domain.team.entity.Team;
-import sharev.domain.team.exception.TeamNameDuplicateException;
-import sharev.domain.team.exception.TeamNotFoundException;
 import sharev.domain.team.repository.TeamRepository;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +35,7 @@ public class TeamService {
             Team team = teamRepository.save(new Team(title));
             memberRepository.save(new Member(team, account, MemberStatusType.ACTIVATE, MemberRoleType.ADMIN));
         } catch (DataIntegrityViolationException e) {
-            throw new TeamNameDuplicateException();
+            throw new CustomException(ExceptionCode.TEAM_NAME_DUPLICATE);
         }
     }
 
@@ -59,7 +59,7 @@ public class TeamService {
     @Transactional
     public String updateTeamInfo(Long teamId, String title) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         team.updateTitle(title);
 
@@ -68,7 +68,7 @@ public class TeamService {
 
     public ResponseTeamDetailInfoDto getTeamDetail(Long teamId) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         List<Gathering> gatherings = gatheringRepository.findAllByTeam(team);
 

@@ -18,9 +18,10 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import sharev.base_entity.BaseTimeEntity;
 import sharev.domain.account.entity.Account;
-import sharev.domain.card.exception.InvalidIntroduceTemplateException;
 import sharev.domain.gathering.entity.Gathering;
 import sharev.domain.gathering.entity.IntroduceTemplate;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 
 @Entity
 @Getter
@@ -61,7 +62,7 @@ public class Card extends BaseTimeEntity {
                                        Map<String, String> introductionText) {
 
         if (!introduceTemplate.validateIntroduce(templateVersion, introductionText)) {
-            throw new InvalidIntroduceTemplateException();
+            throw new CustomException(ExceptionCode.INVALID_INTRODUCE_TEMPLATE);
         }
 
         this.templateVersion = templateVersion;

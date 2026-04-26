@@ -6,21 +6,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sharev.domain.account.entity.Account;
-import sharev.domain.account.exception.AccountNotFoundException;
 import sharev.domain.account.repository.AccountRepository;
 import sharev.domain.member.dto.response.ResponseMemberDto;
 import sharev.domain.member.entity.Member;
 import sharev.domain.member.entity.MemberRoleType;
 import sharev.domain.member.entity.MemberStatusType;
-import sharev.domain.member.exception.CannotRemoveLastAdminException;
-import sharev.domain.member.exception.CannotRemoveSelfException;
-import sharev.domain.member.exception.MemberAlreadyExistsException;
-import sharev.domain.member.exception.MemberNotFoundException;
-import sharev.domain.member.exception.MemberNotInvitedException;
 import sharev.domain.member.repository.MemberRepository;
 import sharev.domain.team.entity.Team;
-import sharev.domain.team.exception.TeamNotFoundException;
 import sharev.domain.team.repository.TeamRepository;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +27,12 @@ public class MemberService {
 
     public boolean isAdmin(Account account, Long teamId) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         Optional<Member> optionalMember = memberRepository.findByTeamAndAccount(team, account);
 
         if (optionalMember.isEmpty()) {
-            throw new TeamNotFoundException();
+            throw new CustomException(ExceptionCode.TEAM_NOT_FOUND);
         }
 
         Member member = optionalMember.get();
@@ -47,7 +42,7 @@ public class MemberService {
 
     public List<ResponseMemberDto> getMembers(Long teamId) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         return memberRepository.findAllByTeam(team).stream()
                 .map(ResponseMemberDto::new)
@@ -57,14 +52,14 @@ public class MemberService {
     @Transactional
     public void invite(Account account, Long teamId, String email) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         Account targetAccount = accountRepository.findByEmail(email)
-                .orElseThrow(AccountNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.ACCOUNT_NOT_FOUND));
 
         memberRepository.findByTeamAndAccount(team, targetAccount)
                 .ifPresent(m -> {
-                    throw new MemberAlreadyExistsException();
+                    throw new CustomException(ExceptionCode.MEMBER_ALREADY_EXISTS);
                 });
 
         memberRepository.save(new Member(team, targetAccount, MemberStatusType.INVITE, MemberRoleType.COMMON));
@@ -73,13 +68,13 @@ public class MemberService {
     @Transactional
     public void acceptInvitation(Account account, Long teamId) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         Member member = memberRepository.findByTeamAndAccount(team, account)
-                .orElseThrow(MemberNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.MEMBER_NOT_FOUND));
 
         if (member.getStatus() != MemberStatusType.INVITE) {
-            throw new MemberNotInvitedException();
+            throw new CustomException(ExceptionCode.MEMBER_NOT_INVITED);
         }
 
         member.activate();
@@ -88,10 +83,10 @@ public class MemberService {
     @Transactional
     public void leave(Account account, Long teamId) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         Member member = memberRepository.findByTeamAndAccount(team, account)
-                .orElseThrow(MemberNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.MEMBER_NOT_FOUND));
 
         validateNotLastAdmin(team, member);
 
@@ -101,7 +96,7 @@ public class MemberService {
     @Transactional
     public void updateRole(Long teamId, Long memberId, MemberRoleType role) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         Member member = findMemberInTeam(memberId, team);
 
@@ -115,12 +110,12 @@ public class MemberService {
     @Transactional
     public void removeMember(Account account, Long teamId, Long memberId) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         Member member = findMemberInTeam(memberId, team);
 
         if (member.getAccount().getId().equals(account.getId())) {
-            throw new CannotRemoveSelfException();
+            throw new CustomException(ExceptionCode.CANNOT_REMOVE_SELF);
         }
 
         validateNotLastAdmin(team, member);
@@ -130,10 +125,10 @@ public class MemberService {
 
     private Member findMemberInTeam(Long memberId, Team team) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(MemberNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.MEMBER_NOT_FOUND));
 
         if (!member.getTeam().getId().equals(team.getId())) {
-            throw new MemberNotFoundException();
+            throw new CustomException(ExceptionCode.MEMBER_NOT_FOUND);
         }
 
         return member;
@@ -142,7 +137,7 @@ public class MemberService {
     private void validateNotLastAdmin(Team team, Member member) {
         if (member.getRole() == MemberRoleType.ADMIN
                 && memberRepository.countByTeamAndRole(team, MemberRoleType.ADMIN) <= 1) {
-            throw new CannotRemoveLastAdminException();
+            throw new CustomException(ExceptionCode.CANNOT_REMOVE_LAST_ADMIN);
         }
     }
 }

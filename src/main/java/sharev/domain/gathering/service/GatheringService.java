@@ -10,16 +10,15 @@ import sharev.domain.gathering.dto.request.RequestCreateGatheringDto;
 import sharev.domain.gathering.dto.request.RequestUpdateGatheringDto;
 import sharev.domain.gathering.dto.response.ResponseGatheringDetailDto;
 import sharev.domain.gathering.dto.response.ResponseIntroduceTemplateDto;
-import sharev.domain.gathering.exception.IntroduceTemplateNotFoundException;
 import sharev.domain.gathering.entity.Gathering;
 import sharev.domain.gathering.entity.IntroduceTemplate;
 import sharev.domain.gathering.entity.IntroduceTemplateContent;
-import sharev.domain.gathering.exception.GatheringNotFoundException;
 import sharev.domain.gathering.repository.GatheringRepository;
 import sharev.domain.gathering.repository.IntroduceTemplateRepository;
 import sharev.domain.team.entity.Team;
-import sharev.domain.team.exception.TeamNotFoundException;
 import sharev.domain.team.repository.TeamRepository;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +32,7 @@ public class GatheringService {
     @Transactional
     public void create(Long teamId, RequestCreateGatheringDto dto) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         Gathering gathering = gatheringRepository.save(new Gathering(
                 team, dto.visible(), dto.title(), dto.content(),
@@ -50,7 +49,7 @@ public class GatheringService {
 
     public List<ResponseGatheringDetailDto> getGatherings(Long teamId) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.TEAM_NOT_FOUND));
 
         return gatheringRepository.findAllByTeam(team).stream()
                 .map(ResponseGatheringDetailDto::new)
@@ -83,17 +82,17 @@ public class GatheringService {
     public ResponseIntroduceTemplateDto getLatestTemplate(UUID gatheringId) {
         IntroduceTemplate template = introduceTemplateRepository
                 .findTopByGatheringIdOrderByVersionDesc(gatheringId)
-                .orElseThrow(IntroduceTemplateNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.INTRODUCE_TEMPLATE_NOT_FOUND));
 
         return new ResponseIntroduceTemplateDto(template);
     }
 
     private Gathering getGatheringWithTeamValidation(Long teamId, UUID gatheringId) {
         Gathering gathering = gatheringRepository.findById(gatheringId)
-                .orElseThrow(GatheringNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.EVENT_NOT_FOUND));
 
         if (!gathering.getTeam().getId().equals(teamId)) {
-            throw new GatheringNotFoundException();
+            throw new CustomException(ExceptionCode.EVENT_NOT_FOUND);
         }
 
         return gathering;

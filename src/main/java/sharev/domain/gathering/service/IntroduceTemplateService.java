@@ -5,8 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sharev.domain.gathering.entity.IntroduceTemplate;
 import sharev.domain.gathering.entity.IntroduceTemplateContent;
-import sharev.domain.gathering.exception.IntroduceTemplateNotFoundException;
 import sharev.domain.gathering.repository.IntroduceTemplateRepository;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class IntroduceTemplateService {
     @Transactional
     public IntroduceTemplate updateTemplate(Long templateId, IntroduceTemplateContent newContent) {
         IntroduceTemplate existing = introduceTemplateRepository.findById(templateId)
-                .orElseThrow(IntroduceTemplateNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.INTRODUCE_TEMPLATE_NOT_FOUND));
 
         if (existing.getContent().hasSameFields(newContent.fieldPlaceholders())) {
             existing.updateContent(newContent);

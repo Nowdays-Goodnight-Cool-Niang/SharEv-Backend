@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import sharev.domain.gathering.exception.TemplateVariableMismatchException;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 
 public record IntroduceTemplateContent(
         @NotBlank
@@ -31,12 +32,12 @@ public record IntroduceTemplateContent(
             foundKeys.add(key);
 
             if (!fieldPlaceholders.containsKey(key)) {
-                throw new TemplateVariableMismatchException();
+                throw new CustomException(ExceptionCode.WRONG_TEMPLATE);
             }
         }
 
         if (foundKeys.size() != fieldPlaceholders.size()) {
-            throw new TemplateVariableMismatchException();
+            throw new CustomException(ExceptionCode.WRONG_TEMPLATE);
         }
     }
 
