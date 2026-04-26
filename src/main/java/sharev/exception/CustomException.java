@@ -1,14 +1,15 @@
 package sharev.exception;
 
-import org.springframework.http.HttpStatus;
+public class CustomException extends RuntimeException {
+    public final ExceptionCode code;
 
-public abstract class CustomException extends RuntimeException {
-    public final HttpStatus status;
-    public final ExceptionCode exceptionCode;
-
-    protected CustomException(HttpStatus status, ExceptionCode exceptionCode) {
+    public CustomException(ExceptionCode exceptionCode) {
         super(exceptionCode.message);
-        this.status = status;
-        this.exceptionCode = exceptionCode;
+        this.code = exceptionCode;
+    }
+
+    public CustomException(ExceptionCode exceptionCode, String message) {
+        super(message);
+        this.code = exceptionCode;
     }
 }

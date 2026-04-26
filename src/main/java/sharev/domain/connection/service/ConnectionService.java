@@ -7,12 +7,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sharev.domain.card.entity.Card;
-import sharev.domain.card.exception.CardNotFoundException;
 import sharev.domain.card.repository.CardRepository;
 import sharev.domain.connection.entity.Connection;
-import sharev.domain.connection.exception.RegisterAlreadyException;
-import sharev.domain.connection.exception.RegisterMyselfException;
 import sharev.domain.connection.repository.ConnectionRepository;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +24,12 @@ public class ConnectionService {
     @Transactional
     public void connect(UUID eventId, Long accountId, Long targetCardId) {
         Card card = cardRepository.findByGatheringIdAndAccountId(eventId, accountId)
-                .orElseThrow(CardNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.CARD_NOT_FOUND));
         Card targetCard = cardRepository.findById(targetCardId)
-                .orElseThrow(CardNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.CARD_NOT_FOUND));
 
         if (card.getId().equals(targetCard.getId())) {
-            throw new RegisterMyselfException();
+            throw new CustomException(ExceptionCode.REGISTER_MYSELF);
         }
 
         List<Connection> connections = Connection.connect(card, targetCard);
@@ -38,7 +37,7 @@ public class ConnectionService {
         try {
             connectionRepository.saveAllAndFlush(connections);
         } catch (DataIntegrityViolationException e) {
-            throw new RegisterAlreadyException();
+            throw new CustomException(ExceptionCode.REGISTER_ALREADY);
         }
     }
 }

@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sharev.domain.account.entity.Account;
 import sharev.domain.account.entity.Feedback;
-import sharev.domain.account.exception.AccountNotFoundException;
 import sharev.domain.account.repository.AccountRepository;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 import sharev.domain.account.repository.FeedbackRepository;
 
 @Service
@@ -21,7 +22,7 @@ public class AccountService {
     public Account updateAccountInfo(Long accountId, String name, String email) {
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(AccountNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.ACCOUNT_NOT_FOUND));
 
         account.updateInfo(name, email);
 

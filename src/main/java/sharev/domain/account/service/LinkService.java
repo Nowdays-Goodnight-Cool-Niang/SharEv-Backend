@@ -8,9 +8,9 @@ import sharev.domain.account.dto.response.ResponseCreateLinkDto;
 import sharev.domain.account.dto.response.ResponseLinkDto;
 import sharev.domain.account.entity.Account;
 import sharev.domain.account.entity.Link;
-import sharev.domain.account.exception.LinkNotFoundException;
 import sharev.domain.account.repository.LinkRepository;
-import sharev.exception.AccessDeniedException;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 
 @Service
 @RequiredArgsConstructor
@@ -33,13 +33,13 @@ public class LinkService {
     @Transactional
     public void removeLink(Account account, Long linkId) {
         Link link = linkRepository.findById(linkId)
-                .orElseThrow(LinkNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.LINK_NOT_FOUND));
 
         if (account.getId().equals(link.getAccount().getId())) {
             linkRepository.delete(link);
             return;
         }
 
-        throw new AccessDeniedException();
+        throw new CustomException(ExceptionCode.ACCESS_DENIED);
     }
 }

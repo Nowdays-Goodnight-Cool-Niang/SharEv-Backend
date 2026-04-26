@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 
 @Component
 @RequiredArgsConstructor
@@ -23,14 +25,14 @@ public class LockProcessor {
         try {
             lockSuccessFlag = lock.tryLock(WAIT_TIME, LEASE_TIME, TimeUnit.SECONDS);
             if (!lockSuccessFlag) {
-                throw new LockOverWaitTimeException();
+                throw new CustomException(ExceptionCode.LOCK_OVER_WAIT_TIME);
             }
 
             consumer.accept(key);
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new LockInterruptedException();
+            throw new CustomException(ExceptionCode.LOCK_INTERRUPTED);
         } finally {
             if (lockSuccessFlag && lock.isHeldByCurrentThread()) {
                 lock.unlock();

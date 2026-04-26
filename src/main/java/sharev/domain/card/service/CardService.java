@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sharev.domain.account.entity.Account;
 import sharev.domain.account.entity.Link;
-import sharev.domain.account.exception.AccountNotFoundException;
 import sharev.domain.account.repository.AccountRepository;
 import sharev.domain.account.repository.LinkRepository;
 import sharev.domain.card.dto.response.ResponseCardDto;
@@ -29,20 +28,15 @@ import sharev.domain.card.dto.response.ResponsePinNumberOnlyDto;
 import sharev.domain.card.dto.response.ResponseUpdateCardInfoDto;
 import sharev.domain.card.dto.response.TempResponseCardDto;
 import sharev.domain.card.entity.Card;
-import sharev.domain.card.exception.CardNotFoundException;
-import sharev.domain.card.exception.CardUncompletedException;
-import sharev.domain.card.exception.JoinAlreadyException;
-import sharev.domain.card.exception.KeyBlankException;
-import sharev.domain.card.exception.PinNumberGenerateException;
 import sharev.domain.card.repository.CardRepository;
 import sharev.domain.connection.event.ShowCardEvent;
 import sharev.domain.gathering.entity.Gathering;
 import sharev.domain.gathering.entity.IntroduceTemplate;
-import sharev.domain.gathering.exception.GatheringNotFoundException;
-import sharev.domain.gathering.exception.IntroduceTemplateNotFoundException;
 import sharev.domain.gathering.repository.GatheringRepository;
 import sharev.domain.gathering.repository.IntroduceTemplateRepository;
 import sharev.domain.gathering.util.GatheringKeyGenerator;
+import sharev.exception.CustomException;
+import sharev.exception.ExceptionCode;
 import sharev.util.LockProcessor;
 
 @Service
@@ -65,9 +59,9 @@ public class CardService {
     @Transactional
     public void join(UUID gatheringId, Long accountId) {
         Gathering gathering = gatheringRepository.findById(gatheringId)
-                .orElseThrow(GatheringNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.EVENT_NOT_FOUND));
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(AccountNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.ACCOUNT_NOT_FOUND));
 
         int pinNumber = getPinNumber(gatheringId);
 
@@ -76,14 +70,14 @@ public class CardService {
         } catch (DataIntegrityViolationException e) {
             String eventPinKey = GatheringKeyGenerator.calculateEventPinKey(gatheringId);
             redisTemplate.opsForSet().add(eventPinKey, pinNumber);
-            throw new JoinAlreadyException();
+            throw new CustomException(ExceptionCode.JOIN_ALREADY);
         }
     }
 
     private int getPinNumber(UUID gatheringId) {
         Integer pinNumber = getUniquePinNumber(gatheringId);
         if (Objects.isNull(pinNumber)) {
-            throw new PinNumberGenerateException();
+            throw new CustomException(ExceptionCode.PIN_NUMBER_GENERATE);
         }
 
         return pinNumber;
@@ -107,7 +101,7 @@ public class CardService {
         Boolean keyExistFlag = redisTemplate.hasKey(eventPinKey);
 
         if (Objects.isNull(keyExistFlag)) {
-            throw new KeyBlankException();
+            throw new CustomException(ExceptionCode.KEY_BLANK);
         }
 
         if (keyExistFlag.equals(Boolean.TRUE)) {
@@ -131,11 +125,11 @@ public class CardService {
     public ResponseUpdateCardInfoDto updateInfo(UUID gatheringId, Long accountId, Integer templateVersion,
                                                 Map<String, String> introductionText) {
         Card card = cardRepository.findByGatheringIdAndAccountId(gatheringId, accountId)
-                .orElseThrow(CardNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.CARD_NOT_FOUND));
 
         IntroduceTemplate introduceTemplate =
                 introduceTemplateRepository.findByGatheringIdAndVersion(gatheringId, templateVersion)
-                        .orElseThrow(IntroduceTemplateNotFoundException::new);
+                        .orElseThrow(() -> new CustomException(ExceptionCode.INTRODUCE_TEMPLATE_NOT_FOUND));
 
         card.updateIntroductionText(introduceTemplate, templateVersion, introductionText);
 
@@ -144,7 +138,7 @@ public class CardService {
 
     public ResponseCardDto getCardByPinNumber(UUID gatheringId, Long accountId, Integer pinNumber) {
         Card targetCard = cardRepository.findByGatheringIdAndPinNumber(gatheringId, pinNumber)
-                .orElseThrow(CardNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.CARD_NOT_FOUND));
 
         applicationEventPublisher.publishEvent(new ShowCardEvent(gatheringId, accountId, targetCard.getId()));
 
@@ -153,14 +147,14 @@ public class CardService {
 
     public ResponseCardDto getMyCard(UUID gatheringId, Long accountId) {
         Card card = cardRepository.findByGatheringIdAndAccountId(gatheringId, accountId)
-                .orElseThrow(CardNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.CARD_NOT_FOUND));
 
         return calculateResponseCardDto(gatheringId, card);
     }
 
     public int getMyPinNumber(UUID gatheringId, Long accountId) {
         Card card = cardRepository.findByGatheringIdAndAccountId(gatheringId, accountId)
-                .orElseThrow(CardNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.CARD_NOT_FOUND));
 
         return card.getPinNumber();
     }
@@ -173,13 +167,13 @@ public class CardService {
 
         IntroduceTemplate lastintroduceTemplate =
                 introduceTemplateRepository.findTopByGatheringIdOrderByVersionDesc(gatheringId)
-                        .orElseThrow(IntroduceTemplateNotFoundException::new);
+                        .orElseThrow(() -> new CustomException(ExceptionCode.INTRODUCE_TEMPLATE_NOT_FOUND));
 
         Integer templateVersion = card.getTemplateVersion();
 
         IntroduceTemplate introduceTemplate =
                 introduceTemplateRepository.findByGatheringIdAndVersion(gatheringId, templateVersion)
-                        .orElseThrow(IntroduceTemplateNotFoundException::new);
+                        .orElseThrow(() -> new CustomException(ExceptionCode.INTRODUCE_TEMPLATE_NOT_FOUND));
 
         return new ResponseCardDto(card, linkUrls, account, lastintroduceTemplate.getVersion(),
                 introduceTemplate);
@@ -198,13 +192,13 @@ public class CardService {
     public boolean hasCompletedCard(Account account, UUID gatheringId) {
         Long accountId = account.getId();
         Card card = cardRepository.findByGatheringIdAndAccountId(gatheringId, accountId)
-                .orElseThrow(CardNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.CARD_NOT_FOUND));
 
         if (card.isCompleted()) {
             return true;
         }
 
-        throw new CardUncompletedException();
+        throw new CustomException(ExceptionCode.CARD_UNCOMPLETED);
     }
 
     public Page<ResponseCardDto> getAllCard(UUID gatheringId, Long accountId, LocalDateTime snapshotTime,
@@ -215,7 +209,7 @@ public class CardService {
 
         IntroduceTemplate introduceTemplate = introduceTemplateRepository.findTopByGatheringIdOrderByVersionDesc(
                         gatheringId)
-                .orElseThrow(IntroduceTemplateNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ExceptionCode.INTRODUCE_TEMPLATE_NOT_FOUND));
 
         Integer lastVersion = introduceTemplate.getVersion();
 
