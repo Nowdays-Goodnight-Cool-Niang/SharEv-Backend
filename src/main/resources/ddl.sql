@@ -147,8 +147,10 @@ CREATE INDEX idx_connections_other_card_id ON connections (other_card_id);
 CREATE TABLE links
 (
     link_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    account_id BIGINT NOT NULL,
-    link_url   TEXT   NOT NULL,
+    account_id BIGINT      NOT NULL,
+    link_url   TEXT        NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_links_account FOREIGN KEY (account_id) REFERENCES accounts (account_id) ON DELETE CASCADE
 );
