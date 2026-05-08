@@ -99,6 +99,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
 }
 
 tasks.named('test') {
@@ -111,7 +112,7 @@ tasks.named('test') {
 
 // === querydsl start ===
 
-def qClassDir = 'src/main/generated'
+def qClassDir = "${layout.buildDirectory.get().asFile}/generated/querydsl"
 
 tasks.withType(JavaCompile).configureEach {
     options.getGeneratedSourceOutputDirectory().set(file(qClassDir))
