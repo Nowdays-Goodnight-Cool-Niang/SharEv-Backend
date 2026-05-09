@@ -25,7 +25,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import sharev.domain.account.entity.Account;
+import sharev.common.adapter.inbound.security.model.AccountPrincipal;
 
 @Configuration
 @EnableWebSecurity
@@ -96,24 +96,24 @@ public class SecurityConfig {
 
     private AuthenticationSuccessHandler loginSuccessHandler() {
         return (request, response, authentication) -> {
-            Account account = (Account) authentication.getPrincipal();
+            AccountPrincipal accountPrincipal = (AccountPrincipal) authentication.getPrincipal();
 
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
 
-            Map<String, Object> responseData = accountEntityToLoginResponse(account);
+            Map<String, Object> responseData = accountEntityToLoginResponse(accountPrincipal);
 
             String jsonResponse = objectMapper.writeValueAsString(responseData);
             response.getWriter().write(jsonResponse);
         };
     }
 
-    private static Map<String, Object> accountEntityToLoginResponse(Account account) {
+    private static Map<String, Object> accountEntityToLoginResponse(AccountPrincipal accountPrincipal) {
         Map<String, Object> responseData = new HashMap<>();
 
-        responseData.put("id", account.getId());
-        responseData.put("name", account.getName());
-        responseData.put("email", account.getEmail());
+        responseData.put("id", accountPrincipal.getId());
+        responseData.put("name", accountPrincipal.getAccountName());
+        responseData.put("email", accountPrincipal.getEmail());
 
         return responseData;
     }
