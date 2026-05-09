@@ -7,7 +7,10 @@ import sharev.team.application.port.inbound.command.GetMyTeamsCommand
 import sharev.team.application.port.inbound.command.UpdateTeamInfoCommand
 import sharev.team.application.port.inbound.mapper.toCreateTeamResult
 import sharev.team.application.port.inbound.result.*
-import sharev.team.application.port.inbound.usecase.*
+import sharev.team.application.port.inbound.usecase.CreateTeamUseCase
+import sharev.team.application.port.inbound.usecase.GetMyTeamsUseCase
+import sharev.team.application.port.inbound.usecase.GetTeamDetailUseCase
+import sharev.team.application.port.inbound.usecase.UpdateTeamInfoUseCase
 import sharev.team.application.port.outbound.*
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
@@ -24,8 +27,7 @@ class TeamService(
 ) : CreateTeamUseCase,
     GetMyTeamsUseCase,
     GetTeamDetailUseCase,
-    UpdateTeamInfoUseCase,
-    CheckTeamMemberUseCase {
+    UpdateTeamInfoUseCase {
 
     @Transactional
     override fun create(command: CreateTeamCommand): CreateTeamResult {
@@ -50,14 +52,6 @@ class TeamService(
                     headcount = it.headcount,
                 )
             }
-    }
-
-    override fun isMember(accountId: Long, teamId: Long): Boolean {
-        if (!loadTeamPort.exists(teamId)) {
-            return false
-        }
-
-        return checkTeamMemberPort.isMember(accountId, teamId)
     }
 
     @Transactional
