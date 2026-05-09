@@ -8,6 +8,7 @@ import sharev.link.application.port.inbound.command.GetLinksCommand
 import sharev.link.application.port.inbound.mapper.toCreateLinkResult
 import sharev.link.application.port.inbound.mapper.toLinkResult
 import sharev.link.application.port.inbound.result.CreateLinkResult
+import sharev.link.application.port.inbound.result.DeleteLinkResult
 import sharev.link.application.port.inbound.result.LinkResult
 import sharev.link.application.port.inbound.usecase.CreateLinkUseCase
 import sharev.link.application.port.inbound.usecase.DeleteLinkUseCase
@@ -38,7 +39,7 @@ class LinkService(
     }
 
     @Transactional
-    override fun delete(command: DeleteLinkCommand) {
+    override fun delete(command: DeleteLinkCommand): DeleteLinkResult {
         val link = loadLinkPort.load(command.linkId)
 
         if (link.accountId != command.accountId) {
@@ -46,5 +47,7 @@ class LinkService(
         }
 
         deleteLinkPort.delete(command.linkId)
+
+        return DeleteLinkResult(command.linkId)
     }
 }

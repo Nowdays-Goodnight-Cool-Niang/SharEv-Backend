@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*
 import sharev.common.adapter.inbound.security.model.AccountPrincipal
 import sharev.link.adapter.inbound.web.dto.request.CreateLinkRequest
 import sharev.link.adapter.inbound.web.dto.response.CreateLinkResponse
+import sharev.link.adapter.inbound.web.dto.response.DeleteLinkResponse
 import sharev.link.adapter.inbound.web.dto.response.LinkResponse
 import sharev.link.adapter.inbound.web.mapper.toCommand
 import sharev.link.adapter.inbound.web.mapper.toDeleteLinkCommand
@@ -52,11 +53,11 @@ class LinkController(
     fun deleteLink(
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
         @PathVariable linkId: Long,
-    ): ResponseEntity<Unit> {
+    ): ResponseEntity<DeleteLinkResponse> {
 
-        deleteLinkUseCase.delete(accountPrincipal.toDeleteLinkCommand(linkId))
+        val response = deleteLinkUseCase.delete(accountPrincipal.toDeleteLinkCommand(linkId))
+            .toResponse()
 
-        return ResponseEntity.noContent()
-            .build()
+        return ResponseEntity.ok(response)
     }
 }
