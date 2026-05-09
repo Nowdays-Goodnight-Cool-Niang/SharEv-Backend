@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 import sharev.account.domain.event.AccountWithdrawalFeedbackSubmittedEvent
+import sharev.feedback.application.port.inbound.command.SaveFeedbackCommand
 
 @Component
 class FeedbackEventListener(
@@ -15,7 +16,7 @@ class FeedbackEventListener(
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     fun listen(event: AccountWithdrawalFeedbackSubmittedEvent) {
         saveFeedbackUseCase.save(
-            _root_ide_package_.sharev.feedback.application.port.inbound.command.SaveFeedbackCommand(
+            SaveFeedbackCommand(
                 event.feedback
             )
         )

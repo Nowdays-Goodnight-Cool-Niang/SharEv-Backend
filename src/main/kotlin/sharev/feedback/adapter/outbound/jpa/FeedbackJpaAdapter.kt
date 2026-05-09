@@ -1,6 +1,7 @@
 package sharev.feedback.adapter.outbound.jpa
 
 import org.springframework.stereotype.Component
+import sharev.feedback.adapter.outbound.jpa.entity.FeedbackJpaEntity
 
 @Component
 class FeedbackJpaAdapter(
@@ -9,7 +10,7 @@ class FeedbackJpaAdapter(
 
     override fun save(content: String) {
         feedbackRepository.save(
-            _root_ide_package_.sharev.feedback.adapter.outbound.jpa.entity.FeedbackJpaEntity(
+            FeedbackJpaEntity(
                 null,
                 content
             )
