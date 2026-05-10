@@ -5,7 +5,7 @@ import sharev.team.domain.model.Team
 
 fun TeamJpaEntity.toDomainModel() = Team(
     id = id!!,
-    teamCertification = teamCertification,
+    teamCertification = certification,
     title = title,
     content = content,
     activateFlag = activateFlag,

@@ -13,9 +13,9 @@ class TeamJpaEntity(
     @Column(name = "team_id")
     val id: Long? = null,
 
-    @Column(columnDefinition = "team_certification")
+    @Column
     @Enumerated(EnumType.STRING)
-    var teamCertification: TeamCertification = TeamCertification.NONE,
+    var certification: TeamCertification = TeamCertification.NONE,
 
     @Column(unique = true)
     var title: String,
