@@ -200,8 +200,4 @@ bootRun {
     }
 }
 
-clean {
-    delete file("src/main/resources/static/docs/")
-}
-
 // === swagger end ===
