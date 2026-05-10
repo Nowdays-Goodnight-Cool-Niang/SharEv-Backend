@@ -4,6 +4,7 @@ import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import sharev.account.adapter.outbound.jpa.entity.AccountJpaEntity
+import sharev.common.adapter.outbound.jpa.entity.BaseTimeEntity
 import sharev.gathering.adapter.outbound.jpa.entity.GatheringJpaEntity
 
 @Entity
@@ -32,7 +33,7 @@ class CardJpaEntity(
     @Column
     @JdbcTypeCode(SqlTypes.JSON)
     var introductionText: Map<String, String>? = null,
-) : sharev.common.adapter.outbound.jpa.entity.BaseTimeEntity() {
+) : BaseTimeEntity() {
 
     fun updateIntroductionText(templateVersion: Int, introductionText: Map<String, String>) {
         this.templateVersion = templateVersion

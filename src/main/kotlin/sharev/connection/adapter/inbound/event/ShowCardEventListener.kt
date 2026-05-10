@@ -5,10 +5,12 @@ import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import sharev.card.domain.event.ShowCardEvent
+import sharev.connection.application.port.inbound.command.ConnectCardsCommand
+import sharev.connection.application.port.inbound.usecase.ConnectCardsUseCase
 
 @Component
 class ShowCardEventListener(
-    private val connectCardsUseCase: sharev.connection.application.port.inbound.usecase.ConnectCardsUseCase,
+    private val connectCardsUseCase: ConnectCardsUseCase,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -17,7 +19,7 @@ class ShowCardEventListener(
     fun connect(showCardEvent: ShowCardEvent) {
         try {
             connectCardsUseCase.connect(
-                _root_ide_package_.sharev.connection.application.port.inbound.command.ConnectCardsCommand(
+                ConnectCardsCommand(
                     gatheringId = showCardEvent.eventId,
                     accountId = showCardEvent.accountId,
                     targetCardId = showCardEvent.targetCardId,

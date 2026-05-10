@@ -6,6 +6,7 @@ import org.hibernate.type.SqlTypes
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import sharev.card.adapter.outbound.jpa.entity.CardJpaEntity
 import sharev.common.adapter.outbound.jpa.entity.BaseTimeEntity
+import sharev.connection.domain.model.ConnectionStatusType
 
 @Entity
 @Table(name = "connections")
@@ -28,7 +29,7 @@ class ConnectionJpaEntity(
     @Column(columnDefinition = "card_connection_status")
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    val status: sharev.connection.domain.model.ConnectionStatusType = _root_ide_package_.sharev.connection.domain.model.ConnectionStatusType.REGISTRATION,
+    val status: ConnectionStatusType = ConnectionStatusType.REGISTRATION,
 
     @Column
     val memo: String? = null,
