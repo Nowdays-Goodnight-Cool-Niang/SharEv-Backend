@@ -33,6 +33,12 @@ class LinkJpaAdapter(
         val account = accountRepository.findByIdOrNull(accountId)
             ?: throw AccountException(AccountExceptionCode.ACCOUNT_NOT_FOUND)
 
+        val currentCount = linkRepository.countByAccountId(accountId)
+
+        if (currentCount + urls.size > Link.MAX_COUNT) {
+            throw LinkException(LinkExceptionCode.LINK_LIMIT_EXCEEDED)
+        }
+
         val entities = urls.map { LinkJpaEntity(account = account, linkUrl = it) }
         linkRepository.saveAll(entities)
     }

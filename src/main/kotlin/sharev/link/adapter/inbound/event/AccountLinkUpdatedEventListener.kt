@@ -14,12 +14,12 @@ class AccountLinkUpdatedEventListener(
 
     @EventListener
     fun handle(event: AccountLinkUpdatedEvent) {
-        if (event.addLinkUrls.isNotEmpty()) {
-            saveLinkPort.saveAll(event.accountId, event.addLinkUrls)
-        }
-
         if (event.deleteLinkIds.isNotEmpty()) {
             deleteLinkPort.deleteAllByIds(event.accountId, event.deleteLinkIds)
+        }
+
+        if (event.addLinkUrls.isNotEmpty()) {
+            saveLinkPort.saveAll(event.accountId, event.addLinkUrls)
         }
     }
 }
