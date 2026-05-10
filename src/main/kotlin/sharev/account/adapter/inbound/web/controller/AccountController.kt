@@ -43,8 +43,7 @@ class AccountController(
         updateSessionInfo(accountPrincipal.updateFrom(result), httpSession)
 
         return ResponseEntity.ok(result.toUpdateAccountInfoResponse())
-    } // TODO: 계정 업데이트 시 추가 링크 목록, 삭제 링크 목록을 받아 추가하거나 삭제할 것
-    // TODO: 이벤트로 넘기되 비동기 쓰지 말고, 같은 트랜잭션 내에서 동작하게끔 수정할 것
+    }
 
     @GetMapping
     fun getAccountInfo(

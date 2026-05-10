@@ -11,7 +11,13 @@ import sharev.account.application.port.inbound.result.UpdateAccountInfoResult
 import sharev.common.adapter.inbound.security.model.AccountPrincipal
 
 fun UpdateAccountInfoRequest.toCommand(accountId: Long) =
-    UpdateAccountInfoCommand(accountId, this.name, this.email)
+    UpdateAccountInfoCommand(
+        accountId,
+        name,
+        email,
+        requireNotNull(addLinkUrls),
+        requireNotNull(deleteLinkIds)
+    )
 
 fun UpdateAccountInfoResult.toUpdateAccountInfoResponse() =
     UpdateAccountInfoResponse(id, name, email, updateAt)
@@ -26,4 +32,4 @@ fun AccountPrincipal.toDeleteAccountCommand(feedback: String) =
     DeleteAccountCommand(id, feedback)
 
 fun AccountPrincipal.updateFrom(result: UpdateAccountInfoResult) =
-    copy(role = result.role.name, email = result.email, accountName = result.name)
+    copy(email = result.email, accountName = result.name)

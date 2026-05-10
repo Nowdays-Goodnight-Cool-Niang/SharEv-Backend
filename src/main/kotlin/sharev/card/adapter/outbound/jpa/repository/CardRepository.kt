@@ -6,7 +6,7 @@ import sharev.card.adapter.outbound.jpa.entity.CardJpaEntity
 import java.util.*
 
 interface CardRepository : JpaRepository<CardJpaEntity, Long>,
-    sharev.card.adapter.outbound.jpa.repository.CardRepositoryCustom {
+    CardRepositoryCustom {
     fun findByGatheringIdAndAccountId(gatheringId: UUID, accountId: Long): CardJpaEntity?
 
     fun findByGatheringIdAndPinNumber(gatheringId: UUID, pinNumber: Int): CardJpaEntity?

@@ -10,17 +10,16 @@ import sharev.account.application.port.inbound.result.UpdateAccountInfoResult
 import sharev.account.application.port.inbound.usecase.DeleteAccountUseCase
 import sharev.account.application.port.inbound.usecase.UpdateAccountInfoUseCase
 import sharev.account.application.port.outbound.DeleteAccountPort
-import sharev.account.application.port.outbound.LoadAccountPort
-import sharev.account.application.port.outbound.SaveAccountPort
+import sharev.account.application.port.outbound.UpdateAccountPort
+import sharev.account.domain.event.AccountLinkUpdatedEvent
 import sharev.account.domain.event.AccountWithdrawalFeedbackSubmittedEvent
 import sharev.common.application.port.outbound.PublishEventPort
 
 @Service
 @Transactional(readOnly = true)
 class AccountService(
-    private val loadAccountPort: LoadAccountPort,
+    private val updateAccountPort: UpdateAccountPort,
     private val deleteAccountPort: DeleteAccountPort,
-    private val saveAccountPort: SaveAccountPort,
     private val publishEventPort: PublishEventPort,
 ) : UpdateAccountInfoUseCase, DeleteAccountUseCase {
 
@@ -28,10 +27,17 @@ class AccountService(
     override fun updateAccountInfo(
         command: UpdateAccountInfoCommand
     ): UpdateAccountInfoResult {
-        val account = loadAccountPort.load(command.accountId)
-        val updatedAccount = account.updateInfo(command.name, command.email)
-        return saveAccountPort.save(updatedAccount)
-            .toUpdateAccountInfoResult()
+        val account = updateAccountPort.update(command.accountId, command.name, command.email)
+
+        publishEventPort.publish(
+            AccountLinkUpdatedEvent(
+                accountId = command.accountId,
+                addLinkUrls = command.addLinkUrls,
+                deleteLinkIds = command.deleteLinkIds,
+            )
+        )
+
+        return account.toUpdateAccountInfoResult()
     }
 
     @Transactional

@@ -2,6 +2,7 @@ package sharev.link.application.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
@@ -31,7 +32,8 @@ class LinkServiceTest {
     // ───────────── create ─────────────
 
     @Test
-    fun `정상 생성 시 create는 저장된 링크를 반환한다`() {
+    @DisplayName("정상 생성 시 create는 저장된 링크를 반환한다")
+    fun create_returnsSavedLink() {
         val accountId = 10L
         val url = "https://example.com"
         val command = CreateLinkCommand(accountId = accountId, url = url)
@@ -49,7 +51,8 @@ class LinkServiceTest {
     // ───────────── getLinks ─────────────
 
     @Test
-    fun `정상 조회 시 getLinks는 링크 목록을 반환한다`() {
+    @DisplayName("정상 조회 시 getLinks는 링크 목록을 반환한다")
+    fun getLinks_returnsLinkList() {
         val accountId = 10L
         val command = GetLinksCommand(accountId = accountId)
         val links = listOf(
@@ -69,7 +72,8 @@ class LinkServiceTest {
     // ───────────── delete ─────────────
 
     @Test
-    fun `소유자 불일치 시 delete는 LINK_OWNERSHIP_MISMATCH 예외가 발생한다`() {
+    @DisplayName("소유자 불일치 시 delete는 LINK_OWNERSHIP_MISMATCH 예외가 발생한다")
+    fun delete_throwsOwnershipMismatch_whenNotOwner() {
         val accountId = 10L
         val otherAccountId = 99L
         val linkId = 1L
@@ -89,7 +93,8 @@ class LinkServiceTest {
     }
 
     @Test
-    fun `정상 삭제 시 delete는 deleteLinkPort를 호출하고 linkId를 반환한다`() {
+    @DisplayName("정상 삭제 시 delete는 deleteLinkPort를 호출하고 linkId를 반환한다")
+    fun delete_callsDeletePortAndReturnsLinkId() {
         val accountId = 10L
         val linkId = 1L
         val command = DeleteLinkCommand(accountId = accountId, linkId = linkId)

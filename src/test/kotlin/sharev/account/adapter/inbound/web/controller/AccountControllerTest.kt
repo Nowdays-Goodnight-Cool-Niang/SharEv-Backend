@@ -23,7 +23,6 @@ import sharev.account.application.port.inbound.command.DeleteAccountCommand
 import sharev.account.application.port.inbound.command.UpdateAccountInfoCommand
 import sharev.account.application.port.inbound.result.DeleteAccountResult
 import sharev.account.application.port.inbound.result.UpdateAccountInfoResult
-import sharev.account.domain.model.AccountRole
 import java.time.LocalDateTime
 
 class AccountControllerTest : ControllerTestSupport() {
@@ -31,11 +30,11 @@ class AccountControllerTest : ControllerTestSupport() {
     @WithCustomMockUser
     @DisplayName("회원 정보 업데이트")
     fun updateAccountInfo() {
-        val requestDto = UpdateAccountInfoRequest("김주호", "eora21@naver.com")
-        val command = UpdateAccountInfoCommand(1L, "김주호", "eora21@naver.com")
+        val requestDto = UpdateAccountInfoRequest("김주호", "eora21@naver.com", setOf("https://link.com"), setOf(1L))
+        val command = UpdateAccountInfoCommand(1L, "김주호", "eora21@naver.com", setOf("https://link.com"), setOf(1L))
 
         given(updateAccountInfoUseCase.updateAccountInfo(command)).willReturn(
-            UpdateAccountInfoResult(1L, "김주호", "eora21@naver.com", AccountRole.USER, LocalDateTime.now())
+            UpdateAccountInfoResult(1L, "김주호", "eora21@naver.com")
         )
 
         val request = RestDocumentationRequestBuilders.patch("/accounts")
@@ -55,6 +54,8 @@ class AccountControllerTest : ControllerTestSupport() {
                             .requestFields(
                                 fieldWithPath("name").type(STRING).description("회원 이름"),
                                 fieldWithPath("email").type(STRING).description("이메일"),
+                                fieldWithPath("addLinkUrls[]").type(STRING).description("추가할 링크 URL 목록"),
+                                fieldWithPath("deleteLinkIds[]").type(NUMBER).description("삭제할 링크 ID 목록"),
                             )
                             .responseFields(
                                 fieldWithPath("id").type(NUMBER).description("회원 ID"),

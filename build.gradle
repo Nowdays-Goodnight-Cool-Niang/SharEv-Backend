@@ -21,17 +21,10 @@ plugins {
 
 group = 'sharev'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
     }
 }
 
@@ -181,18 +174,11 @@ swaggerSources {
 }
 
 tasks.register("copySwaggerUISample") {
+    dependsOn generateSwaggerUISample
     doLast {
-        def destinationDir
-
-        if ("${profile}" == 'dev') {
-            destinationDir = "${layout.buildDirectory.dir("resources/main/static/docs/").get()}"
-        } else {
-            destinationDir = "src/main/resources/static/docs/"
-        }
-
         copy {
             from("${generateSwaggerUISample.outputDir}")
-            into(destinationDir)
+            into("${layout.buildDirectory.dir("resources/main/static/docs/").get()}")
         }
     }
 }
@@ -204,12 +190,14 @@ tasks.withType(GenerateSwaggerUI).configureEach {
 
 bootJar {
     if ("${profile}" != 'prod') {
-        dependsOn generateSwaggerUISample
+        dependsOn copySwaggerUISample
     }
 }
 
-clean {
-    delete file("src/main/resources/static/docs/")
+bootRun {
+    if ("${profile}" != 'prod') {
+        dependsOn copySwaggerUISample
+    }
 }
 
 // === swagger end ===

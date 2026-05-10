@@ -1,5 +1,6 @@
 package sharev.link.application.port.outbound
 
-fun interface DeleteLinkPort {
+interface DeleteLinkPort {
     fun delete(linkId: Long)
+    fun deleteAllByIds(accountId: Long, linkIds: Set<Long>)
 }

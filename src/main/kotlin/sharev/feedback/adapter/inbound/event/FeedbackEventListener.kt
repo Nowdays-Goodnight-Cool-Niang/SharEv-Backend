@@ -6,10 +6,11 @@ import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 import sharev.account.domain.event.AccountWithdrawalFeedbackSubmittedEvent
 import sharev.feedback.application.port.inbound.command.SaveFeedbackCommand
+import sharev.feedback.application.port.inbound.usecase.SaveFeedbackUseCase
 
 @Component
 class FeedbackEventListener(
-    private val saveFeedbackUseCase: sharev.feedback.application.port.inbound.usecase.SaveFeedbackUseCase,
+    private val saveFeedbackUseCase: SaveFeedbackUseCase,
 ) {
 
     @Async

@@ -2,6 +2,7 @@ package sharev.member.application.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
@@ -47,7 +48,8 @@ class MemberServiceTest {
     // ───────────── isAdmin ─────────────
 
     @Test
-    fun `팀이 존재하지 않으면 isAdmin은 false를 반환한다`() {
+    @DisplayName("팀이 존재하지 않으면 isAdmin은 false를 반환한다")
+    fun isAdmin_returnsFalse_whenTeamNotExists() {
         val teamId = 1L
         val accountId = 10L
 
@@ -60,7 +62,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `admin 멤버이면 isAdmin은 true를 반환한다`() {
+    @DisplayName("admin 멤버이면 isAdmin은 true를 반환한다")
+    fun isAdmin_returnsTrue_whenAdminMember() {
         val teamId = 1L
         val accountId = 10L
 
@@ -73,7 +76,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `admin이 아니면 isAdmin은 false를 반환한다`() {
+    @DisplayName("admin이 아니면 isAdmin은 false를 반환한다")
+    fun isAdmin_returnsFalse_whenNotAdmin() {
         val teamId = 1L
         val accountId = 10L
 
@@ -88,7 +92,8 @@ class MemberServiceTest {
     // ───────────── getMembers ─────────────
 
     @Test
-    fun `팀 멤버가 아니면 getMembers 시 NOT_TEAM_MEMBER 예외가 발생한다`() {
+    @DisplayName("팀 멤버가 아니면 getMembers 시 NOT_TEAM_MEMBER 예외가 발생한다")
+    fun getMembers_throwsException_whenNotTeamMember() {
         val accountId = 10L
         val teamId = 1L
         val command = GetMembersCommand(accountId = accountId, teamId = teamId)
@@ -106,7 +111,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `정상 조회 시 getMembers는 멤버 목록을 반환한다`() {
+    @DisplayName("정상 조회 시 getMembers는 멤버 목록을 반환한다")
+    fun getMembers_returnsMemberList() {
         val accountId = 10L
         val teamId = 1L
         val command = GetMembersCommand(accountId = accountId, teamId = teamId)
@@ -128,7 +134,8 @@ class MemberServiceTest {
     // ───────────── invite ─────────────
 
     @Test
-    fun `admin이 아니면 invite 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다`() {
+    @DisplayName("admin이 아니면 invite 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다")
+    fun invite_throwsException_whenNotAdmin() {
         val accountId = 10L
         val teamId = 1L
         val command = InviteMemberCommand(accountId = accountId, teamId = teamId, email = "target@test.com")
@@ -146,7 +153,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `이미 팀 멤버이면 invite 시 MEMBER_ALREADY_EXISTS 예외가 발생한다`() {
+    @DisplayName("이미 팀 멤버이면 invite 시 MEMBER_ALREADY_EXISTS 예외가 발생한다")
+    fun invite_throwsException_whenMemberAlreadyExists() {
         val accountId = 10L
         val teamId = 1L
         val targetAccountId = 20L
@@ -168,7 +176,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `정상 초대 시 INVITE 상태로 멤버를 저장한다`() {
+    @DisplayName("정상 초대 시 INVITE 상태로 멤버를 저장한다")
+    fun invite_savesMemberWithInviteStatus() {
         val accountId = 10L
         val teamId = 1L
         val targetAccountId = 20L
@@ -191,7 +200,8 @@ class MemberServiceTest {
     // ───────────── acceptInvitation ─────────────
 
     @Test
-    fun `초대 상태가 아니면 acceptInvitation 시 MEMBER_NOT_INVITED 예외가 발생한다`() {
+    @DisplayName("초대 상태가 아니면 acceptInvitation 시 MEMBER_NOT_INVITED 예외가 발생한다")
+    fun acceptInvitation_throwsException_whenNotInvited() {
         val accountId = 10L
         val teamId = 1L
         val command = AcceptInvitationCommand(accountId = accountId, teamId = teamId)
@@ -210,7 +220,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `정상 수락 시 acceptInvitation은 activate를 호출한다`() {
+    @DisplayName("정상 수락 시 acceptInvitation은 activate를 호출한다")
+    fun acceptInvitation_activatesMember() {
         val accountId = 10L
         val teamId = 1L
         val memberId = 1L
@@ -231,7 +242,8 @@ class MemberServiceTest {
     // ───────────── leave ─────────────
 
     @Test
-    fun `마지막 admin이면 leave 시 CANNOT_REMOVE_LAST_ADMIN 예외가 발생한다`() {
+    @DisplayName("마지막 admin이면 leave 시 CANNOT_REMOVE_LAST_ADMIN 예외가 발생한다")
+    fun leave_throwsException_whenLastAdmin() {
         val accountId = 10L
         val teamId = 1L
         val memberId = 1L
@@ -252,7 +264,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `정상 탈퇴 시 leave는 delete를 호출한다`() {
+    @DisplayName("정상 탈퇴 시 leave는 delete를 호출한다")
+    fun leave_deletesMember() {
         val accountId = 10L
         val teamId = 1L
         val memberId = 1L
@@ -268,7 +281,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `admin이 여러 명이면 leave 시 정상 탈퇴된다`() {
+    @DisplayName("admin이 여러 명이면 leave 시 정상 탈퇴된다")
+    fun leave_succeeds_whenMultipleAdminsExist() {
         val accountId = 10L
         val teamId = 1L
         val memberId = 1L
@@ -287,7 +301,8 @@ class MemberServiceTest {
     // ───────────── updateRole ─────────────
 
     @Test
-    fun `admin이 아니면 updateRole 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다`() {
+    @DisplayName("admin이 아니면 updateRole 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다")
+    fun updateRole_throwsException_whenNotAdmin() {
         val accountId = 10L
         val teamId = 1L
         val command = UpdateMemberRoleCommand(accountId = accountId, teamId = teamId, memberId = 2L, role = MemberRole.ADMIN)
@@ -305,7 +320,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `다른 팀의 멤버를 변경하려 하면 updateRole 시 MEMBER_NOT_FOUND 예외가 발생한다`() {
+    @DisplayName("다른 팀의 멤버를 변경하려 하면 updateRole 시 MEMBER_NOT_FOUND 예외가 발생한다")
+    fun updateRole_throwsException_whenMemberInDifferentTeam() {
         val accountId = 10L
         val teamId = 1L
         val otherTeamId = 99L
@@ -327,7 +343,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `마지막 admin을 COMMON으로 강등하면 updateRole 시 CANNOT_REMOVE_LAST_ADMIN 예외가 발생한다`() {
+    @DisplayName("마지막 admin을 COMMON으로 강등하면 updateRole 시 CANNOT_REMOVE_LAST_ADMIN 예외가 발생한다")
+    fun updateRole_throwsException_whenDemotingLastAdmin() {
         val accountId = 10L
         val teamId = 1L
         val targetMemberId = 2L
@@ -349,7 +366,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `admin이 여러 명이면 COMMON으로 강등할 수 있다`() {
+    @DisplayName("admin이 여러 명이면 COMMON으로 강등할 수 있다")
+    fun updateRole_demotesToCommon_whenMultipleAdminsExist() {
         val accountId = 10L
         val teamId = 1L
         val targetMemberId = 2L
@@ -371,7 +389,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `정상 역할 변경 시 updateRole은 updateRole을 호출한다`() {
+    @DisplayName("정상 역할 변경 시 updateRole은 updateRole을 호출한다")
+    fun updateRole_updatesRole() {
         val accountId = 10L
         val teamId = 1L
         val targetMemberId = 2L
@@ -394,7 +413,8 @@ class MemberServiceTest {
     // ───────────── removeMember ─────────────
 
     @Test
-    fun `admin이 아니면 removeMember 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다`() {
+    @DisplayName("admin이 아니면 removeMember 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다")
+    fun removeMember_throwsException_whenNotAdmin() {
         val accountId = 10L
         val teamId = 1L
         val command = RemoveMemberCommand(accountId = accountId, teamId = teamId, memberId = 2L)
@@ -412,7 +432,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `자기 자신을 제거하려 하면 removeMember 시 CANNOT_REMOVE_SELF 예외가 발생한다`() {
+    @DisplayName("자기 자신을 제거하려 하면 removeMember 시 CANNOT_REMOVE_SELF 예외가 발생한다")
+    fun removeMember_throwsException_whenRemovingSelf() {
         val accountId = 10L
         val teamId = 1L
         val memberId = 1L
@@ -433,7 +454,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `마지막 admin을 제거하려 하면 removeMember 시 CANNOT_REMOVE_LAST_ADMIN 예외가 발생한다`() {
+    @DisplayName("마지막 admin을 제거하려 하면 removeMember 시 CANNOT_REMOVE_LAST_ADMIN 예외가 발생한다")
+    fun removeMember_throwsException_whenRemovingLastAdmin() {
         val accountId = 10L
         val teamId = 1L
         val targetMemberId = 2L
@@ -455,7 +477,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `다른 팀의 멤버를 제거하려 하면 removeMember 시 MEMBER_NOT_FOUND 예외가 발생한다`() {
+    @DisplayName("다른 팀의 멤버를 제거하려 하면 removeMember 시 MEMBER_NOT_FOUND 예외가 발생한다")
+    fun removeMember_throwsException_whenMemberInDifferentTeam() {
         val accountId = 10L
         val teamId = 1L
         val otherTeamId = 99L
@@ -477,7 +500,8 @@ class MemberServiceTest {
     }
 
     @Test
-    fun `정상 제거 시 removeMember는 delete를 호출한다`() {
+    @DisplayName("정상 제거 시 removeMember는 delete를 호출한다")
+    fun removeMember_deletesMember() {
         val accountId = 10L
         val teamId = 1L
         val targetMemberId = 2L

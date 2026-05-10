@@ -7,4 +7,6 @@ interface LinkRepository : JpaRepository<LinkJpaEntity, Long> {
     fun findAllByAccountIdIn(accountIds: Collection<Long>): List<LinkJpaEntity>
 
     fun findAllByAccountId(accountId: Long): List<LinkJpaEntity>
+
+    fun countByAccountId(accountId: Long): Long
 }
