@@ -2,6 +2,7 @@ package sharev.gathering.application.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
@@ -45,7 +46,8 @@ class GatheringParticipantServiceTest {
     // ───────────── create ─────────────
 
     @Test
-    fun `admin이 아니면 create 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다`() {
+    @DisplayName("admin이 아니면 create 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다")
+    fun create_throwsException_whenNotAdmin() {
         val command = createGatheringCommand()
 
         given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)).willReturn(false)
@@ -61,7 +63,8 @@ class GatheringParticipantServiceTest {
     }
 
     @Test
-    fun `admin이면 create 시 gathering을 저장하고 결과를 반환한다`() {
+    @DisplayName("admin이면 create 시 gathering을 저장하고 결과를 반환한다")
+    fun create_savesGathering_whenAdmin() {
         val command = createGatheringCommand()
         val savedGathering = gathering(id = UUID.randomUUID(), command = command)
 
@@ -78,7 +81,8 @@ class GatheringParticipantServiceTest {
     // ───────────── getGatherings ─────────────
 
     @Test
-    fun `팀 멤버가 아니면 getGatherings 시 NOT_TEAM_MEMBER 예외가 발생한다`() {
+    @DisplayName("팀 멤버가 아니면 getGatherings 시 NOT_TEAM_MEMBER 예외가 발생한다")
+    fun getGatherings_throwsException_whenNotTeamMember() {
         val accountId = 1L
         val teamId = 2L
 
@@ -95,7 +99,8 @@ class GatheringParticipantServiceTest {
     }
 
     @Test
-    fun `팀 멤버이면 getGatherings 시 행사 목록을 반환한다`() {
+    @DisplayName("팀 멤버이면 getGatherings 시 행사 목록을 반환한다")
+    fun getGatherings_returnsGatheringList_whenTeamMember() {
         val accountId = 1L
         val teamId = 2L
         val gatheringList = listOf(
@@ -116,7 +121,8 @@ class GatheringParticipantServiceTest {
     // ───────────── getGathering (getDetail) ─────────────
 
     @Test
-    fun `팀 멤버가 아니면 getGathering 시 NOT_TEAM_MEMBER 예외가 발생한다`() {
+    @DisplayName("팀 멤버가 아니면 getGathering 시 NOT_TEAM_MEMBER 예외가 발생한다")
+    fun getGathering_throwsException_whenNotTeamMember() {
         val accountId = 1L
         val teamId = 2L
         val gatheringId = UUID.randomUUID()
@@ -134,7 +140,8 @@ class GatheringParticipantServiceTest {
     }
 
     @Test
-    fun `gathering이 다른 팀에 속하면 getGathering 시 GATHERING_NOT_FOUND 예외가 발생한다`() {
+    @DisplayName("gathering이 다른 팀에 속하면 getGathering 시 GATHERING_NOT_FOUND 예외가 발생한다")
+    fun getGathering_throwsException_whenGatheringInDifferentTeam() {
         val accountId = 1L
         val teamId = 2L
         val otherTeamId = 99L
@@ -153,7 +160,8 @@ class GatheringParticipantServiceTest {
     }
 
     @Test
-    fun `정상 조회 시 getGathering은 gathering 상세 정보를 반환한다`() {
+    @DisplayName("정상 조회 시 getGathering은 gathering 상세 정보를 반환한다")
+    fun getGathering_returnsDetail() {
         val accountId = 1L
         val teamId = 2L
         val gatheringId = UUID.randomUUID()
@@ -171,7 +179,8 @@ class GatheringParticipantServiceTest {
     // ───────────── update ─────────────
 
     @Test
-    fun `admin이 아니면 update 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다`() {
+    @DisplayName("admin이 아니면 update 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다")
+    fun update_throwsException_whenNotAdmin() {
         val command = updateGatheringCommand()
 
         given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)).willReturn(false)
@@ -187,7 +196,8 @@ class GatheringParticipantServiceTest {
     }
 
     @Test
-    fun `admin이면 update 시 gathering을 수정하고 결과를 반환한다`() {
+    @DisplayName("admin이면 update 시 gathering을 수정하고 결과를 반환한다")
+    fun update_updatesGathering_whenAdmin() {
         val command = updateGatheringCommand()
         val updatedGathering = gathering(command.gatheringId, teamId = command.teamId, title = command.title)
         val captor = argumentCaptor<Gathering>()
@@ -219,7 +229,8 @@ class GatheringParticipantServiceTest {
     // ───────────── delete ─────────────
 
     @Test
-    fun `admin이 아니면 delete 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다`() {
+    @DisplayName("admin이 아니면 delete 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다")
+    fun delete_throwsException_whenNotAdmin() {
         val accountId = 1L
         val teamId = 2L
         val gatheringId = UUID.randomUUID()
@@ -237,7 +248,8 @@ class GatheringParticipantServiceTest {
     }
 
     @Test
-    fun `다른 팀의 행사를 삭제하려 하면 GATHERING_NOT_FOUND 예외가 발생하고 softDelete를 호출하지 않는다`() {
+    @DisplayName("다른 팀의 행사를 삭제하려 하면 GATHERING_NOT_FOUND 예외가 발생하고 softDelete를 호출하지 않는다")
+    fun delete_throwsException_whenGatheringInDifferentTeam() {
         val accountId = 1L
         val teamId = 2L
         val otherTeamId = 99L
@@ -258,7 +270,8 @@ class GatheringParticipantServiceTest {
     }
 
     @Test
-    fun `admin이면 delete 시 softDelete를 호출하고 gatheringId를 반환한다`() {
+    @DisplayName("admin이면 delete 시 softDelete를 호출하고 gatheringId를 반환한다")
+    fun delete_softDeletesGathering_whenAdmin() {
         val accountId = 1L
         val teamId = 2L
         val gatheringId = UUID.randomUUID()
@@ -276,7 +289,8 @@ class GatheringParticipantServiceTest {
     // ───────────── getLatestTemplate (getIntroduceTemplate) ─────────────
 
     @Test
-    fun `참가자가 아니면 getLatestTemplate 시 GATHERING_PARTICIPANT_NOT_FOUND 예외가 발생한다`() {
+    @DisplayName("참가자가 아니면 getLatestTemplate 시 GATHERING_PARTICIPANT_NOT_FOUND 예외가 발생한다")
+    fun getLatestTemplate_throwsException_whenNotParticipant() {
         val gatheringId = UUID.randomUUID()
         val accountId = 1L
 
@@ -293,7 +307,8 @@ class GatheringParticipantServiceTest {
     }
 
     @Test
-    fun `참가자이면 getLatestTemplate 시 최신 템플릿을 반환한다`() {
+    @DisplayName("참가자이면 getLatestTemplate 시 최신 템플릿을 반환한다")
+    fun getLatestTemplate_returnsLatestTemplate_whenParticipant() {
         val gatheringId = UUID.randomUUID()
         val accountId = 1L
         val template = introduceTemplate(gatheringId = gatheringId)
@@ -310,7 +325,8 @@ class GatheringParticipantServiceTest {
     // ───────────── isParticipant ─────────────
 
     @Test
-    fun `isParticipant는 참가 여부를 반환한다`() {
+    @DisplayName("isParticipant는 참가 여부를 반환한다")
+    fun isParticipant_returnsTrue_whenParticipant() {
         val accountId = 1L
         val gatheringId = UUID.randomUUID()
 
@@ -322,7 +338,8 @@ class GatheringParticipantServiceTest {
     }
 
     @Test
-    fun `isParticipant는 비참가 시 false를 반환한다`() {
+    @DisplayName("isParticipant는 비참가 시 false를 반환한다")
+    fun isParticipant_returnsFalse_whenNotParticipant() {
         val accountId = 1L
         val gatheringId = UUID.randomUUID()
 

@@ -1,6 +1,7 @@
 package sharev.connection.application.service
 
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
@@ -18,7 +19,8 @@ class ConnectionServiceTest {
     private val connectionService = ConnectionService(loadCardPort, saveConnectionPort)
 
     @Test
-    fun `같은 행사에 속하지 않은 카드는 연결할 수 없다`() {
+    @DisplayName("같은 행사에 속하지 않은 카드는 연결할 수 없다")
+    fun connect_throwsException_whenCardsInDifferentGatherings() {
         val gatheringId = UUID.randomUUID()
         val otherGatheringId = UUID.randomUUID()
         val myCard = card(id = 1L, gatheringId = gatheringId, accountId = 1L)

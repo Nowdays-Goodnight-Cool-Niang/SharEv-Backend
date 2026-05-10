@@ -1,6 +1,7 @@
 package sharev.account.application.service
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
@@ -33,7 +34,8 @@ class OAuthAccountServiceTest {
     // ───────────── login ─────────────
 
     @Test
-    fun `기존 OAuth 계정이면 login 시 기존 account를 반환한다`() {
+    @DisplayName("기존 OAuth 계정이면 login 시 기존 account를 반환한다")
+    fun login_returnsExistingAccount_whenOAuthAccountExists() {
         val accountId = 10L
         val provider = OAuthProvider.KAKAO
         val subjectIdentifier = "kakao-subject-001"
@@ -65,7 +67,8 @@ class OAuthAccountServiceTest {
     }
 
     @Test
-    fun `신규 사용자면 login 시 account를 저장하고 OAuthAccount를 저장한다`() {
+    @DisplayName("신규 사용자면 login 시 account를 저장하고 OAuthAccount를 저장한다")
+    fun login_savesAccountAndOAuthAccount_whenNewUser() {
         val provider = OAuthProvider.KAKAO
         val subjectIdentifier = "kakao-subject-new"
         val command = OAuthLoginCommand(

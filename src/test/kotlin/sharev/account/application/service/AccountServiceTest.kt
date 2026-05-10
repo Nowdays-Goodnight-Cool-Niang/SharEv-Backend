@@ -1,6 +1,7 @@
 package sharev.account.application.service
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
@@ -32,7 +33,8 @@ class AccountServiceTest {
     // ───────────── updateAccountInfo ─────────────
 
     @Test
-    fun `정상 수정 시 updateAccountInfo는 업데이트된 계정 정보를 반환한다`() {
+    @DisplayName("정상 수정 시 updateAccountInfo는 업데이트된 계정 정보를 반환한다")
+    fun updateAccountInfo_returnsUpdatedInfo() {
         val accountId = 10L
         val command = UpdateAccountInfoCommand(
             accountId = accountId,
@@ -54,7 +56,8 @@ class AccountServiceTest {
     }
 
     @Test
-    fun `updateAccountInfo는 링크 변경 이벤트를 발행한다`() {
+    @DisplayName("updateAccountInfo는 링크 변경 이벤트를 발행한다")
+    fun updateAccountInfo_publishesLinkUpdatedEvent() {
         val accountId = 10L
         val addLinkUrls = setOf("https://link1.com", "https://link2.com")
         val deleteLinkIds = setOf(3L, 4L)
@@ -82,7 +85,8 @@ class AccountServiceTest {
     // ───────────── delete ─────────────
 
     @Test
-    fun `피드백이 blank이면 delete 시 이벤트를 발행하지 않는다`() {
+    @DisplayName("피드백이 blank이면 delete 시 이벤트를 발행하지 않는다")
+    fun delete_doesNotPublishEvent_whenFeedbackIsBlank() {
         val accountId = 10L
         val command = DeleteAccountCommand(accountId = accountId, feedback = "  ")
 
@@ -94,7 +98,8 @@ class AccountServiceTest {
     }
 
     @Test
-    fun `피드백이 non-blank이면 delete 시 이벤트를 발행한다`() {
+    @DisplayName("피드백이 non-blank이면 delete 시 이벤트를 발행한다")
+    fun delete_publishesFeedbackEvent_whenFeedbackIsNonBlank() {
         val accountId = 10L
         val feedback = "서비스가 불편했습니다"
         val command = DeleteAccountCommand(accountId = accountId, feedback = feedback)
@@ -111,7 +116,8 @@ class AccountServiceTest {
     }
 
     @Test
-    fun `정상 삭제 시 delete는 deleteAccountPort를 호출하고 accountId를 반환한다`() {
+    @DisplayName("정상 삭제 시 delete는 deleteAccountPort를 호출하고 accountId를 반환한다")
+    fun delete_callsDeletePortAndReturnsAccountId() {
         val accountId = 10L
         val command = DeleteAccountCommand(accountId = accountId, feedback = "")
 

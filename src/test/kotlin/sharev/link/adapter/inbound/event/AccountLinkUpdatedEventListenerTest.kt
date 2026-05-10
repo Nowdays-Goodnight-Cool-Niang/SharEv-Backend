@@ -1,5 +1,6 @@
 package sharev.link.adapter.inbound.event
 
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.then
 import org.mockito.Mockito.mock
@@ -17,7 +18,8 @@ class AccountLinkUpdatedEventListenerTest {
     private val listener = AccountLinkUpdatedEventListener(saveLinkPort, deleteLinkPort)
 
     @Test
-    fun `추가 링크가 있으면 saveAll을 호출한다`() {
+    @DisplayName("추가 링크가 있으면 saveAll을 호출한다")
+    fun handle_callsSaveAll_whenAddLinksExist() {
         val accountId = 10L
         val addLinkUrls = setOf("https://link1.com", "https://link2.com")
         val event = AccountLinkUpdatedEvent(
@@ -33,7 +35,8 @@ class AccountLinkUpdatedEventListenerTest {
     }
 
     @Test
-    fun `삭제 링크가 있으면 deleteAllByIds를 호출한다`() {
+    @DisplayName("삭제 링크가 있으면 deleteAllByIds를 호출한다")
+    fun handle_callsDeleteAllByIds_whenDeleteLinksExist() {
         val accountId = 10L
         val deleteLinkIds = setOf(1L, 2L)
         val event = AccountLinkUpdatedEvent(
@@ -49,7 +52,8 @@ class AccountLinkUpdatedEventListenerTest {
     }
 
     @Test
-    fun `추가와 삭제 링크가 모두 있으면 saveAll과 deleteAllByIds를 모두 호출한다`() {
+    @DisplayName("추가와 삭제 링크가 모두 있으면 saveAll과 deleteAllByIds를 모두 호출한다")
+    fun handle_callsBothSaveAndDelete_whenBothExist() {
         val accountId = 10L
         val addLinkUrls = setOf("https://new.com")
         val deleteLinkIds = setOf(5L)
@@ -66,7 +70,8 @@ class AccountLinkUpdatedEventListenerTest {
     }
 
     @Test
-    fun `추가와 삭제 링크가 모두 비어있으면 아무 포트도 호출하지 않는다`() {
+    @DisplayName("추가와 삭제 링크가 모두 비어있으면 아무 포트도 호출하지 않는다")
+    fun handle_callsNoPorts_whenBothEmpty() {
         val event = AccountLinkUpdatedEvent(
             accountId = 10L,
             addLinkUrls = emptySet(),
