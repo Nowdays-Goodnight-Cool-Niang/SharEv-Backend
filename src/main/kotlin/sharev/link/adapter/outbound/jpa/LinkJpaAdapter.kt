@@ -29,6 +29,14 @@ class LinkJpaAdapter(
             .toDomainModel()
     }
 
+    override fun saveAll(accountId: Long, urls: Set<String>) {
+        val account = accountRepository.findByIdOrNull(accountId)
+            ?: throw AccountException(AccountExceptionCode.ACCOUNT_NOT_FOUND)
+
+        val entities = urls.map { LinkJpaEntity(account = account, linkUrl = it) }
+        linkRepository.saveAll(entities)
+    }
+
     override fun load(linkId: Long): Link {
         return linkRepository.findByIdOrNull(linkId)
             ?.toDomainModel()
@@ -47,5 +55,17 @@ class LinkJpaAdapter(
 
     override fun delete(linkId: Long) {
         linkRepository.deleteById(linkId)
+    }
+
+    override fun deleteAllByIds(accountId: Long, linkIds: Set<Long>) {
+        val links = linkRepository.findAllById(linkIds)
+
+        val hasOwnershipMismatch = links.any { it.account.id != accountId }
+
+        if (hasOwnershipMismatch) {
+            throw LinkException(LinkExceptionCode.LINK_OWNERSHIP_MISMATCH)
+        }
+
+        linkRepository.deleteAllInBatch(links)
     }
 }
