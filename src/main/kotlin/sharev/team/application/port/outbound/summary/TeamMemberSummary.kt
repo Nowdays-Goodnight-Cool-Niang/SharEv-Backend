@@ -1,4 +1,4 @@
-package sharev.team.application.port.outbound.summery
+package sharev.team.application.port.outbound.summary
 
 data class TeamMemberSummary(
     val name: String,

@@ -9,8 +9,8 @@ import sharev.team.adapter.outbound.jpa.repository.TeamRepository
 import sharev.team.application.port.outbound.LoadTeamPort
 import sharev.team.application.port.outbound.QueryTeamPort
 import sharev.team.application.port.outbound.SaveTeamPort
-import sharev.team.application.port.outbound.summery.TeamMemberSummary
-import sharev.team.application.port.outbound.summery.TeamSummary
+import sharev.team.application.port.outbound.summary.TeamMemberSummary
+import sharev.team.application.port.outbound.summary.TeamSummary
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.Team

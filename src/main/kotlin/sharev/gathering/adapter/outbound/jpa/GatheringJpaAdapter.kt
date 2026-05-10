@@ -16,7 +16,7 @@ import sharev.gathering.domain.model.IntroduceTemplate
 import sharev.gathering.domain.model.IntroduceTemplateContent
 import sharev.team.adapter.outbound.jpa.repository.TeamRepository
 import sharev.team.application.port.outbound.LoadGatheringSummaryPort
-import sharev.team.application.port.outbound.summery.GatheringSummary
+import sharev.team.application.port.outbound.summary.GatheringSummary
 import sharev.team.domain.exception.TeamException
 import java.util.*
 import sharev.gathering.domain.exception.GatheringExceptionCode as GatheringCode

@@ -1,4 +1,4 @@
-package sharev.team.application.port.outbound.summery
+package sharev.team.application.port.outbound.summary
 
 import java.time.LocalDateTime
 
