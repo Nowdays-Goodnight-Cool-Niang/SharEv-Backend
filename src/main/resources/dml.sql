@@ -3,44 +3,44 @@
 -- ============================================
 INSERT INTO "accounts" ("account_id", "role", "name", "email", "created_at", "updated_at")
     OVERRIDING SYSTEM VALUE
-VALUES (1, 'ADMIN'::role_type, '관리자', 'admin@example.com', NOW(), NOW()),
-       (2, 'USER'::role_type, '홍길동', 'hong@example.com', NOW(), NOW()),
-       (3, 'USER'::role_type, '김철수', 'kim@example.com', NOW(), NOW()),
-       (4, 'USER'::role_type, '이영희', 'lee@example.com', NOW(), NOW()),
-       (5, 'USER'::role_type, '박민수', 'park@example.com', NOW(), NOW());
+VALUES (1, 'ADMIN', '관리자', 'admin@example.com', NOW(), NOW()),
+       (2, 'USER', '홍길동', 'hong@example.com', NOW(), NOW()),
+       (3, 'USER', '김철수', 'kim@example.com', NOW(), NOW()),
+       (4, 'USER', '이영희', 'lee@example.com', NOW(), NOW()),
+       (5, 'USER', '박민수', 'park@example.com', NOW(), NOW());
 
 -- ============================================
 -- Teams (독립적 테이블)
 -- ============================================
 INSERT INTO "teams" ("team_id", "certification", "title", "content", "activate_flag", "created_at", "updated_at")
     OVERRIDING SYSTEM VALUE
-VALUES (1, 'CERTIFICATED'::team_certification, '개발팀', '백엔드 개발을 담당하는 팀입니다.', true, NOW(), NOW()),
-       (2, 'NONE'::team_certification, '디자인팀', 'UI/UX 디자인을 담당하는 팀입니다.', true, NOW(), NOW()),
-       (3, 'CERTIFICATED'::team_certification, '기획팀', '서비스 기획을 담당하는 팀입니다.', true, NOW(), NOW()),
-       (4, 'NONE'::team_certification, '마케팅팀', '마케팅을 담당하는 팀입니다.', false, NOW(), NOW());
+VALUES (1, 'CERTIFICATED', '개발팀', '백엔드 개발을 담당하는 팀입니다.', true, NOW(), NOW()),
+       (2, 'NONE', '디자인팀', 'UI/UX 디자인을 담당하는 팀입니다.', true, NOW(), NOW()),
+       (3, 'CERTIFICATED', '기획팀', '서비스 기획을 담당하는 팀입니다.', true, NOW(), NOW()),
+       (4, 'NONE', '마케팅팀', '마케팅을 담당하는 팀입니다.', false, NOW(), NOW());
 
 -- ============================================
 -- OAuth Accounts (accounts 참조)
 -- ============================================
 INSERT INTO "oauth_accounts" ("provider", "subject_identifier", "account_id", "created_at", "updated_at")
-VALUES ('KAKAO'::oauth_provider, '123456789', 1, NOW(), NOW()),
-       ('KAKAO'::oauth_provider, '987654321', 2, NOW(), NOW()),
-       ('GOOGLE'::oauth_provider, '111222333', 3, NOW(), NOW()),
-       ('KAKAO'::oauth_provider, '444555666', 4, NOW(), NOW()),
-       ('GOOGLE'::oauth_provider, '777888999', 5, NOW(), NOW());
+VALUES ('KAKAO', '123456789', 1, NOW(), NOW()),
+       ('KAKAO', '987654321', 2, NOW(), NOW()),
+       ('GOOGLE', '111222333', 3, NOW(), NOW()),
+       ('KAKAO', '444555666', 4, NOW(), NOW()),
+       ('GOOGLE', '777888999', 5, NOW(), NOW());
 
 -- ============================================
 -- Members (teams, accounts 참조)
 -- ============================================
 INSERT INTO "members" ("member_id", "team_id", "account_id", "status", "role", "created_at", "updated_at")
     OVERRIDING SYSTEM VALUE
-VALUES (1, 1, 1, 'ACTIVATE'::member_status, 'ADMIN'::member_role, NOW(), NOW()),
-       (2, 1, 2, 'ACTIVATE'::member_status, 'COMMON'::member_role, NOW(), NOW()),
-       (3, 1, 3, 'ACTIVATE'::member_status, 'COMMON'::member_role, NOW(), NOW()),
-       (4, 2, 2, 'ACTIVATE'::member_status, 'ADMIN'::member_role, NOW(), NOW()),
-       (5, 2, 4, 'INVITE'::member_status, 'COMMON'::member_role, NOW(), NOW()),
-       (6, 3, 1, 'ACTIVATE'::member_status, 'ADMIN'::member_role, NOW(), NOW()),
-       (7, 3, 5, 'ACTIVATE'::member_status, 'COMMON'::member_role, NOW(), NOW());
+VALUES (1, 1, 1, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
+       (2, 1, 2, 'ACTIVATE', 'COMMON', NOW(), NOW()),
+       (3, 1, 3, 'ACTIVATE', 'COMMON', NOW(), NOW()),
+       (4, 2, 2, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
+       (5, 2, 4, 'INVITE', 'COMMON', NOW(), NOW()),
+       (6, 3, 1, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
+       (7, 3, 5, 'ACTIVATE', 'COMMON', NOW(), NOW());
 
 -- ============================================
 -- Gatherings (teams 참조)
@@ -62,7 +62,7 @@ INSERT INTO "gatherings" ("gathering_id",
                           "created_at",
                           "updated_at")
 VALUES ('a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
-        'PUBLIC'::visible_type,
+        'PUBLIC',
         1,
         'Spring Boot 워크샵',
         'Spring Boot를 활용한 백엔드 개발 워크샵입니다. 실무 경험을 공유합니다.',
@@ -78,7 +78,7 @@ VALUES ('a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         NOW(),
         NOW()),
        ('45b2e9d2-5a21-4d1a-8c9e-5f8e5b4e3f17'::UUID,
-        'PRIVATE'::visible_type,
+        'PRIVATE',
         1,
         '팀 내부 미팅',
         '개발팀 내부 미팅입니다.',
@@ -94,7 +94,7 @@ VALUES ('a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         NOW(),
         NOW()),
        ('d8f1e6c3-9a7b-4d4f-b6e1-5c8e3b7d2e0a'::UUID,
-        'PUBLIC'::visible_type,
+        'PUBLIC',
         2,
         'UI/UX 디자인 컨퍼런스',
         '최신 UI/UX 디자인 트렌드를 공유하는 컨퍼런스입니다.',
@@ -110,7 +110,7 @@ VALUES ('a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         NOW(),
         NOW()),
        ('e9f2e7c4-0b8c-5e5f-c7f2-6d9f4e8c3f1b'::UUID,
-        'PUBLIC'::visible_type,
+        'PUBLIC',
         3,
         '프로젝트 기획 세미나',
         '효과적인 프로젝트 기획 방법론을 다루는 세미나입니다.',
@@ -282,28 +282,28 @@ INSERT INTO "connections" ("connection_id",
 VALUES (1,
         1,
         2,
-        'REGISTRATION'::card_connection_status,
+        'REGISTRATION',
         '좋은 만남이었습니다!',
         NOW(),
         NOW()),
        (2,
         1,
         3,
-        'STAR'::card_connection_status,
+        'STAR',
         '나중에 연락하겠습니다.',
         NOW(),
         NOW()),
        (3,
         2,
         1,
-        'REGISTRATION'::card_connection_status,
+        'REGISTRATION',
         NULL,
         NOW(),
         NOW()),
        (4,
         3,
         4,
-        'STAR'::card_connection_status,
+        'STAR',
         '디자인 관련 협업 가능합니다.',
         NOW(),
         NOW());
@@ -339,7 +339,8 @@ VALUES (1, '서비스가 매우 유용합니다. 계속 발전시켜 주세요!'
 SELECT setval(pg_get_serial_sequence('accounts', 'account_id'), (SELECT MAX(account_id) FROM accounts));
 SELECT setval(pg_get_serial_sequence('teams', 'team_id'), (SELECT MAX(team_id) FROM teams));
 SELECT setval(pg_get_serial_sequence('members', 'member_id'), (SELECT MAX(member_id) FROM members));
-SELECT setval(pg_get_serial_sequence('introduce_templates', 'introduce_template_id'), (SELECT MAX(introduce_template_id) FROM introduce_templates));
+SELECT setval(pg_get_serial_sequence('introduce_templates', 'introduce_template_id'),
+              (SELECT MAX(introduce_template_id) FROM introduce_templates));
 SELECT setval(pg_get_serial_sequence('cards', 'card_id'), (SELECT MAX(card_id) FROM cards));
 SELECT setval(pg_get_serial_sequence('connections', 'connection_id'), (SELECT MAX(connection_id) FROM connections));
 SELECT setval(pg_get_serial_sequence('feedbacks', 'feedback_id'), (SELECT MAX(feedback_id) FROM feedbacks));
