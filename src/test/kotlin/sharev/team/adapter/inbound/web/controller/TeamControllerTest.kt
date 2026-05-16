@@ -68,16 +68,16 @@ class TeamControllerTest : ControllerTestSupport() {
         val teams = listOf(
             TeamInfoResult(
                 1L,
-                "개발팀",
-                "개발 관련 팀",
+                "요즘잘자쿨냥이",
+                "진짜 잘자",
                 LocalDateTime.of(2025, 1, 1, 10, 0),
                 MemberRole.ADMIN.name,
                 5,
             ),
             TeamInfoResult(
                 2L,
-                "기획팀",
-                "기획 관련 팀",
+                "아산행사",
+                "아산에서 열리는 행사 관리팀",
                 LocalDateTime.of(2025, 1, 2, 10, 0),
                 MemberRole.COMMON.name,
                 3,
@@ -135,8 +135,8 @@ class TeamControllerTest : ControllerTestSupport() {
     fun getTeamDetail() {
         val response = TeamDetailResult(
             1L,
-            "개발팀",
-            "개발 관련 팀",
+            "요즘잘자쿨냥이",
+            "진짜 잘자",
             LocalDateTime.of(2025, 1, 1, 10, 0),
             2,
             listOf(
@@ -147,7 +147,7 @@ class TeamControllerTest : ControllerTestSupport() {
                     "서울 강남구",
                 )
             ),
-            listOf(TeamMemberInfoResult("김주호", "admin@test.com")),
+            listOf(TeamMemberInfoResult("김주호", "admin@test.com", MemberRole.ADMIN)),
         )
 
         given(getTeamDetailUseCase.getTeamDetail(1L, 1L)).willReturn(response)
@@ -180,6 +180,7 @@ class TeamControllerTest : ControllerTestSupport() {
                                 fieldWithPath("members").type("ARRAY").description("멤버 목록"),
                                 fieldWithPath("members[].name").type(STRING).description("멤버 이름"),
                                 fieldWithPath("members[].email").type(STRING).description("멤버 이메일"),
+                                fieldWithPath("members[].role").type(STRING).description("멤버 권한"),
                             )
                             .responseSchema(schema(TeamDetailResponse::class.java.simpleName))
                             .build()

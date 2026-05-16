@@ -22,6 +22,7 @@ import sharev.team.application.port.outbound.summary.TeamSummary
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.Team
+import sharev.member.domain.model.MemberRole
 import sharev.team.domain.model.TeamCertification
 import java.time.LocalDateTime
 
@@ -112,9 +113,9 @@ class TeamServiceTest {
             gatheringSummary(title = "행사2"),
         )
         val memberSummaries = listOf(
-            teamMemberSummary(name = "홍길동", email = "hong@test.com"),
-            teamMemberSummary(name = "김철수", email = "kim@test.com"),
-            teamMemberSummary(name = "이영희", email = "lee@test.com"),
+            teamMemberSummary(name = "홍길동", email = "hong@test.com", role = MemberRole.ADMIN),
+            teamMemberSummary(name = "김철수", email = "kim@test.com", role = MemberRole.COMMON),
+            teamMemberSummary(name = "이영희", email = "lee@test.com", role = MemberRole.COMMON),
         )
 
         given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(true)
@@ -131,6 +132,9 @@ class TeamServiceTest {
         assertThat(result.gatherings[0].title).isEqualTo("행사1")
         assertThat(result.members).hasSize(3)
         assertThat(result.members[0].name).isEqualTo("홍길동")
+        assertThat(result.members[0].role).isEqualTo(MemberRole.ADMIN)
+        assertThat(result.members[1].role).isEqualTo(MemberRole.COMMON)
+        assertThat(result.members[2].role).isEqualTo(MemberRole.COMMON)
     }
 
     // ───────────── updateTeamInfo ─────────────
@@ -206,8 +210,10 @@ class TeamServiceTest {
     private fun teamMemberSummary(
         name: String,
         email: String,
+        role: MemberRole = MemberRole.COMMON,
     ) = TeamMemberSummary(
         name = name,
         email = email,
+        role = role,
     )
 }

@@ -1,5 +1,6 @@
 package sharev.team.application.port.inbound.result
 
+import sharev.member.domain.model.MemberRole
 import java.time.LocalDateTime
 
 data class TeamDetailResult(
@@ -22,4 +23,5 @@ data class GatheringInfoResult(
 data class TeamMemberInfoResult(
     val name: String,
     val email: String,
+    val role: MemberRole,
 )

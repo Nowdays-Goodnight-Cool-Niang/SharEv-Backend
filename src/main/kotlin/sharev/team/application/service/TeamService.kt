@@ -83,7 +83,7 @@ class TeamService(
                 GatheringInfoResult(it.title, it.startAt, it.endAt, it.place)
             },
             members = members.map {
-                TeamMemberInfoResult(it.name, it.email)
+                TeamMemberInfoResult(it.name, it.email, it.role)
             },
         )
     }

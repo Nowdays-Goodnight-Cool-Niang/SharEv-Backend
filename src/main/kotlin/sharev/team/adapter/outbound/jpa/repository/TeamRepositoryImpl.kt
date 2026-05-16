@@ -2,6 +2,7 @@ package sharev.team.adapter.outbound.jpa.repository
 
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Repository
+import sharev.member.domain.model.MemberRole
 import sharev.team.application.port.outbound.summary.TeamMemberSummary
 import sharev.team.application.port.outbound.summary.TeamSummary
 import java.time.LocalDateTime
@@ -40,7 +41,7 @@ class TeamRepositoryImpl(
     override fun findMyTeamMembers(teamId: Long): List<TeamMemberSummary> {
         val rows = entityManager.createQuery(
             """
-            select m.account.name, m.account.email
+            select m.account.name, m.account.email, m.role
             from MemberJpaEntity m
             where m.team.id = :teamId
             """.trimIndent(),
@@ -53,6 +54,7 @@ class TeamRepositoryImpl(
             TeamMemberSummary(
                 name = row[0] as String,
                 email = row[1] as String,
+                role = row[2] as MemberRole,
             )
         }
     }
