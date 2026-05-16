@@ -22,4 +22,5 @@ data class GatheringInfoResponse(
 data class TeamMemberInfoResponse(
     val name: String,
     val email: String,
+    val role: String,
 )
