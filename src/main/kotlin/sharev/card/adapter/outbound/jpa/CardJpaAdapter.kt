@@ -16,9 +16,12 @@ import sharev.card.application.port.outbound.SaveCardPort
 import sharev.card.application.port.outbound.result.TempCard
 import sharev.card.domain.exception.CardException
 import sharev.card.domain.model.Card
+import sharev.gathering.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.gathering.adapter.outbound.jpa.repository.GatheringRepository
 import sharev.gathering.application.port.outbound.CheckGatheringParticipantPort
+import sharev.gathering.application.port.outbound.LoadParticipatedGatheringsPort
 import sharev.gathering.domain.exception.GatheringException
+import sharev.gathering.domain.model.Gathering
 import java.time.LocalDateTime
 import java.util.*
 import sharev.account.domain.exception.AccountExceptionCode as AccountCode
@@ -30,7 +33,11 @@ class CardJpaAdapter(
     private val cardRepository: CardRepository,
     private val gatheringRepository: GatheringRepository,
     private val accountRepository: AccountRepository,
-) : SaveCardPort, LoadCardPort, QueryCardPort, CheckGatheringParticipantPort {
+) : SaveCardPort,
+    LoadCardPort,
+    QueryCardPort,
+    CheckGatheringParticipantPort,
+    LoadParticipatedGatheringsPort {
 
     override fun join(gatheringId: UUID, accountId: Long, pinNumber: Int): Card {
         val gathering = gatheringRepository.findByIdOrNull(gatheringId)
@@ -96,5 +103,11 @@ class CardJpaAdapter(
         pageable: Pageable,
     ): Page<TempCard> {
         return cardRepository.searchTempCards(gatheringId, myCardId, snapshotTime, pageable)
+    }
+
+    override fun loadParticipatedGatherings(accountId: Long): List<Gathering> {
+        return cardRepository.findByAccountId(accountId)
+            .map { it.gathering }
+            .map { it.toDomainModel() }
     }
 }
