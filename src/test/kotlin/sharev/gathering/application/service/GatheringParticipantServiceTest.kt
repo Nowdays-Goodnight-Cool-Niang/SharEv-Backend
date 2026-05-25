@@ -15,6 +15,7 @@ import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.outbound.CheckGatheringParticipantPort
 import sharev.gathering.application.port.outbound.LoadGatheringPort
 import sharev.gathering.application.port.outbound.LoadIntroduceTemplatePort
+import sharev.gathering.application.port.outbound.LoadParticipatedGatheringsPort
 import sharev.gathering.application.port.outbound.SaveGatheringPort
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.exception.GatheringExceptionCode
@@ -26,7 +27,7 @@ import sharev.team.application.port.outbound.CheckTeamMemberPort
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class GatheringParticipantServiceTest {
     private val checkGatheringParticipantPort = mock(CheckGatheringParticipantPort::class.java)
@@ -34,13 +35,15 @@ class GatheringParticipantServiceTest {
     private val loadGatheringPort = mock(LoadGatheringPort::class.java)
     private val loadIntroduceTemplatePort = mock(LoadIntroduceTemplatePort::class.java)
     private val checkTeamMemberPort = mock(CheckTeamMemberPort::class.java)
+    private val loadParticipatedGatheringsPort = mock(LoadParticipatedGatheringsPort::class.java)
 
-    private val gatheringParticipantService = GatheringParticipantService(
+    private val gatheringParticipantService = GatheringService(
         checkGatheringParticipantPort,
         saveGatheringPort,
         loadGatheringPort,
         loadIntroduceTemplatePort,
         checkTeamMemberPort,
+        loadParticipatedGatheringsPort,
     )
 
     // ───────────── create ─────────────
@@ -78,17 +81,78 @@ class GatheringParticipantServiceTest {
         then(saveGatheringPort).should().save(gathering(Gathering.NEW_ID, command))
     }
 
-    // ───────────── getGatherings ─────────────
+    // ───────────── getParticipatedGatherings ─────────────
+
+    @Test
+    @DisplayName("getParticipatedGatherings는 참여 중인 행사 목록을 반환한다")
+    fun getParticipatedGatherings_returnsGatheringList() {
+        val accountId = 1L
+        val gatheringList = listOf(
+            gathering(id = UUID.randomUUID(), teamId = 1L, title = "참여 행사1"),
+            gathering(id = UUID.randomUUID(), teamId = 2L, title = "참여 행사2"),
+        )
+
+        given(loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId)).willReturn(gatheringList)
+
+        val result = gatheringParticipantService.getParticipatedGatherings(accountId)
+
+        assertThat(result).hasSize(2)
+        assertThat(result[0].title).isEqualTo("참여 행사1")
+        assertThat(result[1].title).isEqualTo("참여 행사2")
+    }
+
+    @Test
+    @DisplayName("참여 행사가 없으면 빈 목록을 반환한다")
+    fun getParticipatedGatherings_returnsEmptyList() {
+        val accountId = 1L
+
+        given(loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId)).willReturn(emptyList())
+
+        val result = gatheringParticipantService.getParticipatedGatherings(accountId)
+
+        assertThat(result).isEmpty()
+    }
+
+    // ───────────── getGatherings (all public) ─────────────
+
+    @Test
+    @DisplayName("getGatherings는 전체 행사 목록을 반환한다")
+    fun getGatherings_returnsAllGatherings() {
+        val gatheringList = listOf(
+            gathering(id = UUID.randomUUID(), teamId = 1L, title = "행사1"),
+            gathering(id = UUID.randomUUID(), teamId = 2L, title = "행사2"),
+        )
+
+        given(loadGatheringPort.loadAll()).willReturn(gatheringList)
+
+        val result = gatheringParticipantService.getGatherings()
+
+        assertThat(result).hasSize(2)
+        assertThat(result[0].title).isEqualTo("행사1")
+        assertThat(result[1].title).isEqualTo("행사2")
+    }
+
+    @Test
+    @DisplayName("행사가 없으면 빈 목록을 반환한다")
+    fun getGatherings_returnsEmptyList() {
+        given(loadGatheringPort.loadAll()).willReturn(emptyList())
+
+        val result = gatheringParticipantService.getGatherings()
+
+        assertThat(result).isEmpty()
+    }
+
+    // ───────────── getTeamGatherings ─────────────
 
     @Test
     @DisplayName("팀 멤버가 아니면 getGatherings 시 NOT_TEAM_MEMBER 예외가 발생한다")
-    fun getGatherings_throwsException_whenNotTeamMember() {
+    fun getTeamGatherings_throwsException_whenNotTeamMember() {
         val accountId = 1L
         val teamId = 2L
 
         given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(false)
 
-        assertThatThrownBy { gatheringParticipantService.getGatherings(accountId, teamId) }
+        assertThatThrownBy { gatheringParticipantService.getTeamGatherings(accountId, teamId) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
@@ -100,7 +164,7 @@ class GatheringParticipantServiceTest {
 
     @Test
     @DisplayName("팀 멤버이면 getGatherings 시 행사 목록을 반환한다")
-    fun getGatherings_returnsGatheringList_whenTeamMember() {
+    fun getTeamGatherings_returnsGatheringList_whenTeamMember() {
         val accountId = 1L
         val teamId = 2L
         val gatheringList = listOf(
@@ -111,7 +175,7 @@ class GatheringParticipantServiceTest {
         given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(true)
         given(loadGatheringPort.loadAllByTeam(teamId)).willReturn(gatheringList)
 
-        val result = gatheringParticipantService.getGatherings(accountId, teamId)
+        val result = gatheringParticipantService.getTeamGatherings(accountId, teamId)
 
         assertThat(result).hasSize(2)
         assertThat(result[0].title).isEqualTo("행사1")
@@ -129,7 +193,7 @@ class GatheringParticipantServiceTest {
 
         given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(false)
 
-        assertThatThrownBy { gatheringParticipantService.getGathering(accountId, teamId, gatheringId) }
+        assertThatThrownBy { gatheringParticipantService.getTeamGathering(accountId, teamId, gatheringId) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
@@ -151,7 +215,7 @@ class GatheringParticipantServiceTest {
         given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(true)
         given(loadGatheringPort.load(gatheringId)).willReturn(gatheringInOtherTeam)
 
-        assertThatThrownBy { gatheringParticipantService.getGathering(accountId, teamId, gatheringId) }
+        assertThatThrownBy { gatheringParticipantService.getTeamGathering(accountId, teamId, gatheringId) }
             .isInstanceOf(GatheringException::class.java)
             .satisfies({ ex ->
                 val gatheringEx = ex as GatheringException
@@ -170,7 +234,7 @@ class GatheringParticipantServiceTest {
         given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(true)
         given(loadGatheringPort.load(gatheringId)).willReturn(existingGathering)
 
-        val result = gatheringParticipantService.getGathering(accountId, teamId, gatheringId)
+        val result = gatheringParticipantService.getTeamGathering(accountId, teamId, gatheringId)
 
         assertThat(result.id).isEqualTo(gatheringId)
         assertThat(result.title).isEqualTo(existingGathering.title)

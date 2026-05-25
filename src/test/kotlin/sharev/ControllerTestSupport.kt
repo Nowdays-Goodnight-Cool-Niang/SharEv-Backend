@@ -80,7 +80,7 @@ abstract class ControllerTestSupport {
     protected lateinit var createGatheringUseCase: CreateGatheringUseCase
 
     @MockitoBean
-    protected lateinit var getGatheringUseCase: GetGatheringUseCase
+    protected lateinit var getTeamGatheringUseCase: GetTeamGatheringUseCase
 
     @MockitoBean
     protected lateinit var updateGatheringUseCase: UpdateGatheringUseCase
@@ -93,6 +93,12 @@ abstract class ControllerTestSupport {
 
     @MockitoBean
     protected lateinit var checkGatheringParticipantUseCase: CheckGatheringParticipantUseCase
+
+    @MockitoBean
+    protected lateinit var getParticipatedGatheringsUseCase: GetParticipatedGatheringsUseCase
+
+    @MockitoBean
+    protected lateinit var getGatheringsUseCase: GetGatheringsUseCase
 
     @MockitoBean
     protected lateinit var getLinksUseCase: GetLinksUseCase
