@@ -27,7 +27,10 @@ class GatheringJpaAdapter(
     private val gatheringRepository: GatheringRepository,
     private val introduceTemplateRepository: IntroduceTemplateRepository,
     private val teamRepository: TeamRepository,
-) : SaveGatheringPort, LoadGatheringPort, LoadIntroduceTemplatePort, LoadGatheringSummaryPort {
+) : SaveGatheringPort,
+    LoadGatheringPort,
+    LoadIntroduceTemplatePort,
+    LoadGatheringSummaryPort {
 
     override fun save(gathering: Gathering): Gathering {
         val team = teamRepository.findByIdOrNull(gathering.teamId)
@@ -92,6 +95,11 @@ class GatheringJpaAdapter(
         return gatheringRepository.findByIdOrNull(gatheringId)
             ?.toDomainModel()
             ?: throw GatheringException(GatheringCode.GATHERING_NOT_FOUND)
+    }
+
+    override fun loadAll(): List<Gathering> {
+        return gatheringRepository.findAll()
+            .map { it.toDomainModel() }
     }
 
     override fun loadAllByTeam(teamId: Long): List<Gathering> {
