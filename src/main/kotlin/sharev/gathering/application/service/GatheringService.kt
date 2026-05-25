@@ -9,10 +9,7 @@ import sharev.gathering.application.port.inbound.mapper.toDetailResult
 import sharev.gathering.application.port.inbound.mapper.toResult
 import sharev.gathering.application.port.inbound.result.*
 import sharev.gathering.application.port.inbound.usecase.*
-import sharev.gathering.application.port.outbound.CheckGatheringParticipantPort
-import sharev.gathering.application.port.outbound.LoadGatheringPort
-import sharev.gathering.application.port.outbound.LoadIntroduceTemplatePort
-import sharev.gathering.application.port.outbound.SaveGatheringPort
+import sharev.gathering.application.port.outbound.*
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.exception.GatheringExceptionCode
 import sharev.gathering.domain.model.Gathering
@@ -23,18 +20,21 @@ import java.util.*
 
 @Service
 @Transactional(readOnly = true)
-class GatheringParticipantService(
+class GatheringService(
     private val checkGatheringParticipantPort: CheckGatheringParticipantPort,
     private val saveGatheringPort: SaveGatheringPort,
     private val loadGatheringPort: LoadGatheringPort,
     private val loadIntroduceTemplatePort: LoadIntroduceTemplatePort,
     private val checkTeamMemberPort: CheckTeamMemberPort,
+    private val loadParticipatedGatheringsPort: LoadParticipatedGatheringsPort,
 ) : CheckGatheringParticipantUseCase,
     CreateGatheringUseCase,
-    GetGatheringUseCase,
+    GetTeamGatheringUseCase,
     UpdateGatheringUseCase,
     DeleteGatheringUseCase,
-    GetIntroduceTemplateUseCase {
+    GetIntroduceTemplateUseCase,
+    GetParticipatedGatheringsUseCase,
+    GetGatheringsUseCase {
 
     override fun isParticipant(accountId: Long, gatheringId: UUID): ParticipantResult {
         return ParticipantResult(checkGatheringParticipantPort.isParticipant(gatheringId, accountId))
@@ -63,14 +63,24 @@ class GatheringParticipantService(
         ).toCreateGatheringResult()
     }
 
-    override fun getGatherings(accountId: Long, teamId: Long): List<GatheringDetailResult> {
-        validateTeamMember(accountId, teamId) // TODO: 단순 조회에서 이 로직이 필요할 것 같지는 않음, 공개되지 않은 행사 조회에 영향을 끼쳐야 함
+    override fun getParticipatedGatherings(accountId: Long): List<GatheringDetailResult> {
+        return loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId)
+            .map { it.toDetailResult() }
+    }
+
+    override fun getGatherings(): List<GatheringDetailResult> {
+        return loadGatheringPort.loadAll()
+            .map { it.toDetailResult() }
+    }
+
+    override fun getTeamGatherings(accountId: Long, teamId: Long): List<GatheringDetailResult> {
+        validateTeamMember(accountId, teamId)
 
         return loadGatheringPort.loadAllByTeam(teamId)
             .map { it.toDetailResult() }
     }
 
-    override fun getGathering(accountId: Long, teamId: Long, gatheringId: UUID): GatheringDetailResult {
+    override fun getTeamGathering(accountId: Long, teamId: Long, gatheringId: UUID): GatheringDetailResult {
         validateTeamMember(accountId, teamId)
 
         val gathering = loadGatheringPort.load(gatheringId)
@@ -79,7 +89,7 @@ class GatheringParticipantService(
             throw GatheringException(GatheringExceptionCode.GATHERING_NOT_FOUND)
         }
 
-        return gathering.toDetailResult() // TODO: 해당 행사 소개 템플릿 마지막 버전 가져와서 detail에 넣어줘야 하는지? 기본적으로 행사 미참여라면 템플릿 내용이 보이지 않음
+        return gathering.toDetailResult()
     }
 
     @Transactional
