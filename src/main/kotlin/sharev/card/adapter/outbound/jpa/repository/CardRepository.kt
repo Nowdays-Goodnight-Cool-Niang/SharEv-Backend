@@ -13,6 +13,8 @@ interface CardRepository : JpaRepository<CardJpaEntity, Long>,
 
     fun existsByGatheringIdAndAccountId(gatheringId: UUID, accountId: Long): Boolean
 
+    fun findByAccountId(accountId: Long): List<CardJpaEntity>
+
     @Query("select c.pinNumber from CardJpaEntity c where c.gathering.id = :gatheringId and c.pinNumber is not null")
     fun findPinNumbersByGatheringId(gatheringId: UUID): Set<Int>
 }

@@ -17,12 +17,33 @@ import java.util.*
 @RestController
 class GatheringController(
     private val createGatheringUseCase: CreateGatheringUseCase,
-    private val getGatheringUseCase: GetGatheringUseCase,
+    private val getTeamGatheringUseCase: GetTeamGatheringUseCase,
     private val updateGatheringUseCase: UpdateGatheringUseCase,
     private val deleteGatheringUseCase: DeleteGatheringUseCase,
     private val getIntroduceTemplateUseCase: GetIntroduceTemplateUseCase,
     private val checkGatheringParticipantUseCase: CheckGatheringParticipantUseCase,
+    private val getParticipatedGatheringsUseCase: GetParticipatedGatheringsUseCase,
+    private val getGatheringsUseCase: GetGatheringsUseCase,
 ) {
+
+    @GetMapping("/gatherings")
+    fun allGatherings(
+    ): ResponseEntity<List<GatheringDetailResponse>> {
+        return ResponseEntity.ok(
+            getGatheringsUseCase.getGatherings()
+                .map { it.toResponse() }
+        )
+    }
+
+    @GetMapping("/gatherings/me")
+    fun participatedGatherings(
+        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
+    ): ResponseEntity<List<GatheringDetailResponse>> {
+        return ResponseEntity.ok(
+            getParticipatedGatheringsUseCase.getParticipatedGatherings(accountPrincipal.id)
+                .map { it.toResponse() }
+        )
+    }
 
     @GetMapping("/gatherings/{gatheringId}")
     fun isParticipant(
@@ -54,12 +75,12 @@ class GatheringController(
     // TODO: 이전 content key와 업데이트 key 일치(혹은 부분일치) 시 단순 템플릿 변경이므로 버전 그대로, 다르다면(추가된 게 있다면) 버전 업
 
     @GetMapping("/teams/{teamId}/gatherings")
-    fun getGatherings(
+    fun getTeamGatherings(
         @PathVariable teamId: Long,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
     ): ResponseEntity<List<GatheringDetailResponse>> {
         return ResponseEntity.ok(
-            getGatheringUseCase.getGatherings(accountPrincipal.id, teamId)
+            getTeamGatheringUseCase.getTeamGatherings(accountPrincipal.id, teamId)
                 .map { it.toResponse() }
         )
     }
@@ -71,7 +92,7 @@ class GatheringController(
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
     ): ResponseEntity<GatheringDetailResponse> {
         return ResponseEntity.ok(
-            getGatheringUseCase.getGathering(
+            getTeamGatheringUseCase.getTeamGathering(
                 accountPrincipal.id, teamId, gatheringId
             ).toResponse()
         )
