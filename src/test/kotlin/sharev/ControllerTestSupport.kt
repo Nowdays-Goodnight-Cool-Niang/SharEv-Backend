@@ -16,12 +16,7 @@ import sharev.account.adapter.inbound.web.controller.AccountController
 import sharev.account.application.port.inbound.usecase.DeleteAccountUseCase
 import sharev.account.application.port.inbound.usecase.UpdateAccountInfoUseCase
 import sharev.card.adapter.inbound.web.controller.CardController
-import sharev.card.application.port.inbound.usecase.GetAllCardsUseCase
-import sharev.card.application.port.inbound.usecase.GetCardByPinNumberUseCase
-import sharev.card.application.port.inbound.usecase.GetMyCardUseCase
-import sharev.card.application.port.inbound.usecase.GetMyPinNumberUseCase
-import sharev.card.application.port.inbound.usecase.JoinCardUseCase
-import sharev.card.application.port.inbound.usecase.UpdateCardInfoUseCase
+import sharev.card.application.port.inbound.usecase.*
 import sharev.config.SecurityConfig
 import sharev.gathering.adapter.inbound.web.controller.GatheringController
 import sharev.gathering.application.port.inbound.usecase.*
@@ -32,7 +27,10 @@ import sharev.link.application.port.inbound.usecase.GetLinksUseCase
 import sharev.member.adapter.inbound.web.controller.MemberController
 import sharev.member.application.port.inbound.usecase.*
 import sharev.team.adapter.inbound.web.controller.TeamController
-import sharev.team.application.port.inbound.usecase.*
+import sharev.team.application.port.inbound.usecase.CreateTeamUseCase
+import sharev.team.application.port.inbound.usecase.GetMyTeamsUseCase
+import sharev.team.application.port.inbound.usecase.GetTeamDetailUseCase
+import sharev.team.application.port.inbound.usecase.UpdateTeamInfoUseCase
 
 @WebMvcTest(
     controllers = [
@@ -84,7 +82,7 @@ abstract class ControllerTestSupport {
     protected lateinit var createGatheringUseCase: CreateGatheringUseCase
 
     @MockitoBean
-    protected lateinit var getGatheringUseCase: GetGatheringUseCase
+    protected lateinit var getTeamGatheringUseCase: GetTeamGatheringUseCase
 
     @MockitoBean
     protected lateinit var updateGatheringUseCase: UpdateGatheringUseCase
@@ -97,6 +95,12 @@ abstract class ControllerTestSupport {
 
     @MockitoBean
     protected lateinit var checkGatheringParticipantUseCase: CheckGatheringParticipantUseCase
+
+    @MockitoBean
+    protected lateinit var getParticipatedGatheringsUseCase: GetParticipatedGatheringsUseCase
+
+    @MockitoBean
+    protected lateinit var getGatheringsUseCase: GetGatheringsUseCase
 
     @MockitoBean
     protected lateinit var createLinkUseCase: CreateLinkUseCase

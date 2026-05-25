@@ -19,18 +19,10 @@ import sharev.ControllerTestSupport
 import sharev.WithCustomMockUser
 import sharev.gathering.adapter.inbound.web.dto.request.CreateGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.request.UpdateGatheringRequest
-import sharev.gathering.adapter.inbound.web.dto.response.CreateGatheringResponse
-import sharev.gathering.adapter.inbound.web.dto.response.DeleteGatheringResponse
-import sharev.gathering.adapter.inbound.web.dto.response.GatheringDetailResponse
-import sharev.gathering.adapter.inbound.web.dto.response.IntroduceTemplateResponse
-import sharev.gathering.adapter.inbound.web.dto.response.ParticipantResponse
+import sharev.gathering.adapter.inbound.web.dto.response.*
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
-import sharev.gathering.application.port.inbound.result.CreateGatheringResult
-import sharev.gathering.application.port.inbound.result.DeleteGatheringResult
-import sharev.gathering.application.port.inbound.result.GatheringDetailResult
-import sharev.gathering.application.port.inbound.result.IntroduceTemplateResult
-import sharev.gathering.application.port.inbound.result.ParticipantResult
+import sharev.gathering.application.port.inbound.result.*
 import sharev.gathering.domain.model.GatheringVisible
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
@@ -38,6 +30,64 @@ import java.time.LocalDateTime
 import java.util.*
 
 class GatheringControllerTest : ControllerTestSupport() {
+    @Test
+    @WithCustomMockUser
+    @DisplayName("전체 행사 목록 조회")
+    fun allGatherings() {
+        val response = listOf(gatheringResult(UUID.randomUUID()))
+
+        given(getGatheringsUseCase.getGatherings()).willReturn(response)
+
+        val request = RestDocumentationRequestBuilders.get("/gatherings")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(
+                documentResource(
+                    "allGatherings",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("전체 행사 목록 조회")
+                            .description("모든 행사 목록을 조회합니다.")
+                            .responseFields(*gatheringArrayFields())
+                            .responseSchema(schema(GatheringDetailResponse::class.java.simpleName))
+                            .build()
+                    )
+                )
+            )
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("참여 행사 목록 조회")
+    fun participatedGatherings() {
+        val response = listOf(gatheringResult(UUID.randomUUID()))
+
+        given(getParticipatedGatheringsUseCase.getParticipatedGatherings(1L)).willReturn(response)
+
+        val request = RestDocumentationRequestBuilders.get("/gatherings/me")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(
+                documentResource(
+                    "participatedGatherings",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("참여 행사 목록 조회")
+                            .description("사용자가 참여한 행사 목록을 조회합니다.")
+                            .responseFields(*gatheringArrayFields())
+                            .responseSchema(schema(GatheringDetailResponse::class.java.simpleName))
+                            .build()
+                    )
+                )
+            )
+    }
+
     @Test
     @WithCustomMockUser
     @DisplayName("행사 참여 유무 확인")
@@ -226,11 +276,11 @@ class GatheringControllerTest : ControllerTestSupport() {
     @Test
     @WithCustomMockUser
     @DisplayName("팀별 행사 목록 조회")
-    fun getGatherings() {
+    fun getTeamGatherings() {
         val teamId = 1L
         val response = listOf(gatheringResult(UUID.randomUUID()))
 
-        given(getGatheringUseCase.getGatherings(1L, teamId)).willReturn(response)
+        given(getTeamGatheringUseCase.getTeamGatherings(1L, teamId)).willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/teams/{teamId}/gatherings", teamId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -257,10 +307,10 @@ class GatheringControllerTest : ControllerTestSupport() {
     @Test
     @WithCustomMockUser
     @DisplayName("팀별 행사 목록 조회 실패 - 팀 미소속")
-    fun getGatheringsFail() {
+    fun getTeamGatheringsFail() {
         val teamId = 1L
 
-        given(getGatheringUseCase.getGatherings(1L, teamId))
+        given(getTeamGatheringUseCase.getTeamGatherings(1L, teamId))
             .willThrow(TeamException(TeamExceptionCode.NOT_TEAM_MEMBER))
 
         val request = RestDocumentationRequestBuilders.get("/teams/{teamId}/gatherings", teamId)
@@ -278,7 +328,13 @@ class GatheringControllerTest : ControllerTestSupport() {
         val teamId = 1L
         val gatheringId = UUID.randomUUID()
 
-        given(getGatheringUseCase.getGathering(1L, teamId, gatheringId)).willReturn(gatheringResult(gatheringId))
+        given(
+            getTeamGatheringUseCase.getTeamGathering(
+                1L,
+                teamId,
+                gatheringId
+            )
+        ).willReturn(gatheringResult(gatheringId))
 
         val request =
             RestDocumentationRequestBuilders.get("/teams/{teamId}/gatherings/{gatheringId}", teamId, gatheringId)
