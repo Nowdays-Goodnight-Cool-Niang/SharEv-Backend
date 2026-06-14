@@ -3,6 +3,7 @@ package sharev.gathering.adapter.inbound.web.controller
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -30,7 +31,7 @@ class GatheringController(
 
     @GetMapping("/gatherings")
     fun allGatherings(
-        pageable: Pageable,
+        @PageableDefault(size = 20) pageable: Pageable,
     ): ResponseEntity<Page<GatheringDetailResponse>> {
         return ResponseEntity.ok(
             getGatheringsUseCase.getGatherings(pageable)
@@ -41,7 +42,7 @@ class GatheringController(
     @GetMapping("/gatherings/me")
     fun participatedGatherings(
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-        pageable: Pageable,
+        @PageableDefault(size = 20) pageable: Pageable,
     ): ResponseEntity<Page<GatheringDetailResponse>> {
         return ResponseEntity.ok(
             getParticipatedGatheringsUseCase.getParticipatedGatherings(accountPrincipal.id, pageable)
