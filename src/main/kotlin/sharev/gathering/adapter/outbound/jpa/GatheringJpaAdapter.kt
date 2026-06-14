@@ -1,5 +1,7 @@
 package sharev.gathering.adapter.outbound.jpa
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import sharev.gathering.adapter.outbound.jpa.entity.GatheringJpaEntity
@@ -97,8 +99,8 @@ class GatheringJpaAdapter(
             ?: throw GatheringException(GatheringCode.GATHERING_NOT_FOUND)
     }
 
-    override fun loadAll(): List<Gathering> {
-        return gatheringRepository.findAll()
+    override fun loadAll(pageable: Pageable): Page<Gathering> {
+        return gatheringRepository.findAll(pageable)
             .map { it.toDomainModel() }
     }
 
