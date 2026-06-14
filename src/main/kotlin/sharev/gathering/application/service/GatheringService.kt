@@ -1,5 +1,7 @@
 package sharev.gathering.application.service
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
@@ -63,13 +65,13 @@ class GatheringService(
         ).toCreateGatheringResult()
     }
 
-    override fun getParticipatedGatherings(accountId: Long): List<GatheringDetailResult> {
-        return loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId)
+    override fun getParticipatedGatherings(accountId: Long, pageable: Pageable): Page<GatheringDetailResult> {
+        return loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId, pageable)
             .map { it.toDetailResult() }
     }
 
-    override fun getGatherings(): List<GatheringDetailResult> {
-        return loadGatheringPort.loadAll()
+    override fun getGatherings(pageable: Pageable): Page<GatheringDetailResult> {
+        return loadGatheringPort.loadAll(pageable)
             .map { it.toDetailResult() }
     }
 

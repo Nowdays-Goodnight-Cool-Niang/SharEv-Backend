@@ -105,9 +105,8 @@ class CardJpaAdapter(
         return cardRepository.searchTempCards(gatheringId, myCardId, snapshotTime, pageable)
     }
 
-    override fun loadParticipatedGatherings(accountId: Long): List<Gathering> {
-        return cardRepository.findByAccountId(accountId)
-            .map { it.gathering }
-            .map { it.toDomainModel() }
+    override fun loadParticipatedGatherings(accountId: Long, pageable: Pageable): Page<Gathering> {
+        return cardRepository.findByAccountId(accountId, pageable)
+            .map { it.gathering.toDomainModel() }
     }
 }
