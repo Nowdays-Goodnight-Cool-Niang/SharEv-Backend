@@ -10,6 +10,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.outbound.CheckGatheringParticipantPort
@@ -87,30 +89,34 @@ class GatheringParticipantServiceTest {
     @DisplayName("getParticipatedGatherings는 참여 중인 행사 목록을 반환한다")
     fun getParticipatedGatherings_returnsGatheringList() {
         val accountId = 1L
+        val pageable = PageRequest.of(0, 10)
         val gatheringList = listOf(
             gathering(id = UUID.randomUUID(), teamId = 1L, title = "참여 행사1"),
             gathering(id = UUID.randomUUID(), teamId = 2L, title = "참여 행사2"),
         )
 
-        given(loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId)).willReturn(gatheringList)
+        given(loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId, pageable))
+            .willReturn(PageImpl(gatheringList, pageable, gatheringList.size.toLong()))
 
-        val result = gatheringParticipantService.getParticipatedGatherings(accountId)
+        val result = gatheringParticipantService.getParticipatedGatherings(accountId, pageable)
 
-        assertThat(result).hasSize(2)
-        assertThat(result[0].title).isEqualTo("참여 행사1")
-        assertThat(result[1].title).isEqualTo("참여 행사2")
+        assertThat(result.totalElements).isEqualTo(2)
+        assertThat(result.content[0].title).isEqualTo("참여 행사1")
+        assertThat(result.content[1].title).isEqualTo("참여 행사2")
     }
 
     @Test
     @DisplayName("참여 행사가 없으면 빈 목록을 반환한다")
     fun getParticipatedGatherings_returnsEmptyList() {
         val accountId = 1L
+        val pageable = PageRequest.of(0, 10)
 
-        given(loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId)).willReturn(emptyList())
+        given(loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId, pageable))
+            .willReturn(PageImpl(emptyList(), pageable, 0))
 
-        val result = gatheringParticipantService.getParticipatedGatherings(accountId)
+        val result = gatheringParticipantService.getParticipatedGatherings(accountId, pageable)
 
-        assertThat(result).isEmpty()
+        assertThat(result.content).isEmpty()
     }
 
     // ───────────── getGatherings (all public) ─────────────
@@ -118,28 +124,32 @@ class GatheringParticipantServiceTest {
     @Test
     @DisplayName("getGatherings는 전체 행사 목록을 반환한다")
     fun getGatherings_returnsAllGatherings() {
+        val pageable = PageRequest.of(0, 10)
         val gatheringList = listOf(
             gathering(id = UUID.randomUUID(), teamId = 1L, title = "행사1"),
             gathering(id = UUID.randomUUID(), teamId = 2L, title = "행사2"),
         )
 
-        given(loadGatheringPort.loadAll()).willReturn(gatheringList)
+        given(loadGatheringPort.loadAll(pageable))
+            .willReturn(PageImpl(gatheringList, pageable, gatheringList.size.toLong()))
 
-        val result = gatheringParticipantService.getGatherings()
+        val result = gatheringParticipantService.getGatherings(pageable)
 
-        assertThat(result).hasSize(2)
-        assertThat(result[0].title).isEqualTo("행사1")
-        assertThat(result[1].title).isEqualTo("행사2")
+        assertThat(result.totalElements).isEqualTo(2)
+        assertThat(result.content[0].title).isEqualTo("행사1")
+        assertThat(result.content[1].title).isEqualTo("행사2")
     }
 
     @Test
     @DisplayName("행사가 없으면 빈 목록을 반환한다")
     fun getGatherings_returnsEmptyList() {
-        given(loadGatheringPort.loadAll()).willReturn(emptyList())
+        val pageable = PageRequest.of(0, 10)
 
-        val result = gatheringParticipantService.getGatherings()
+        given(loadGatheringPort.loadAll(pageable)).willReturn(PageImpl(emptyList(), pageable, 0))
 
-        assertThat(result).isEmpty()
+        val result = gatheringParticipantService.getGatherings(pageable)
+
+        assertThat(result.content).isEmpty()
     }
 
     // ───────────── getTeamGatherings ─────────────

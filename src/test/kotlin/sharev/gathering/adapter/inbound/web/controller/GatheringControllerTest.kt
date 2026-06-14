@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.willThrow
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
 import org.springframework.restdocs.payload.FieldDescriptor
@@ -34,11 +36,14 @@ class GatheringControllerTest : ControllerTestSupport() {
     @WithCustomMockUser
     @DisplayName("전체 행사 목록 조회")
     fun allGatherings() {
-        val response = listOf(gatheringResult(UUID.randomUUID()))
+        val pageable = PageRequest.of(0, 20)
+        val response = PageImpl(listOf(gatheringResult(UUID.randomUUID())), pageable, 1)
 
-        given(getGatheringsUseCase.getGatherings()).willReturn(response)
+        given(getGatheringsUseCase.getGatherings(pageable)).willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/gatherings")
+            .param("page", "0")
+            .param("size", "20")
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -50,8 +55,9 @@ class GatheringControllerTest : ControllerTestSupport() {
                     resource(
                         ResourceSnippetParameters.builder()
                             .summary("전체 행사 목록 조회")
-                            .description("모든 행사 목록을 조회합니다.")
-                            .responseFields(*gatheringArrayFields())
+                            .description("모든 행사 목록을 페이지네이션으로 조회합니다.")
+                            .queryParameters(*pageableQueryParameters())
+                            .responseFields(*gatheringPageFields())
                             .responseSchema(schema(GatheringDetailResponse::class.java.simpleName))
                             .build()
                     )
@@ -63,11 +69,14 @@ class GatheringControllerTest : ControllerTestSupport() {
     @WithCustomMockUser
     @DisplayName("참여 행사 목록 조회")
     fun participatedGatherings() {
-        val response = listOf(gatheringResult(UUID.randomUUID()))
+        val pageable = PageRequest.of(0, 20)
+        val response = PageImpl(listOf(gatheringResult(UUID.randomUUID())), pageable, 1)
 
-        given(getParticipatedGatheringsUseCase.getParticipatedGatherings(1L)).willReturn(response)
+        given(getParticipatedGatheringsUseCase.getParticipatedGatherings(1L, pageable)).willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/gatherings/me")
+            .param("page", "0")
+            .param("size", "20")
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -79,8 +88,9 @@ class GatheringControllerTest : ControllerTestSupport() {
                     resource(
                         ResourceSnippetParameters.builder()
                             .summary("참여 행사 목록 조회")
-                            .description("사용자가 참여한 행사 목록을 조회합니다.")
-                            .responseFields(*gatheringArrayFields())
+                            .description("사용자가 참여한 행사 목록을 페이지네이션으로 조회합니다.")
+                            .queryParameters(*pageableQueryParameters())
+                            .responseFields(*gatheringPageFields())
                             .responseSchema(schema(GatheringDetailResponse::class.java.simpleName))
                             .build()
                     )
@@ -648,5 +658,31 @@ class GatheringControllerTest : ControllerTestSupport() {
         fieldWithPath("[].contact").type(STRING).description("연락처").optional(),
         fieldWithPath("[].registerStartAt").type(STRING).description("참가 등록 시작일시"),
         fieldWithPath("[].registerEndAt").type(STRING).description("참가 등록 종료일시"),
+    )
+
+    private fun pageableQueryParameters() = arrayOf(
+        parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
+        parameterWithName("size").description("페이지 크기").optional(),
+        parameterWithName("sort").description("정렬 기준 (예: startAt,desc)").optional(),
+    )
+
+    private fun gatheringPageFields(): Array<FieldDescriptor> = arrayOf(
+        fieldWithPath("content[].id").type(STRING).description("행사 ID (UUID)"),
+        fieldWithPath("content[].visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+        fieldWithPath("content[].title").type(STRING).description("행사 제목"),
+        fieldWithPath("content[].content").type(STRING).description("행사 설명"),
+        fieldWithPath("content[].startAt").type(STRING).description("행사 시작일시"),
+        fieldWithPath("content[].endAt").type(STRING).description("행사 종료일시"),
+        fieldWithPath("content[].place").type(STRING).description("행사 장소"),
+        fieldWithPath("content[].imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+        fieldWithPath("content[].gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+        fieldWithPath("content[].contact").type(STRING).description("연락처").optional(),
+        fieldWithPath("content[].registerStartAt").type(STRING).description("참가 등록 시작일시"),
+        fieldWithPath("content[].registerEndAt").type(STRING).description("참가 등록 종료일시"),
+        fieldWithPath("page").type("OBJECT").description("페이지 정보"),
+        fieldWithPath("page.size").type(NUMBER).description("페이지 크기"),
+        fieldWithPath("page.number").type(NUMBER).description("현재 페이지"),
+        fieldWithPath("page.totalElements").type(NUMBER).description("총 요소 수"),
+        fieldWithPath("page.totalPages").type(NUMBER).description("총 페이지 수"),
     )
 }
