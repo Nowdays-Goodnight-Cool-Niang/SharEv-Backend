@@ -26,6 +26,7 @@ fun TeamDetailResult.toResponse() = TeamDetailResponse(
     content = content,
     createdAt = createdAt,
     headcount = headcount,
+    certification = certification.name,
     gatherings = gatherings.map { GatheringInfoResponse(it.title, it.startAt!!, it.endAt!!, it.place) },
     members = members.map { TeamMemberInfoResponse(it.name, it.email, it.role.name) },
 )

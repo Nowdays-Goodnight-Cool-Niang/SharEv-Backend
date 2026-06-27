@@ -79,6 +79,7 @@ class TeamService(
             content = team.content,
             createdAt = team.createdAt,
             headcount = members.size,
+            certification = team.teamCertification,
             gatherings = gatherings.map {
                 GatheringInfoResult(it.title, it.startAt, it.endAt, it.place)
             },

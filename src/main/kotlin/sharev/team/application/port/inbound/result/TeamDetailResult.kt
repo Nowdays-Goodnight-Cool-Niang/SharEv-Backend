@@ -1,6 +1,7 @@
 package sharev.team.application.port.inbound.result
 
 import sharev.member.domain.model.MemberRole
+import sharev.team.domain.model.TeamCertification
 import java.time.LocalDateTime
 
 data class TeamDetailResult(
@@ -9,6 +10,7 @@ data class TeamDetailResult(
     val content: String?,
     val createdAt: LocalDateTime?,
     val headcount: Int,
+    val certification: TeamCertification,
     val gatherings: List<GatheringInfoResult>,
     val members: List<TeamMemberInfoResult>,
 )

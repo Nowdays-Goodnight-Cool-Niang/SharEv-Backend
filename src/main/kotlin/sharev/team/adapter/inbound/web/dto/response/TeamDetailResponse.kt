@@ -8,6 +8,7 @@ data class TeamDetailResponse(
     val content: String?,
     val createdAt: LocalDateTime?,
     val headcount: Int,
+    val certification: String,
     val gatherings: List<GatheringInfoResponse>,
     val members: List<TeamMemberInfoResponse>,
 )
