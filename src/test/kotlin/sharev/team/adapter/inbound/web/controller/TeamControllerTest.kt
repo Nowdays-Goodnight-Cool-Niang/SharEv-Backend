@@ -175,7 +175,7 @@ class TeamControllerTest : ControllerTestSupport() {
                                 fieldWithPath("createdAt").type(STRING).description("생성일시"),
                                 fieldWithPath("headcount").type(NUMBER).description("팀 인원 수"),
                                 fieldWithPath("certification").type(STRING)
-                                    .description("팀 인증 정보(public 행사 만들 수 있는지, 없는지 유무"),
+                                    .description("팀 인증 정보(public 행사 만들 수 있는지, 없는지 유무)"),
                                 fieldWithPath("gatherings").type("ARRAY").description("행사 목록"),
                                 fieldWithPath("gatherings[].title").type(STRING).description("행사 제목"),
                                 fieldWithPath("gatherings[].startAt").type(STRING).description("행사 시작일시"),
