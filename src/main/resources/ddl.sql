@@ -16,6 +16,7 @@ CREATE TABLE accounts
     role       VARCHAR(20) NOT NULL, -- 'ADMIN', 'USER'
     name       TEXT        NOT NULL,
     email      TEXT        NOT NULL UNIQUE,
+    handle     TEXT        NULL UNIQUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
