@@ -11,4 +11,9 @@ enum class AccountExceptionCode(
         ExceptionCategory.NOT_FOUND,
         "사용자가 존재하지 않습니다."
     ),
+
+    HANDLE_ALREADY_EXISTS(
+        ExceptionCategory.CONFLICT,
+        "이미 존재하는 handle입니다."
+    )
 }
