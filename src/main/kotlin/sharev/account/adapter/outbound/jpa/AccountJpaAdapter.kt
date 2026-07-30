@@ -6,10 +6,7 @@ import sharev.account.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.account.adapter.outbound.jpa.mapper.toJpaEntity
 import sharev.account.adapter.outbound.jpa.mapper.updateFrom
 import sharev.account.adapter.outbound.jpa.repository.AccountRepository
-import sharev.account.application.port.outbound.DeleteAccountPort
-import sharev.account.application.port.outbound.LoadAccountPort
-import sharev.account.application.port.outbound.SaveAccountPort
-import sharev.account.application.port.outbound.UpdateAccountPort
+import sharev.account.application.port.outbound.*
 import sharev.account.domain.exception.AccountException
 import sharev.account.domain.exception.AccountExceptionCode
 import sharev.account.domain.model.Account
@@ -17,7 +14,12 @@ import sharev.account.domain.model.Account
 @Component
 class AccountJpaAdapter(
     private val accountRepository: AccountRepository
-) : LoadAccountPort, SaveAccountPort, DeleteAccountPort, UpdateAccountPort {
+) : LoadAccountPort,
+    SaveAccountPort,
+    DeleteAccountPort,
+    UpdateAccountPort,
+    UpdateAccountHandlePort,
+    CheckHandleDuplicatedPort {
 
     override fun load(accountId: Long): Account {
         val accountJpaEntity = accountRepository.findByIdOrNull(accountId)
@@ -52,5 +54,19 @@ class AccountJpaAdapter(
 
     override fun delete(accountId: Long) {
         accountRepository.deleteById(accountId)
+    }
+
+    override fun update(accountId: Long, handle: String): Account {
+        val accountJpaEntity = (accountRepository.findByIdOrNull(accountId)
+            ?: throw AccountException(AccountExceptionCode.ACCOUNT_NOT_FOUND))
+
+        accountJpaEntity.handle = handle
+
+        return accountRepository.saveAndFlush(accountJpaEntity)
+            .toDomainModel()
+    }
+
+    override fun isDuplicated(accountId: Long, handle: String): Boolean {
+        return accountRepository.existsByHandleAndIdNot(handle, accountId)
     }
 }

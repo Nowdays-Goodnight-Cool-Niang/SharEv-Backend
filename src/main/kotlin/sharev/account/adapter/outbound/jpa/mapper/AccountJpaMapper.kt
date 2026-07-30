@@ -8,14 +8,16 @@ fun Account.toJpaEntity(): AccountJpaEntity {
         id.takeIf { it != 0L },
         name,
         email,
-        role
+        role,
+        handle,
     )
 }
 
-fun AccountJpaEntity.toDomainModel(): Account = Account(id!!, name, email, role)
+fun AccountJpaEntity.toDomainModel(): Account = Account(id!!, name, email, role, handle)
 
 fun AccountJpaEntity.updateFrom(domain: Account) {
     name = domain.name
     email = domain.email
     role = domain.role
+    handle = domain.handle
 }
