@@ -9,10 +9,17 @@ data class AccountPrincipal(
     val role: String,
     val accountName: String,
     val email: String,
+    val handle: String?,
     private val attributes: Map<String, Any>,
 ) : OAuth2User {
 
-    private val authorities = listOf(SimpleGrantedAuthority("ROLE_$role"))
+    private val authorities = buildList {
+        add(SimpleGrantedAuthority("ROLE_$role"))
+
+        if (handle != null) {
+            add(SimpleGrantedAuthority("ROLE_VERIFIED"))
+        }
+    }
 
     override fun getAttributes(): Map<String, Any> = attributes
 
