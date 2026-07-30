@@ -63,8 +63,10 @@ public class SecurityConfig {
                     .permitAll();
             authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
                     .permitAll();
-            authorizeRequests.anyRequest()
+            authorizeRequests.requestMatchers(HttpMethod.PATCH, "/accounts/handle")
                     .authenticated();
+            authorizeRequests.anyRequest()
+                    .hasRole("VERIFIED");
         });
 
         return http.build();
