@@ -118,10 +118,12 @@ class OAuthAccountServiceTest {
         name: String = "name",
         email: String = "account@test.com",
         role: AccountRole = AccountRole.USER,
+        handle: String = "handle",
     ) = Account(
         id = id,
         name = name,
         email = email,
         role = role,
+        handle = handle,
     )
 }

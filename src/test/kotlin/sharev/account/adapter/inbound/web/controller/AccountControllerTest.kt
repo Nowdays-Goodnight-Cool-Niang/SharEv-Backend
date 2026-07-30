@@ -1,9 +1,9 @@
 package sharev.account.adapter.inbound.web.controller
 
 import com.epages.restdocs.apispec.ResourceDocumentation.resource
+import com.epages.restdocs.apispec.ResourceSnippetParameters
 import com.epages.restdocs.apispec.SimpleType.NUMBER
 import com.epages.restdocs.apispec.SimpleType.STRING
-import com.epages.restdocs.apispec.ResourceSnippetParameters
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
@@ -23,7 +23,6 @@ import sharev.account.application.port.inbound.command.DeleteAccountCommand
 import sharev.account.application.port.inbound.command.UpdateAccountInfoCommand
 import sharev.account.application.port.inbound.result.DeleteAccountResult
 import sharev.account.application.port.inbound.result.UpdateAccountInfoResult
-import java.time.LocalDateTime
 
 class AccountControllerTest : ControllerTestSupport() {
     @Test
@@ -61,7 +60,6 @@ class AccountControllerTest : ControllerTestSupport() {
                                 fieldWithPath("id").type(NUMBER).description("회원 ID"),
                                 fieldWithPath("name").type(STRING).description("회원 이름"),
                                 fieldWithPath("email").type(STRING).description("이메일"),
-                                fieldWithPath("updatedAt").type(STRING).description("수정 일시"),
                             )
                             .requestSchema(schema(UpdateAccountInfoRequest::class.java.simpleName))
                             .responseSchema(schema(UpdateAccountInfoResponse::class.java.simpleName))
@@ -107,7 +105,7 @@ class AccountControllerTest : ControllerTestSupport() {
         val requestDto = DeleteAccountRequest("test")
         val command = DeleteAccountCommand(1L, "test")
 
-        given(deleteAccountUseCase.delete(command)).willReturn(DeleteAccountResult(1L, LocalDateTime.now()))
+        given(deleteAccountUseCase.delete(command)).willReturn(DeleteAccountResult(1L))
 
         val request = RestDocumentationRequestBuilders.delete("/accounts")
             .content(objectMapper.writeValueAsString(requestDto))
@@ -128,7 +126,6 @@ class AccountControllerTest : ControllerTestSupport() {
                             )
                             .responseFields(
                                 fieldWithPath("id").type(NUMBER).description("회원 ID"),
-                                fieldWithPath("deletedAt").type(STRING).description("탈퇴 일시"),
                             )
                             .requestSchema(schema(DeleteAccountRequest::class.java.simpleName))
                             .responseSchema(schema(DeleteAccountResponse::class.java.simpleName))

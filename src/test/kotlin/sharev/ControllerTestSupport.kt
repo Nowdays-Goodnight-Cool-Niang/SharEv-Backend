@@ -14,6 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import sharev.account.adapter.inbound.web.controller.AccountController
 import sharev.account.application.port.inbound.usecase.DeleteAccountUseCase
+import sharev.account.application.port.inbound.usecase.UpdateAccountHandleUseCase
 import sharev.account.application.port.inbound.usecase.UpdateAccountInfoUseCase
 import sharev.card.adapter.inbound.web.controller.CardController
 import sharev.card.application.port.inbound.usecase.*
@@ -135,6 +136,9 @@ abstract class ControllerTestSupport {
 
     @MockitoBean
     protected lateinit var updateTeamInfoUseCase: UpdateTeamInfoUseCase
+
+    @MockitoBean
+    protected lateinit var updateAccountHandleUseCase: UpdateAccountHandleUseCase
 
     protected fun documentResource(
         identifier: String,
