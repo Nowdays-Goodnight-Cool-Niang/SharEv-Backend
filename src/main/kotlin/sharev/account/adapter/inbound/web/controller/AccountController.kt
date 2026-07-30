@@ -11,14 +11,17 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.web.bind.annotation.*
 import sharev.account.adapter.inbound.web.dto.request.DeleteAccountRequest
+import sharev.account.adapter.inbound.web.dto.request.UpdateAccountHandleRequest
 import sharev.account.adapter.inbound.web.dto.request.UpdateAccountInfoRequest
 import sharev.account.adapter.inbound.web.dto.response.AccountInfoResponse
 import sharev.account.adapter.inbound.web.dto.response.DeleteAccountResponse
+import sharev.account.adapter.inbound.web.dto.response.UpdateAccountHandleResponse
 import sharev.account.adapter.inbound.web.dto.response.UpdateAccountInfoResponse
 import sharev.account.adapter.inbound.web.mapper.*
 import sharev.account.application.port.inbound.result.DeleteAccountResult
 import sharev.account.application.port.inbound.result.UpdateAccountInfoResult
 import sharev.account.application.port.inbound.usecase.DeleteAccountUseCase
+import sharev.account.application.port.inbound.usecase.UpdateAccountHandleUseCase
 import sharev.account.application.port.inbound.usecase.UpdateAccountInfoUseCase
 import sharev.common.adapter.inbound.security.model.AccountPrincipal
 
@@ -27,6 +30,7 @@ import sharev.common.adapter.inbound.security.model.AccountPrincipal
 class AccountController(
     private val updateAccountInfoUseCase: UpdateAccountInfoUseCase,
     private val deleteAccountUseCase: DeleteAccountUseCase,
+    private val updateAccountHandleUseCase: UpdateAccountHandleUseCase,
 ) {
 
     @PatchMapping
@@ -76,6 +80,22 @@ class AccountController(
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, cookie.toString())
             .body(result.toDeleteAccountResponse())
+    }
+
+    @PatchMapping("/handle")
+    fun updateHandle(
+        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
+        @Valid @RequestBody updateAccountHandleRequest: UpdateAccountHandleRequest,
+        httpSession: HttpSession,
+    ): ResponseEntity<UpdateAccountHandleResponse> {
+
+        val result = updateAccountHandleUseCase.updateAccountHandle(
+            updateAccountHandleRequest.toCommand(accountPrincipal.id)
+        )
+
+        updateSessionInfo(accountPrincipal.updateFrom(result), httpSession)
+
+        return ResponseEntity.ok(result.toUpdateAccountHandleResponse())
     }
 }
 
