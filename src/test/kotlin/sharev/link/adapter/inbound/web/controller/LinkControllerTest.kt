@@ -17,6 +17,7 @@ import sharev.WithCustomMockUser
 import sharev.link.adapter.inbound.web.dto.response.LinkResponse
 import sharev.link.application.port.inbound.command.GetLinksCommand
 import sharev.link.application.port.inbound.result.LinkResult
+import sharev.link.application.port.inbound.usecase.GetLinksUseCase
 
 class LinkControllerTest : ControllerTestSupport() {
 
@@ -29,7 +30,8 @@ class LinkControllerTest : ControllerTestSupport() {
             LinkResult(2L, "https://linkedin.com/in/sharev"),
         )
 
-        given(getLinksUseCase.getLinks(GetLinksCommand(1L))).willReturn(response)
+        given(mockBean<GetLinksUseCase>().getLinks(GetLinksCommand(1L)))
+            .willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/accounts/links")
             .contentType(MediaType.APPLICATION_JSON)

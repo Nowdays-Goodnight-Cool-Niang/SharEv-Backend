@@ -23,6 +23,8 @@ import sharev.account.application.port.inbound.command.DeleteAccountCommand
 import sharev.account.application.port.inbound.command.UpdateAccountInfoCommand
 import sharev.account.application.port.inbound.result.DeleteAccountResult
 import sharev.account.application.port.inbound.result.UpdateAccountInfoResult
+import sharev.account.application.port.inbound.usecase.DeleteAccountUseCase
+import sharev.account.application.port.inbound.usecase.UpdateAccountInfoUseCase
 
 class AccountControllerTest : ControllerTestSupport() {
     @Test
@@ -32,7 +34,7 @@ class AccountControllerTest : ControllerTestSupport() {
         val requestDto = UpdateAccountInfoRequest("김주호", "eora21@naver.com", setOf("https://link.com"), setOf(1L))
         val command = UpdateAccountInfoCommand(1L, "김주호", "eora21@naver.com", setOf("https://link.com"), setOf(1L))
 
-        given(updateAccountInfoUseCase.updateAccountInfo(command)).willReturn(
+        given(mockBean<UpdateAccountInfoUseCase>().updateAccountInfo(command)).willReturn(
             UpdateAccountInfoResult(1L, "김주호", "eora21@naver.com")
         )
 
@@ -105,7 +107,8 @@ class AccountControllerTest : ControllerTestSupport() {
         val requestDto = DeleteAccountRequest("test")
         val command = DeleteAccountCommand(1L, "test")
 
-        given(deleteAccountUseCase.delete(command)).willReturn(DeleteAccountResult(1L))
+        given(mockBean<DeleteAccountUseCase>().delete(command))
+            .willReturn(DeleteAccountResult(1L))
 
         val request = RestDocumentationRequestBuilders.delete("/accounts")
             .content(objectMapper.writeValueAsString(requestDto))
