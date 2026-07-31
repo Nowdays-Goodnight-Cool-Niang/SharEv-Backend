@@ -15,15 +15,20 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import sharev.ControllerTestSupport
 import sharev.WithCustomMockUser
 import sharev.account.adapter.inbound.web.dto.request.DeleteAccountRequest
+import sharev.account.adapter.inbound.web.dto.request.UpdateAccountHandleRequest
 import sharev.account.adapter.inbound.web.dto.request.UpdateAccountInfoRequest
 import sharev.account.adapter.inbound.web.dto.response.AccountInfoResponse
 import sharev.account.adapter.inbound.web.dto.response.DeleteAccountResponse
+import sharev.account.adapter.inbound.web.dto.response.UpdateAccountHandleResponse
 import sharev.account.adapter.inbound.web.dto.response.UpdateAccountInfoResponse
 import sharev.account.application.port.inbound.command.DeleteAccountCommand
+import sharev.account.application.port.inbound.command.UpdateAccountHandleCommand
 import sharev.account.application.port.inbound.command.UpdateAccountInfoCommand
 import sharev.account.application.port.inbound.result.DeleteAccountResult
+import sharev.account.application.port.inbound.result.UpdateAccountHandleResult
 import sharev.account.application.port.inbound.result.UpdateAccountInfoResult
 import sharev.account.application.port.inbound.usecase.DeleteAccountUseCase
+import sharev.account.application.port.inbound.usecase.UpdateAccountHandleUseCase
 import sharev.account.application.port.inbound.usecase.UpdateAccountInfoUseCase
 
 class AccountControllerTest : ControllerTestSupport() {
@@ -132,6 +137,53 @@ class AccountControllerTest : ControllerTestSupport() {
                             )
                             .requestSchema(schema(DeleteAccountRequest::class.java.simpleName))
                             .responseSchema(schema(DeleteAccountResponse::class.java.simpleName))
+                            .build()
+                    )
+                )
+            )
+    }
+
+    @Test
+    @WithCustomMockUser(handle = "") // handle null 처리
+    @DisplayName("handle 미등록 시 VERIFIED 필요 엔드포인트에서 거부")
+    fun unverifiedUserIsDenied() {
+        val request = RestDocumentationRequestBuilders.get("/accounts")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isNotFound())
+    }
+
+    @Test
+    @WithCustomMockUser(handle = "")
+    @DisplayName("handle 미등록 유저도 handle 업데이트는 허용")
+    fun unverifiedUserCanRegisterHandle() {
+        val requestDto = UpdateAccountHandleRequest("new_handle")
+        given(mockBean<UpdateAccountHandleUseCase>().updateAccountHandle(UpdateAccountHandleCommand(1L, "new_handle")))
+            .willReturn(UpdateAccountHandleResult("new_handle"))
+
+        val request = RestDocumentationRequestBuilders.patch("/accounts/handle")
+            .content(objectMapper.writeValueAsString(requestDto))
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isOk)
+            .andDo(
+                documentResource(
+                    "updateHandle",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("핸들 등록/수정")
+                            .description("핸들을 등록/수정합니다. 핸들 미등록 사용자도 접근할 수 있습니다.")
+                            .requestFields(
+                                fieldWithPath("handle").type(STRING).description("등록할 핸들 (영문·숫자·언더바 4~20자)"),
+                            )
+                            .responseFields(
+                                fieldWithPath("handle").type(STRING).description("등록된 핸들"),
+                            )
+                            .requestSchema(schema(UpdateAccountHandleRequest::class.java.simpleName))
+                            .responseSchema(schema(UpdateAccountHandleResponse::class.java.simpleName))
                             .build()
                     )
                 )

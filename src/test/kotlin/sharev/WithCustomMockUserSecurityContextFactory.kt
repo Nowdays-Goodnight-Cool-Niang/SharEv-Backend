@@ -8,7 +8,8 @@ import sharev.common.adapter.inbound.security.model.AccountPrincipal
 
 class WithCustomMockUserSecurityContextFactory : WithSecurityContextFactory<WithCustomMockUser> {
     override fun createSecurityContext(annotation: WithCustomMockUser): SecurityContext {
-        val account = AccountPrincipal(1L, "USER", "test", "test@test.com", "test_user", emptyMap())
+        val account =
+            AccountPrincipal(1L, "USER", "test", "test@test.com", annotation.handle.ifEmpty { null }, emptyMap())
         val token = OAuth2AuthenticationToken(
             account,
             account.authorities,
