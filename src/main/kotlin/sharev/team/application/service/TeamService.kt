@@ -60,8 +60,8 @@ class TeamService(
             throw TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER)
         }
 
-        val team = saveTeamPort.updateTitle(command.teamId, command.title)
-        return TeamUpdateInfoResult(team.title)
+        val team = saveTeamPort.update(command.teamId, command.title, command.content)
+        return TeamUpdateInfoResult(team.title, team.content)
     }
 
     override fun getTeamDetail(accountId: Long, teamId: Long): TeamDetailResult {

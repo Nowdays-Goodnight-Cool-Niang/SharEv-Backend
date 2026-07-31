@@ -27,7 +27,8 @@ class TeamJpaEntity(
     var content: String,
 ) : BaseTimeEntity() {
 
-    fun updateTitle(title: String) {
+    fun update(title: String, content: String) {
         this.title = title
+        this.content = content
     }
 }

@@ -29,11 +29,11 @@ class TeamJpaAdapter(
         }
     }
 
-    override fun updateTitle(teamId: Long, title: String): Team {
+    override fun update(teamId: Long, title: String, content: String): Team {
         val teamJpaEntity = teamRepository.findByIdOrNull(teamId)
             ?: throw TeamException(TeamExceptionCode.TEAM_NOT_FOUND)
 
-        teamJpaEntity.updateTitle(title)
+        teamJpaEntity.update(title, content)
 
         return teamJpaEntity.toDomainModel()
     }

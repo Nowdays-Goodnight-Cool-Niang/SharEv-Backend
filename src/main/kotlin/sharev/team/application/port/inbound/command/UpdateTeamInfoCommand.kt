@@ -4,4 +4,5 @@ data class UpdateTeamInfoCommand(
     val accountId: Long,
     val teamId: Long,
     val title: String,
+    val content: String,
 )
