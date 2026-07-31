@@ -46,7 +46,7 @@ class CardJpaAdapter(
             ?: throw AccountException(AccountCode.ACCOUNT_NOT_FOUND)
 
         return onUniqueViolation({ CardException(CardCode.JOIN_ALREADY) }) {
-            cardRepository.save(CardJpaEntity(gathering = gathering, account = account, pinNumber = pinNumber))
+            cardRepository.saveAndFlush(CardJpaEntity(gathering = gathering, account = account, pinNumber = pinNumber))
                 .toDomainModel()
         }
     }
