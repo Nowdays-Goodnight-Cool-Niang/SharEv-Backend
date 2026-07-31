@@ -12,12 +12,12 @@ VALUES (1, 'ADMIN', '관리자', 'admin@example.com', NOW(), NOW()),
 -- ============================================
 -- Teams (독립적 테이블)
 -- ============================================
-INSERT INTO "teams" ("team_id", "certification", "title", "content", "activate_flag", "created_at", "updated_at")
+INSERT INTO "teams" ("team_id", "certification", "title", "content", "created_at", "updated_at")
     OVERRIDING SYSTEM VALUE
-VALUES (1, 'CERTIFICATED', '개발팀', '백엔드 개발을 담당하는 팀입니다.', true, NOW(), NOW()),
-       (2, 'NONE', '디자인팀', 'UI/UX 디자인을 담당하는 팀입니다.', true, NOW(), NOW()),
-       (3, 'CERTIFICATED', '기획팀', '서비스 기획을 담당하는 팀입니다.', true, NOW(), NOW()),
-       (4, 'NONE', '마케팅팀', '마케팅을 담당하는 팀입니다.', false, NOW(), NOW());
+VALUES (1, 'CERTIFICATED', '개발팀', '백엔드 개발을 담당하는 팀입니다.', NOW(), NOW()),
+       (2, 'NONE', '디자인팀', 'UI/UX 디자인을 담당하는 팀입니다.', NOW(), NOW()),
+       (3, 'CERTIFICATED', '기획팀', '서비스 기획을 담당하는 팀입니다.', NOW(), NOW()),
+       (4, 'NONE', '마케팅팀', '마케팅을 담당하는 팀입니다.', NOW(), NOW());
 
 -- ============================================
 -- OAuth Accounts (accounts 참조)
