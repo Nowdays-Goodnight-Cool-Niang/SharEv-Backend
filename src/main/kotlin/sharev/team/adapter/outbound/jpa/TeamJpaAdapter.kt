@@ -1,8 +1,8 @@
 package sharev.team.adapter.outbound.jpa
 
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
+import sharev.common.adapter.outbound.jpa.exception.onUniqueViolation
 import sharev.team.adapter.outbound.jpa.entity.TeamJpaEntity
 import sharev.team.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.team.adapter.outbound.jpa.repository.TeamRepository
@@ -21,11 +21,9 @@ class TeamJpaAdapter(
 ) : SaveTeamPort, LoadTeamPort, QueryTeamPort {
 
     override fun save(title: String, content: String): Team {
-        return try {
+        return onUniqueViolation({ TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME) }) {
             teamRepository.save(TeamJpaEntity(title = title, content = content))
                 .toDomainModel()
-        } catch (e: DataIntegrityViolationException) {
-            throw TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME)
         }
     }
 
@@ -35,7 +33,10 @@ class TeamJpaAdapter(
 
         teamJpaEntity.update(title, content)
 
-        return teamJpaEntity.toDomainModel()
+        return onUniqueViolation({ TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME) }) {
+            teamRepository.saveAndFlush(teamJpaEntity)
+                .toDomainModel()
+        }
     }
 
     override fun load(teamId: Long): Team {

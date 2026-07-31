@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import sharev.account.adapter.outbound.jpa.repository.AccountRepository
 import sharev.account.domain.exception.AccountException
 import sharev.account.domain.exception.AccountExceptionCode
+import sharev.common.adapter.outbound.jpa.exception.onUniqueViolation
 import sharev.member.adapter.outbound.jpa.entity.MemberJpaEntity
 import sharev.member.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.member.adapter.outbound.jpa.repository.MemberRepository
@@ -46,14 +47,16 @@ class MemberJpaAdapter(
         val account = accountRepository.findByIdOrNull(accountId)
             ?: throw AccountException(AccountExceptionCode.ACCOUNT_NOT_FOUND)
 
-        return memberRepository.save(
-            MemberJpaEntity(
-                team = team,
-                account = account,
-                status = status,
-                role = role,
-            )
-        ).toDomainModel()
+        return onUniqueViolation({ MemberException(MemberExceptionCode.MEMBER_ALREADY_EXISTS) }) {
+            memberRepository.saveAndFlush(
+                MemberJpaEntity(
+                    team = team,
+                    account = account,
+                    status = status,
+                    role = role,
+                )
+            ).toDomainModel()
+        }
     }
 
     override fun saveTeamAdmin(teamId: Long, accountId: Long) {

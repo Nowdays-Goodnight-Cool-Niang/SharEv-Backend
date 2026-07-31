@@ -10,6 +10,7 @@ import sharev.account.application.port.outbound.*
 import sharev.account.domain.exception.AccountException
 import sharev.account.domain.exception.AccountExceptionCode
 import sharev.account.domain.model.Account
+import sharev.common.adapter.outbound.jpa.exception.onUniqueViolation
 
 @Component
 class AccountJpaAdapter(
@@ -18,8 +19,7 @@ class AccountJpaAdapter(
     SaveAccountPort,
     DeleteAccountPort,
     UpdateAccountPort,
-    UpdateAccountHandlePort,
-    CheckHandleDuplicatedPort {
+    UpdateAccountHandlePort {
 
     override fun load(accountId: Long): Account {
         val accountJpaEntity = accountRepository.findByIdOrNull(accountId)
@@ -62,11 +62,9 @@ class AccountJpaAdapter(
 
         accountJpaEntity.handle = handle
 
-        return accountRepository.saveAndFlush(accountJpaEntity)
-            .toDomainModel()
-    }
-
-    override fun isDuplicated(accountId: Long, handle: String): Boolean {
-        return accountRepository.existsByHandleAndIdNot(handle, accountId)
+        return onUniqueViolation({ AccountException(AccountExceptionCode.HANDLE_ALREADY_EXISTS) }) {
+            accountRepository.saveAndFlush(accountJpaEntity)
+                .toDomainModel()
+        }
     }
 }
