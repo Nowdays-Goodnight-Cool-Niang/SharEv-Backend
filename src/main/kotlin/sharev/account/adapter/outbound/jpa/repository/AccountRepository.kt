@@ -6,4 +6,6 @@ import java.util.*
 
 interface AccountRepository : JpaRepository<AccountJpaEntity, Long> {
     fun findByEmail(email: String): Optional<AccountJpaEntity>
+
+    fun existsByHandleAndIdNot(handle: String, id: Long): Boolean
 }

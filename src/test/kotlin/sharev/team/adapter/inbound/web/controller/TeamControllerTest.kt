@@ -26,6 +26,10 @@ import sharev.team.application.port.inbound.command.CreateTeamCommand
 import sharev.team.application.port.inbound.command.GetMyTeamsCommand
 import sharev.team.application.port.inbound.command.UpdateTeamInfoCommand
 import sharev.team.application.port.inbound.result.*
+import sharev.team.application.port.inbound.usecase.CreateTeamUseCase
+import sharev.team.application.port.inbound.usecase.GetMyTeamsUseCase
+import sharev.team.application.port.inbound.usecase.GetTeamDetailUseCase
+import sharev.team.application.port.inbound.usecase.UpdateTeamInfoUseCase
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.TeamCertification
@@ -37,7 +41,7 @@ class TeamControllerTest : ControllerTestSupport() {
     @DisplayName("팀 생성")
     fun createTeam() {
         val requestDto = CreateTeamRequest("새로운 팀")
-        given(createTeamUseCase.create(CreateTeamCommand(1L, "새로운 팀")))
+        given(mockBean<CreateTeamUseCase>().create(CreateTeamCommand(1L, "새로운 팀")))
             .willReturn(CreateTeamResult(1L))
 
         val request = RestDocumentationRequestBuilders.post("/teams")
@@ -85,7 +89,8 @@ class TeamControllerTest : ControllerTestSupport() {
             ),
         )
 
-        given(getMyTeamsUseCase.getMyTeams(GetMyTeamsCommand(1L))).willReturn(teams)
+        given(mockBean<GetMyTeamsUseCase>().getMyTeams(GetMyTeamsCommand(1L)))
+            .willReturn(teams)
 
         val request = RestDocumentationRequestBuilders.get("/teams")
             .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +124,7 @@ class TeamControllerTest : ControllerTestSupport() {
     @WithCustomMockUser
     @DisplayName("팀 상세 조회 실패 - 팀 미존재 혹은 속하지 않음")
     fun getTeamDetailFail() {
-        given(getTeamDetailUseCase.getTeamDetail(1L, 1L))
+        given(mockBean<GetTeamDetailUseCase>().getTeamDetail(1L, 1L))
             .willThrow(TeamException(TeamExceptionCode.TEAM_NOT_FOUND))
 
         val request = RestDocumentationRequestBuilders.get("/teams/{teamId}", 1L)
@@ -152,7 +157,8 @@ class TeamControllerTest : ControllerTestSupport() {
             listOf(TeamMemberInfoResult("김주호", "admin@test.com", MemberRole.ADMIN)),
         )
 
-        given(getTeamDetailUseCase.getTeamDetail(1L, 1L)).willReturn(response)
+        given(mockBean<GetTeamDetailUseCase>().getTeamDetail(1L, 1L))
+            .willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/teams/{teamId}", 1L)
             .contentType(MediaType.APPLICATION_JSON)
@@ -200,7 +206,7 @@ class TeamControllerTest : ControllerTestSupport() {
         val requestDto = UpdateTeamRequest("수정된 팀 이름")
 
         willThrow(TeamException(TeamExceptionCode.TEAM_NOT_FOUND))
-            .given(updateTeamInfoUseCase)
+            .given(mockBean<UpdateTeamInfoUseCase>())
             .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title))
 
         val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
@@ -219,7 +225,7 @@ class TeamControllerTest : ControllerTestSupport() {
         val requestDto = UpdateTeamRequest("수정된 팀 이름")
 
         willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
-            .given(updateTeamInfoUseCase)
+            .given(mockBean<UpdateTeamInfoUseCase>())
             .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title))
 
         val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
@@ -238,7 +244,7 @@ class TeamControllerTest : ControllerTestSupport() {
         val updateTitle = "수정된 팀 이름"
         val requestDto = UpdateTeamRequest(updateTitle)
 
-        given(updateTeamInfoUseCase.updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, updateTitle)))
+        given(mockBean<UpdateTeamInfoUseCase>().updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, updateTitle)))
             .willReturn(TeamUpdateInfoResult(updateTitle))
 
         val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)

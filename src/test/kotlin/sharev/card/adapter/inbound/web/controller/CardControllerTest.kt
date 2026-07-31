@@ -28,6 +28,7 @@ import sharev.card.adapter.inbound.web.dto.response.UpdateCardIntroduceResponse
 import sharev.card.application.port.inbound.result.CardResult
 import sharev.card.application.port.inbound.result.JoinCardResult
 import sharev.card.application.port.inbound.result.UpdateCardInfoResult
+import sharev.card.application.port.inbound.usecase.*
 import sharev.card.domain.model.CardDisplay
 import java.time.LocalDateTime
 import java.util.*
@@ -39,7 +40,8 @@ class CardControllerTest : ControllerTestSupport() {
     fun join() {
         val gatheringId = UUID.randomUUID()
 
-        given(joinCardUseCase.join(any())).willReturn(JoinCardResult(1L, 1234))
+        given(mockBean<JoinCardUseCase>().join(any()))
+            .willReturn(JoinCardResult(1L, 1234))
 
         val request = RestDocumentationRequestBuilders.post("/gatherings/{gatheringId}/cards", gatheringId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -74,7 +76,7 @@ class CardControllerTest : ControllerTestSupport() {
         val introText = mapOf("introduce" to "백엔드")
         val requestDto = UpdateCardIntroduceRequest(1, introText)
 
-        given(updateCardInfoUseCase.updateIntroduce(any()))
+        given(mockBean<UpdateCardInfoUseCase>().updateIntroduce(any()))
             .willReturn(UpdateCardInfoResult(1, introText))
 
         val request = RestDocumentationRequestBuilders.patch("/gatherings/{gatheringId}/cards", gatheringId)
@@ -131,7 +133,7 @@ class CardControllerTest : ControllerTestSupport() {
         val snapshotTime = LocalDateTime.of(2025, 1, 15, 10, 30)
         val pageable = PageRequest.of(0, 20)
 
-        given(getAllCardsUseCase.getAllCards(any()))
+        given(mockBean<GetAllCardsUseCase>().getAllCards(any()))
             .willReturn(PageImpl(listOf(fullCard, minimumCard), pageable, 2))
 
         val request = RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}/cards", gatheringId)
@@ -189,7 +191,8 @@ class CardControllerTest : ControllerTestSupport() {
     fun getMyCard() {
         val gatheringId = UUID.randomUUID()
 
-        given(getMyCardUseCase.getMyCard(any())).willReturn(cardResult(1L))
+        given(mockBean<GetMyCardUseCase>().getMyCard(any()))
+            .willReturn(cardResult(1L))
 
         val request = RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}/cards/me", gatheringId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -219,7 +222,8 @@ class CardControllerTest : ControllerTestSupport() {
     fun getMyPinNumber() {
         val gatheringId = UUID.randomUUID()
 
-        given(getMyPinNumberUseCase.getMyPinNumber(any())).willReturn(1234)
+        given(mockBean<GetMyPinNumberUseCase>().getMyPinNumber(any()))
+            .willReturn(1234)
 
         val request = RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}/cards/me/pin", gatheringId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -250,7 +254,8 @@ class CardControllerTest : ControllerTestSupport() {
         val gatheringId = UUID.randomUUID()
         val pinNumber = 1234
 
-        given(getCardByPinNumberUseCase.getCardByPinNumber(any())).willReturn(cardResult(2L))
+        given(mockBean<GetCardByPinNumberUseCase>().getCardByPinNumber(any()))
+            .willReturn(cardResult(2L))
 
         val request = RestDocumentationRequestBuilders
             .get("/gatherings/{gatheringId}/cards/by-pin/{pinNumber}", gatheringId, pinNumber)

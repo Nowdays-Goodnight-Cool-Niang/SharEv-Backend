@@ -21,6 +21,9 @@ class AccountJpaEntity(
 
     @Column
     @Enumerated(EnumType.STRING)
-    var role: AccountRole = AccountRole.USER
+    var role: AccountRole = AccountRole.USER,
+
+    @Column
+    var handle: String?,
 ) : BaseTimeEntity() {
 }

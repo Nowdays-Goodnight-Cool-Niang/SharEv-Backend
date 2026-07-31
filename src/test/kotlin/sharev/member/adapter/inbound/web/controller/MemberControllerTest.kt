@@ -17,19 +17,10 @@ import sharev.ControllerTestSupport
 import sharev.WithCustomMockUser
 import sharev.member.adapter.inbound.web.dto.request.InviteMemberRequest
 import sharev.member.adapter.inbound.web.dto.request.UpdateMemberRoleRequest
-import sharev.member.adapter.inbound.web.dto.response.AcceptInvitationResponse
-import sharev.member.adapter.inbound.web.dto.response.InviteMemberResponse
-import sharev.member.adapter.inbound.web.dto.response.LeaveTeamResponse
-import sharev.member.adapter.inbound.web.dto.response.MemberResponse
-import sharev.member.adapter.inbound.web.dto.response.RemoveMemberResponse
-import sharev.member.adapter.inbound.web.dto.response.UpdateMemberRoleResponse
-import sharev.member.application.port.inbound.command.AcceptInvitationCommand
-import sharev.member.application.port.inbound.command.GetMembersCommand
-import sharev.member.application.port.inbound.command.InviteMemberCommand
-import sharev.member.application.port.inbound.command.LeaveTeamCommand
-import sharev.member.application.port.inbound.command.RemoveMemberCommand
-import sharev.member.application.port.inbound.command.UpdateMemberRoleCommand
+import sharev.member.adapter.inbound.web.dto.response.*
+import sharev.member.application.port.inbound.command.*
 import sharev.member.application.port.inbound.result.*
+import sharev.member.application.port.inbound.usecase.*
 import sharev.member.domain.model.MemberRole
 import sharev.member.domain.model.MemberStatus
 import sharev.team.domain.exception.TeamException
@@ -47,7 +38,8 @@ class MemberControllerTest : ControllerTestSupport() {
             MemberResult(3L, "이영희", "lee@test.com", MemberRole.COMMON, MemberStatus.INVITE),
         )
 
-        given(getMembersUseCase.getMembers(GetMembersCommand(1L, teamId))).willReturn(response)
+        given(mockBean<GetMembersUseCase>().getMembers(GetMembersCommand(1L, teamId)))
+            .willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/teams/{teamId}/members", teamId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +77,7 @@ class MemberControllerTest : ControllerTestSupport() {
         val teamId = 1L
         val dto = InviteMemberRequest("newuser@test.com")
 
-        given(inviteMemberUseCase.invite(InviteMemberCommand(1L, teamId, dto.email)))
+        given(mockBean<InviteMemberUseCase>().invite(InviteMemberCommand(1L, teamId, dto.email)))
             .willReturn(InviteMemberResult(2L, MemberRole.COMMON, MemberStatus.INVITE))
 
         val request = RestDocumentationRequestBuilders.post("/teams/{teamId}/members", teamId)
@@ -124,7 +116,7 @@ class MemberControllerTest : ControllerTestSupport() {
         val teamId = 1L
         val dto = InviteMemberRequest("newuser@test.com")
 
-        given(inviteMemberUseCase.invite(InviteMemberCommand(1L, teamId, dto.email)))
+        given(mockBean<InviteMemberUseCase>().invite(InviteMemberCommand(1L, teamId, dto.email)))
             .willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
 
         val request = RestDocumentationRequestBuilders.post("/teams/{teamId}/members", teamId)
@@ -142,7 +134,7 @@ class MemberControllerTest : ControllerTestSupport() {
     fun acceptInvitation() {
         val teamId = 1L
 
-        given(acceptInvitationUseCase.acceptInvitation(AcceptInvitationCommand(1L, teamId)))
+        given(mockBean<AcceptInvitationUseCase>().acceptInvitation(AcceptInvitationCommand(1L, teamId)))
             .willReturn(AcceptInvitationResult(1L, MemberStatus.ACTIVATE))
 
         val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}/members/me/accept", teamId)
@@ -176,7 +168,8 @@ class MemberControllerTest : ControllerTestSupport() {
     fun leave() {
         val teamId = 1L
 
-        given(leaveTeamUseCase.leave(LeaveTeamCommand(1L, teamId))).willReturn(LeaveTeamResult(1L))
+        given(mockBean<LeaveTeamUseCase>().leave(LeaveTeamCommand(1L, teamId)))
+            .willReturn(LeaveTeamResult(1L))
 
         val request = RestDocumentationRequestBuilders.delete("/teams/{teamId}/members/me", teamId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -209,7 +202,7 @@ class MemberControllerTest : ControllerTestSupport() {
         val role = MemberRole.ADMIN
         val dto = UpdateMemberRoleRequest(role)
 
-        given(updateMemberRoleUseCase.updateRole(UpdateMemberRoleCommand(1L, teamId, memberId, role)))
+        given(mockBean<UpdateMemberRoleUseCase>().updateRole(UpdateMemberRoleCommand(1L, teamId, memberId, role)))
             .willReturn(UpdateMemberRoleResult(memberId, role))
 
         val request = RestDocumentationRequestBuilders
@@ -253,7 +246,7 @@ class MemberControllerTest : ControllerTestSupport() {
         val role = MemberRole.ADMIN
         val dto = UpdateMemberRoleRequest(role)
 
-        given(updateMemberRoleUseCase.updateRole(UpdateMemberRoleCommand(1L, teamId, memberId, role)))
+        given(mockBean<UpdateMemberRoleUseCase>().updateRole(UpdateMemberRoleCommand(1L, teamId, memberId, role)))
             .willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
 
         val request = RestDocumentationRequestBuilders
@@ -273,7 +266,7 @@ class MemberControllerTest : ControllerTestSupport() {
         val teamId = 1L
         val memberId = 2L
 
-        given(removeMemberUseCase.removeMember(RemoveMemberCommand(1L, teamId, memberId)))
+        given(mockBean<RemoveMemberUseCase>().removeMember(RemoveMemberCommand(1L, teamId, memberId)))
             .willReturn(RemoveMemberResult(memberId))
 
         val request = RestDocumentationRequestBuilders.delete("/teams/{teamId}/members/{memberId}", teamId, memberId)
@@ -308,7 +301,7 @@ class MemberControllerTest : ControllerTestSupport() {
         val teamId = 1L
         val memberId = 2L
 
-        given(removeMemberUseCase.removeMember(RemoveMemberCommand(1L, teamId, memberId)))
+        given(mockBean<RemoveMemberUseCase>().removeMember(RemoveMemberCommand(1L, teamId, memberId)))
             .willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
 
         val request = RestDocumentationRequestBuilders.delete("/teams/{teamId}/members/{memberId}", teamId, memberId)

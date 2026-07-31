@@ -33,11 +33,12 @@ class OAuthAccountService(
             account.role,
             account.name,
             account.email,
+            account.handle,
         )
     }
 
     private fun signup(command: OAuthLoginCommand): Account {
-        val account = saveAccountPort.save(Account(0L, command.name, command.email, AccountRole.USER))
+        val account = saveAccountPort.save(Account(0L, command.name, command.email, AccountRole.USER, null))
         saveOAuthAccountPort.save(OAuthAccount(command.provider, command.subjectIdentifier, account.id))
         return account
     }

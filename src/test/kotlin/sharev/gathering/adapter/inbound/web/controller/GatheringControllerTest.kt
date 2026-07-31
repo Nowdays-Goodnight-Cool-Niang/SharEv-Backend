@@ -25,6 +25,7 @@ import sharev.gathering.adapter.inbound.web.dto.response.*
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.inbound.result.*
+import sharev.gathering.application.port.inbound.usecase.*
 import sharev.gathering.domain.model.GatheringVisible
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
@@ -39,7 +40,8 @@ class GatheringControllerTest : ControllerTestSupport() {
         val pageable = PageRequest.of(0, 20)
         val response = PageImpl(listOf(gatheringResult(UUID.randomUUID())), pageable, 1)
 
-        given(getGatheringsUseCase.getGatherings(pageable)).willReturn(response)
+        given(mockBean<GetGatheringsUseCase>().getGatherings(pageable))
+            .willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/gatherings")
             .param("page", "0")
@@ -72,7 +74,8 @@ class GatheringControllerTest : ControllerTestSupport() {
         val pageable = PageRequest.of(0, 20)
         val response = PageImpl(listOf(gatheringResult(UUID.randomUUID())), pageable, 1)
 
-        given(getParticipatedGatheringsUseCase.getParticipatedGatherings(1L, pageable)).willReturn(response)
+        given(mockBean<GetParticipatedGatheringsUseCase>().getParticipatedGatherings(1L, pageable))
+            .willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/gatherings/me")
             .param("page", "0")
@@ -104,7 +107,8 @@ class GatheringControllerTest : ControllerTestSupport() {
     fun isParticipant() {
         val gatheringId = UUID.randomUUID()
 
-        given(checkGatheringParticipantUseCase.isParticipant(1L, gatheringId)).willReturn(ParticipantResult(false))
+        given(mockBean<CheckGatheringParticipantUseCase>().isParticipant(1L, gatheringId))
+            .willReturn(ParticipantResult(false))
 
         val request = RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}", gatheringId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +153,7 @@ class GatheringControllerTest : ControllerTestSupport() {
         )
 
         given(
-            createGatheringUseCase.create(
+            mockBean<CreateGatheringUseCase>().create(
                 CreateGatheringCommand(
                     1L,
                     teamId,
@@ -255,8 +259,7 @@ class GatheringControllerTest : ControllerTestSupport() {
         )
 
         willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
-            .given(createGatheringUseCase)
-            .create(
+            .given(mockBean<CreateGatheringUseCase>()).create(
                 CreateGatheringCommand(
                     1L,
                     teamId,
@@ -290,7 +293,8 @@ class GatheringControllerTest : ControllerTestSupport() {
         val teamId = 1L
         val response = listOf(gatheringResult(UUID.randomUUID()))
 
-        given(getTeamGatheringUseCase.getTeamGatherings(1L, teamId)).willReturn(response)
+        given(mockBean<GetTeamGatheringUseCase>().getTeamGatherings(1L, teamId))
+            .willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/teams/{teamId}/gatherings", teamId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -320,7 +324,7 @@ class GatheringControllerTest : ControllerTestSupport() {
     fun getTeamGatheringsFail() {
         val teamId = 1L
 
-        given(getTeamGatheringUseCase.getTeamGatherings(1L, teamId))
+        given(mockBean<GetTeamGatheringUseCase>().getTeamGatherings(1L, teamId))
             .willThrow(TeamException(TeamExceptionCode.NOT_TEAM_MEMBER))
 
         val request = RestDocumentationRequestBuilders.get("/teams/{teamId}/gatherings", teamId)
@@ -339,12 +343,13 @@ class GatheringControllerTest : ControllerTestSupport() {
         val gatheringId = UUID.randomUUID()
 
         given(
-            getTeamGatheringUseCase.getTeamGathering(
+            mockBean<GetTeamGatheringUseCase>().getTeamGathering(
                 1L,
                 teamId,
                 gatheringId
             )
-        ).willReturn(gatheringResult(gatheringId))
+        )
+            .willReturn(gatheringResult(gatheringId))
 
         val request =
             RestDocumentationRequestBuilders.get("/teams/{teamId}/gatherings/{gatheringId}", teamId, gatheringId)
@@ -393,7 +398,7 @@ class GatheringControllerTest : ControllerTestSupport() {
         )
 
         given(
-            updateGatheringUseCase.update(
+            mockBean<UpdateGatheringUseCase>().update(
                 UpdateGatheringCommand(
                     1L,
                     teamId,
@@ -466,7 +471,7 @@ class GatheringControllerTest : ControllerTestSupport() {
         )
 
         given(
-            updateGatheringUseCase.update(
+            mockBean<UpdateGatheringUseCase>().update(
                 UpdateGatheringCommand(
                     1L,
                     teamId,
@@ -506,7 +511,8 @@ class GatheringControllerTest : ControllerTestSupport() {
         val teamId = 1L
         val gatheringId = UUID.randomUUID()
 
-        given(deleteGatheringUseCase.delete(1L, teamId, gatheringId)).willReturn(DeleteGatheringResult(gatheringId))
+        given(mockBean<DeleteGatheringUseCase>().delete(1L, teamId, gatheringId))
+            .willReturn(DeleteGatheringResult(gatheringId))
 
         val request = RestDocumentationRequestBuilders.delete(
             "/teams/{teamId}/gatherings/{gatheringId}",
@@ -545,7 +551,7 @@ class GatheringControllerTest : ControllerTestSupport() {
         val gatheringId = UUID.randomUUID()
 
         willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
-            .given(deleteGatheringUseCase)
+            .given(mockBean<DeleteGatheringUseCase>())
             .delete(1L, teamId, gatheringId)
 
         val request = RestDocumentationRequestBuilders.delete(
@@ -567,11 +573,12 @@ class GatheringControllerTest : ControllerTestSupport() {
         val gatheringId = UUID.randomUUID()
         val response = IntroduceTemplateResult(
             1,
-            "안녕하세요. 저는 \${introduce} 개발자입니다. 가장 뿌듯했던 경험은 \${proudestExperience} 입니다.",
+            $$"안녕하세요. 저는 ${introduce} 개발자입니다. 가장 뿌듯했던 경험은 ${proudestExperience} 입니다.",
             mapOf("introduce" to "직무를 입력하세요", "proudestExperience" to "경험을 입력하세요"),
         )
 
-        given(getIntroduceTemplateUseCase.getLatestTemplate(gatheringId, 1L)).willReturn(response)
+        given(mockBean<GetIntroduceTemplateUseCase>().getLatestTemplate(gatheringId, 1L))
+            .willReturn(response)
 
         val request = RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}/template", gatheringId)
             .contentType(MediaType.APPLICATION_JSON)
