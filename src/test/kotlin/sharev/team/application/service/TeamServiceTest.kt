@@ -159,7 +159,7 @@ class TeamServiceTest {
         val newTitle = "수정된 팀 이름"
         val newContent = "수정된 내용"
         val command = UpdateTeamInfoCommand(10L, 1L, newTitle, newContent)
-        val updatedTeam = team(id = command.teamId, title = newTitle, newContent)
+        val updatedTeam = team(command.teamId, newTitle, newContent)
 
         given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId))
             .willReturn(true)
