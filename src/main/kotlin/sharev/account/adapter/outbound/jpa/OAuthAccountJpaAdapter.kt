@@ -28,7 +28,7 @@ class OAuthAccountJpaAdapter(
 
     override fun save(oAuthAccount: OAuthAccount): OAuthAccount {
         val accountJpaEntity = accountRepository.findByIdOrNull(oAuthAccount.accountId)
-            ?: throw AccountException(AccountExceptionCode.ACCOUNT_NOT_FOUND, "Account 저장 과정에서 문제가 발생했습니다.")
+            ?: throw AccountException(AccountExceptionCode.ACCOUNT_SAVE_FAILED)
 
         return oAuthAccountRepository.save(oAuthAccount.toJpaEntity(accountJpaEntity))
             .toDomainModel()

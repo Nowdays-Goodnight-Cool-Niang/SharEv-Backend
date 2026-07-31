@@ -8,6 +8,5 @@ fun TeamJpaEntity.toDomainModel() = Team(
     teamCertification = certification,
     title = title,
     content = content,
-    activateFlag = activateFlag,
     createdAt = createdAt,
 )

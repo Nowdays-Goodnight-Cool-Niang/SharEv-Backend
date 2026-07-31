@@ -40,8 +40,8 @@ class TeamControllerTest : ControllerTestSupport() {
     @WithCustomMockUser
     @DisplayName("팀 생성")
     fun createTeam() {
-        val requestDto = CreateTeamRequest("새로운 팀")
-        given(mockBean<CreateTeamUseCase>().create(CreateTeamCommand(1L, "새로운 팀")))
+        val requestDto = CreateTeamRequest("새로운 팀", "설명")
+        given(mockBean<CreateTeamUseCase>().create(CreateTeamCommand(1L, "새로운 팀", "설명")))
             .willReturn(CreateTeamResult(1L))
 
         val request = RestDocumentationRequestBuilders.post("/teams")
@@ -58,7 +58,10 @@ class TeamControllerTest : ControllerTestSupport() {
                         ResourceSnippetParameters.builder()
                             .summary("팀 생성")
                             .description("새로운 팀을 생성합니다. 생성한 사용자는 자동으로 ADMIN 권한을 부여받습니다.")
-                            .requestFields(fieldWithPath("title").type(STRING).description("팀 이름"))
+                            .requestFields(
+                                fieldWithPath("title").type(STRING).description("팀 이름"),
+                                fieldWithPath("content").type(STRING).description("팀 설명"),
+                            )
                             .requestSchema(schema(CreateTeamRequest::class.java.simpleName))
                             .build()
                     )
@@ -203,11 +206,11 @@ class TeamControllerTest : ControllerTestSupport() {
     @WithCustomMockUser
     @DisplayName("팀 정보 수정 실패 - 팀 미존재 혹은 속하지 않음")
     fun updateTeamInfoTeamFail() {
-        val requestDto = UpdateTeamRequest("수정된 팀 이름")
+        val requestDto = UpdateTeamRequest("수정된 팀 이름", "수정된 설명")
 
         willThrow(TeamException(TeamExceptionCode.TEAM_NOT_FOUND))
             .given(mockBean<UpdateTeamInfoUseCase>())
-            .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title))
+            .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title, requestDto.content))
 
         val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
             .content(objectMapper.writeValueAsString(requestDto))
@@ -222,11 +225,11 @@ class TeamControllerTest : ControllerTestSupport() {
     @WithCustomMockUser
     @DisplayName("팀 정보 수정 실패 - 권한 없음")
     fun updateTeamInfoRoleFail() {
-        val requestDto = UpdateTeamRequest("수정된 팀 이름")
+        val requestDto = UpdateTeamRequest("수정된 팀 이름", "수정된 설명")
 
         willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
             .given(mockBean<UpdateTeamInfoUseCase>())
-            .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title))
+            .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title, requestDto.content))
 
         val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
             .content(objectMapper.writeValueAsString(requestDto))
@@ -242,10 +245,20 @@ class TeamControllerTest : ControllerTestSupport() {
     @DisplayName("팀 정보 수정")
     fun updateTeamInfo() {
         val updateTitle = "수정된 팀 이름"
-        val requestDto = UpdateTeamRequest(updateTitle)
+        val updateContent = "수정된 팀 설명"
+        val requestDto = UpdateTeamRequest(updateTitle, updateContent)
 
-        given(mockBean<UpdateTeamInfoUseCase>().updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, updateTitle)))
-            .willReturn(TeamUpdateInfoResult(updateTitle))
+        given(
+            mockBean<UpdateTeamInfoUseCase>().updateTeamInfo(
+                UpdateTeamInfoCommand(
+                    1L,
+                    1L,
+                    updateTitle,
+                    updateContent
+                )
+            )
+        )
+            .willReturn(TeamUpdateInfoResult(updateTitle, updateContent))
 
         val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
             .content(objectMapper.writeValueAsString(requestDto))
@@ -262,8 +275,14 @@ class TeamControllerTest : ControllerTestSupport() {
                             .summary("팀 정보 수정")
                             .description("팀 정보를 수정합니다. 팀 관리자만 수정할 수 있습니다.")
                             .pathParameters(parameterWithName("teamId").description("팀 ID"))
-                            .requestFields(fieldWithPath("title").type(STRING).description("팀 이름"))
-                            .responseFields(fieldWithPath("title").type(STRING).description("수정된 팀 이름"))
+                            .requestFields(
+                                fieldWithPath("title").type(STRING).description("팀 이름"),
+                                fieldWithPath("content").type(STRING).description("팀 설명"),
+                            )
+                            .responseFields(
+                                fieldWithPath("title").type(STRING).description("수정된 팀 이름"),
+                                fieldWithPath("content").type(STRING).description("수정된 팀 설명"),
+                            )
                             .requestSchema(schema(UpdateTeamRequest::class.java.simpleName))
                             .responseSchema(schema(TeamUpdateInfoResponse::class.java.simpleName))
                             .build()

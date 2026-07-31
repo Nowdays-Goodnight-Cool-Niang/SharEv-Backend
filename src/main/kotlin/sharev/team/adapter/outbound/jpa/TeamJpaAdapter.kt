@@ -1,8 +1,8 @@
 package sharev.team.adapter.outbound.jpa
 
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
+import sharev.common.adapter.outbound.jpa.exception.onUniqueViolation
 import sharev.team.adapter.outbound.jpa.entity.TeamJpaEntity
 import sharev.team.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.team.adapter.outbound.jpa.repository.TeamRepository
@@ -20,22 +20,23 @@ class TeamJpaAdapter(
     private val teamRepository: TeamRepository,
 ) : SaveTeamPort, LoadTeamPort, QueryTeamPort {
 
-    override fun save(title: String): Team {
-        return try {
-            teamRepository.save(TeamJpaEntity(title = title))
+    override fun save(title: String, content: String): Team {
+        return onUniqueViolation({ TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME) }) {
+            teamRepository.save(TeamJpaEntity(title = title, content = content))
                 .toDomainModel()
-        } catch (e: DataIntegrityViolationException) {
-            throw TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME)
         }
     }
 
-    override fun updateTitle(teamId: Long, title: String): Team {
+    override fun update(teamId: Long, title: String, content: String): Team {
         val teamJpaEntity = teamRepository.findByIdOrNull(teamId)
             ?: throw TeamException(TeamExceptionCode.TEAM_NOT_FOUND)
 
-        teamJpaEntity.updateTitle(title)
+        teamJpaEntity.update(title, content)
 
-        return teamJpaEntity.toDomainModel()
+        return onUniqueViolation({ TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME) }) {
+            teamRepository.saveAndFlush(teamJpaEntity)
+                .toDomainModel()
+        }
     }
 
     override fun load(teamId: Long): Team {

@@ -1,6 +1,5 @@
 package sharev.card.adapter.outbound.jpa
 
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -16,6 +15,7 @@ import sharev.card.application.port.outbound.SaveCardPort
 import sharev.card.application.port.outbound.result.TempCard
 import sharev.card.domain.exception.CardException
 import sharev.card.domain.model.Card
+import sharev.common.adapter.outbound.jpa.exception.onUniqueViolation
 import sharev.gathering.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.gathering.adapter.outbound.jpa.repository.GatheringRepository
 import sharev.gathering.application.port.outbound.CheckGatheringParticipantPort
@@ -45,11 +45,9 @@ class CardJpaAdapter(
         val account = accountRepository.findByIdOrNull(accountId)
             ?: throw AccountException(AccountCode.ACCOUNT_NOT_FOUND)
 
-        return try {
-            cardRepository.save(CardJpaEntity(gathering = gathering, account = account, pinNumber = pinNumber))
+        return onUniqueViolation({ CardException(CardCode.JOIN_ALREADY) }) {
+            cardRepository.saveAndFlush(CardJpaEntity(gathering = gathering, account = account, pinNumber = pinNumber))
                 .toDomainModel()
-        } catch (e: DataIntegrityViolationException) {
-            throw CardException(CardCode.JOIN_ALREADY)
         }
     }
 

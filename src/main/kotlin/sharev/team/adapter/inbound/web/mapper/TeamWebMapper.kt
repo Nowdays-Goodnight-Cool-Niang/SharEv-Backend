@@ -10,15 +10,16 @@ import sharev.team.application.port.inbound.result.TeamDetailResult
 import sharev.team.application.port.inbound.result.TeamInfoResult
 import sharev.team.application.port.inbound.result.TeamUpdateInfoResult
 
-fun CreateTeamRequest.toCommand(accountId: Long) = CreateTeamCommand(accountId, title)
+fun CreateTeamRequest.toCommand(accountId: Long) = CreateTeamCommand(accountId, title, content)
 
 fun CreateTeamResult.toResponse() = CreateTeamResponse(teamId)
 
-fun UpdateTeamRequest.toCommand(accountId: Long, teamId: Long) = UpdateTeamInfoCommand(accountId, teamId, title)
+fun UpdateTeamRequest.toCommand(accountId: Long, teamId: Long) =
+    UpdateTeamInfoCommand(accountId, teamId, title, content)
 
 fun TeamInfoResult.toResponse() = TeamInfoResponse(id, title, content, createdAt, memberRole, headcount)
 
-fun TeamUpdateInfoResult.toResponse() = TeamUpdateInfoResponse(title)
+fun TeamUpdateInfoResult.toResponse() = TeamUpdateInfoResponse(title, content)
 
 fun TeamDetailResult.toResponse() = TeamDetailResponse(
     id = id,

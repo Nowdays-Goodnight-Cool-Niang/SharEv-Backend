@@ -1,11 +1,14 @@
 package sharev.team.adapter.outbound.jpa.entity
 
 import jakarta.persistence.*
+import org.hibernate.annotations.SoftDelete
+import org.hibernate.annotations.SoftDeleteType
 import sharev.common.adapter.outbound.jpa.entity.BaseTimeEntity
 import sharev.team.domain.model.TeamCertification
 
 @Entity
 @Table(name = "teams")
+@SoftDelete(columnName = "deleted_at", strategy = SoftDeleteType.TIMESTAMP)
 class TeamJpaEntity(
 
     @Id
@@ -21,13 +24,11 @@ class TeamJpaEntity(
     var title: String,
 
     @Column
-    var content: String? = null,
-
-    @Column
-    var activateFlag: Boolean? = null,
+    var content: String,
 ) : BaseTimeEntity() {
 
-    fun updateTitle(title: String) {
+    fun update(title: String, content: String) {
         this.title = title
+        this.content = content
     }
 }

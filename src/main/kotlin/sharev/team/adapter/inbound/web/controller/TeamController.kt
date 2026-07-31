@@ -69,7 +69,7 @@ class TeamController(
     fun updateTeamInfo(
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
         @PathVariable teamId: Long,
-        @RequestBody request: UpdateTeamRequest,
+        @Valid @RequestBody request: UpdateTeamRequest,
     ): ResponseEntity<TeamUpdateInfoResponse> {
 
         val response = updateTeamInfoUseCase.updateTeamInfo(

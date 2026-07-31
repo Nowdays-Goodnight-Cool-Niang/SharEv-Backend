@@ -1,6 +1,5 @@
 package sharev.account.application.service
 
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import sharev.account.application.port.inbound.command.DeleteAccountCommand
@@ -14,14 +13,11 @@ import sharev.account.application.port.inbound.result.UpdateAccountInfoResult
 import sharev.account.application.port.inbound.usecase.DeleteAccountUseCase
 import sharev.account.application.port.inbound.usecase.UpdateAccountHandleUseCase
 import sharev.account.application.port.inbound.usecase.UpdateAccountInfoUseCase
-import sharev.account.application.port.outbound.CheckHandleDuplicatedPort
 import sharev.account.application.port.outbound.DeleteAccountPort
 import sharev.account.application.port.outbound.UpdateAccountHandlePort
 import sharev.account.application.port.outbound.UpdateAccountPort
 import sharev.account.domain.event.AccountLinkUpdatedEvent
 import sharev.account.domain.event.AccountWithdrawalFeedbackSubmittedEvent
-import sharev.account.domain.exception.AccountException
-import sharev.account.domain.exception.AccountExceptionCode
 import sharev.account.domain.model.HandleValidator
 import sharev.common.application.port.outbound.PublishEventPort
 
@@ -32,7 +28,6 @@ class AccountService(
     private val deleteAccountPort: DeleteAccountPort,
     private val publishEventPort: PublishEventPort,
     private val updateAccountHandlePort: UpdateAccountHandlePort,
-    private val checkHandleDuplicatedPort: CheckHandleDuplicatedPort,
 ) : UpdateAccountInfoUseCase,
     DeleteAccountUseCase,
     UpdateAccountHandleUseCase {
@@ -70,15 +65,8 @@ class AccountService(
     override fun updateAccountHandle(command: UpdateAccountHandleCommand): UpdateAccountHandleResult {
         require(HandleValidator.isValid(command.handle)) { HandleValidator.REGEX_MESSAGE }
 
-        if (checkHandleDuplicatedPort.isDuplicated(command.accountId, command.handle)) {
-            throw AccountException(AccountExceptionCode.HANDLE_ALREADY_EXISTS)
-        }
+        val account = updateAccountHandlePort.update(command.accountId, command.handle)
 
-        try {
-            val account = updateAccountHandlePort.update(command.accountId, command.handle)
-            return account.toUpdateAccountHandleResult()
-        } catch (e: DataIntegrityViolationException) {
-            throw AccountException(AccountExceptionCode.HANDLE_ALREADY_EXISTS)
-        }
+        return account.toUpdateAccountHandleResult()
     }
 }
