@@ -7,22 +7,17 @@ import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
 import org.mockito.Mockito.mock
+import sharev.member.domain.model.MemberRole
 import sharev.team.application.port.inbound.command.CreateTeamCommand
 import sharev.team.application.port.inbound.command.GetMyTeamsCommand
 import sharev.team.application.port.inbound.command.UpdateTeamInfoCommand
-import sharev.team.application.port.outbound.CheckTeamMemberPort
-import sharev.team.application.port.outbound.LoadGatheringSummaryPort
-import sharev.team.application.port.outbound.LoadTeamPort
-import sharev.team.application.port.outbound.QueryTeamPort
-import sharev.team.application.port.outbound.SaveTeamAdminMemberPort
-import sharev.team.application.port.outbound.SaveTeamPort
+import sharev.team.application.port.outbound.*
 import sharev.team.application.port.outbound.summary.GatheringSummary
 import sharev.team.application.port.outbound.summary.TeamMemberSummary
 import sharev.team.application.port.outbound.summary.TeamSummary
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.Team
-import sharev.member.domain.model.MemberRole
 import sharev.team.domain.model.TeamCertification
 import java.time.LocalDateTime
 
@@ -49,10 +44,11 @@ class TeamServiceTest {
     @DisplayName("팀 생성 시 팀을 저장하고 admin 멤버를 자동 생성한다")
     fun create_savesTeamAndCreatesAdminMember() {
         val accountId = 10L
-        val command = CreateTeamCommand(accountId = accountId, title = "새 팀")
-        val savedTeam = team(id = 1L, title = command.title)
+        val command = CreateTeamCommand(accountId, "새 팀", "설명")
+        val savedTeam = team(1L, command.title, command.content)
 
-        given(saveTeamPort.save(command.title)).willReturn(savedTeam)
+        given(saveTeamPort.save(command.title, command.content))
+            .willReturn(savedTeam)
 
         val result = teamService.create(command)
 
@@ -107,7 +103,7 @@ class TeamServiceTest {
     fun getTeamDetail_returnsDetailWithGatheringsAndMembers() {
         val accountId = 10L
         val teamId = 1L
-        val existingTeam = team(id = teamId, title = "팀A")
+        val existingTeam = team(teamId, "팀A", "내용")
         val gatheringSummaries = listOf(
             gatheringSummary(title = "행사1"),
             gatheringSummary(title = "행사2"),
@@ -142,9 +138,10 @@ class TeamServiceTest {
     @Test
     @DisplayName("admin이 아니면 updateTeamInfo 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다")
     fun updateTeamInfo_throwsException_whenNotAdmin() {
-        val command = UpdateTeamInfoCommand(accountId = 10L, teamId = 1L, title = "새 제목")
+        val command = UpdateTeamInfoCommand(10L, 1L, "새 제목", "내용")
 
-        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)).willReturn(false)
+        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId))
+            .willReturn(false)
 
         assertThatThrownBy { teamService.updateTeamInfo(command) }
             .isInstanceOf(TeamException::class.java)
@@ -160,16 +157,19 @@ class TeamServiceTest {
     @DisplayName("admin이면 updateTeamInfo 시 팀 제목을 수정하고 결과를 반환한다")
     fun updateTeamInfo_updatesTitle_whenAdmin() {
         val newTitle = "수정된 팀 이름"
-        val command = UpdateTeamInfoCommand(accountId = 10L, teamId = 1L, title = newTitle)
-        val updatedTeam = team(id = command.teamId, title = newTitle)
+        val newContent = "수정된 내용"
+        val command = UpdateTeamInfoCommand(10L, 1L, newTitle, newContent)
+        val updatedTeam = team(id = command.teamId, title = newTitle, newContent)
 
-        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)).willReturn(true)
-        given(saveTeamPort.updateTitle(command.teamId, newTitle)).willReturn(updatedTeam)
+        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId))
+            .willReturn(true)
+        given(saveTeamPort.update(command.teamId, newTitle, newContent))
+            .willReturn(updatedTeam)
 
         val result = teamService.updateTeamInfo(command)
 
         assertThat(result.title).isEqualTo(newTitle)
-        then(saveTeamPort).should().updateTitle(command.teamId, newTitle)
+        then(saveTeamPort).should().update(command.teamId, newTitle, newContent)
     }
 
     // ───────────── helpers ─────────────
@@ -177,12 +177,12 @@ class TeamServiceTest {
     private fun team(
         id: Long,
         title: String,
+        content: String,
     ) = Team(
         id = id,
         teamCertification = TeamCertification.NONE,
         title = title,
-        content = null,
-        activateFlag = true,
+        content = content,
         createdAt = LocalDateTime.of(2026, 1, 1, 0, 0),
     )
 
