@@ -20,9 +20,9 @@ class TeamJpaAdapter(
     private val teamRepository: TeamRepository,
 ) : SaveTeamPort, LoadTeamPort, QueryTeamPort {
 
-    override fun save(title: String): Team {
+    override fun save(title: String, content: String): Team {
         return try {
-            teamRepository.save(TeamJpaEntity(title = title))
+            teamRepository.save(TeamJpaEntity(title = title, content = content))
                 .toDomainModel()
         } catch (e: DataIntegrityViolationException) {
             throw TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME)
