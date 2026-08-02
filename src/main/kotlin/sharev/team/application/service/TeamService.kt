@@ -21,8 +21,8 @@ class TeamService(
     private val saveTeamPort: SaveTeamPort,
     private val loadTeamPort: LoadTeamPort,
     private val queryTeamPort: QueryTeamPort,
-    private val saveTeamAdminMemberPort: SaveTeamAdminMemberPort,
-    private val checkTeamMemberPort: CheckTeamMemberPort,
+    private val saveTeamAdminPort: SaveTeamAdminPort,
+    private val teamAccessPort: TeamAccessPort,
     private val loadGatheringSummaryPort: LoadGatheringSummaryPort,
 ) : CreateTeamUseCase,
     GetMyTeamsUseCase,
@@ -32,7 +32,7 @@ class TeamService(
     @Transactional
     override fun create(command: CreateTeamCommand): CreateTeamResult {
         val team = saveTeamPort.save(command.title, command.content)
-        saveTeamAdminMemberPort.saveTeamAdmin(
+        saveTeamAdminPort.saveTeamAdmin(
             team.id,
             command.accountId,
         )
@@ -56,8 +56,8 @@ class TeamService(
 
     @Transactional
     override fun updateTeamInfo(command: UpdateTeamInfoCommand): TeamUpdateInfoResult {
-        if (!checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)) {
-            throw TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER)
+        if (!teamAccessPort.canManage(command.accountId, command.teamId)) {
+            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE)
         }
 
         val team = saveTeamPort.update(command.teamId, command.title, command.content)
@@ -65,8 +65,8 @@ class TeamService(
     }
 
     override fun getTeamDetail(accountId: Long, teamId: Long): TeamDetailResult {
-        if (!checkTeamMemberPort.isMember(accountId, teamId)) {
-            throw TeamException(TeamExceptionCode.NOT_TEAM_MEMBER)
+        if (!teamAccessPort.hasAccess(accountId, teamId)) {
+            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS)
         }
 
         val team = loadTeamPort.load(teamId)

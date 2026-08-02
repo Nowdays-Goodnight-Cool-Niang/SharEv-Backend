@@ -14,6 +14,8 @@ interface MemberRepository : JpaRepository<MemberJpaEntity, Long> {
 
     fun findByTeamAndAccountId(team: TeamJpaEntity, accountId: Long): MemberJpaEntity?
 
+    fun existsByTeamIdAndAccountId(teamId: Long, accountId: Long): Boolean
+
     @EntityGraph(attributePaths = ["account"])
     fun findAllByTeam(team: TeamJpaEntity): List<MemberJpaEntity>
 

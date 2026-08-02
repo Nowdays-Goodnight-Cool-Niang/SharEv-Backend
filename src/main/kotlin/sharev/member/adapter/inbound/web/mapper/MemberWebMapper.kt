@@ -9,7 +9,7 @@ import sharev.member.application.port.inbound.command.UpdateMemberRoleCommand
 import sharev.member.application.port.inbound.result.*
 
 fun InviteMemberRequest.toCommand(accountPrincipal: AccountPrincipal, teamId: Long) =
-    InviteMemberCommand(accountPrincipal.id, teamId, email)
+    InviteMemberCommand(accountPrincipal.id, teamId, handle)
 
 fun UpdateMemberRoleRequest.toCommand(accountPrincipal: AccountPrincipal, teamId: Long, memberId: Long) =
     UpdateMemberRoleCommand(accountPrincipal.id, teamId, memberId, role!!)
