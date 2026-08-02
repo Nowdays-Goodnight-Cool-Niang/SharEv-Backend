@@ -14,15 +14,16 @@ import sharev.team.application.port.outbound.summary.TeamSummary
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.Team
+import sharev.team.domain.model.TeamType
 
 @Component
 class TeamJpaAdapter(
     private val teamRepository: TeamRepository,
 ) : SaveTeamPort, LoadTeamPort, QueryTeamPort {
 
-    override fun save(title: String, content: String): Team {
+    override fun save(title: String?, content: String, type: TeamType): Team {
         return onUniqueViolation({ TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME) }) {
-            teamRepository.save(TeamJpaEntity(title = title, content = content))
+            teamRepository.save(TeamJpaEntity(title = title, content = content, type = type))
                 .toDomainModel()
         }
     }

@@ -31,11 +31,8 @@ class TeamService(
 
     @Transactional
     override fun create(command: CreateTeamCommand): CreateTeamResult {
-        val team = saveTeamPort.save(command.title, command.content)
-        saveTeamAdminPort.saveTeamAdmin(
-            team.id,
-            command.accountId,
-        )
+        val team = saveTeamPort.save(command.title, command.content, command.type)
+        saveTeamAdminPort.saveTeamAdmin(team.id, command.accountId)
 
         return team.toCreateTeamResult()
     }

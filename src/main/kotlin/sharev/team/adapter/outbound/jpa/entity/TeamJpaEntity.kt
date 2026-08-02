@@ -26,7 +26,7 @@ class TeamJpaEntity(
     val type: TeamType,
 
     @Column(unique = true)
-    var title: String,
+    var title: String?,
 
     @Column
     var content: String,
