@@ -14,6 +14,7 @@ import sharev.team.application.port.inbound.usecase.UpdateTeamInfoUseCase
 import sharev.team.application.port.outbound.*
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
+import sharev.team.domain.model.TeamType
 
 @Service
 @Transactional(readOnly = true)
@@ -57,8 +58,14 @@ class TeamService(
             throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE)
         }
 
-        val team = saveTeamPort.update(command.teamId, command.title, command.content)
-        return TeamUpdateInfoResult(team.title, team.content)
+        val team = loadTeamPort.load(command.teamId)
+
+        if (team.teamType == TeamType.PERSONAL) {
+            throw TeamException(TeamExceptionCode.PERSONAL_TEAM_NOT_MODIFIABLE)
+        }
+
+        val updateTeam = saveTeamPort.update(command.teamId, command.title, command.content)
+        return TeamUpdateInfoResult(updateTeam.title, updateTeam.content)
     }
 
     override fun getTeamDetail(accountId: Long, teamId: Long): TeamDetailResult {

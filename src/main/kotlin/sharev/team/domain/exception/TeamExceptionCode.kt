@@ -23,4 +23,8 @@ enum class TeamExceptionCode(
         ExceptionCategory.NOT_FOUND,
         "팀이 존재하지 않습니다."
     ),
+    PERSONAL_TEAM_NOT_MODIFIABLE(
+        ExceptionCategory.FORBIDDEN,
+        "개인 팀은 수정할 수 없습니다."
+    ),
 }
