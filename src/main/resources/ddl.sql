@@ -38,6 +38,7 @@ CREATE TABLE teams
 (
     team_id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     certification VARCHAR(20) NOT NULL, -- 'NONE', 'CERTIFICATED'
+    type          VARCHAR(20) NOT NULL, -- 'PUBLIC', 'PERSONAL'
     title         TEXT        NOT NULL,
     content       TEXT        NOT NULL,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
