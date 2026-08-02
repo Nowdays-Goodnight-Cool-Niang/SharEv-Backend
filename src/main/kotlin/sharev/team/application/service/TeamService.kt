@@ -65,7 +65,7 @@ class TeamService(
         }
 
         val updateTeam = saveTeamPort.update(command.teamId, command.title, command.content)
-        return TeamUpdateInfoResult(updateTeam.title, updateTeam.content)
+        return TeamUpdateInfoResult(checkNotNull(updateTeam.title), updateTeam.content)
     }
 
     override fun getTeamDetail(accountId: Long, teamId: Long): TeamDetailResult {

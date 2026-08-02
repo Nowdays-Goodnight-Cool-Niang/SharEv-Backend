@@ -6,7 +6,7 @@ data class Team(
     val id: Long,
     val teamCertification: TeamCertification,
     val teamType: TeamType,
-    val title: String,
+    val title: String?,
     val content: String,
     val createdAt: LocalDateTime?,
 ) {
