@@ -27,4 +27,8 @@ enum class TeamExceptionCode(
         ExceptionCategory.FORBIDDEN,
         "개인 팀은 수정할 수 없습니다."
     ),
+    TEAM_INFO_REQUIRED(
+        ExceptionCategory.BAD_REQUEST,
+        "제목과 내용은 비워둘 수 없습니다."
+    ),
 }
