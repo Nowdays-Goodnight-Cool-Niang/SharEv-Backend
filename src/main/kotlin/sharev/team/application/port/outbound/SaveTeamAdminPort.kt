@@ -1,5 +1,5 @@
 package sharev.team.application.port.outbound
 
 fun interface SaveTeamAdminPort {
-    fun saveTeamAdmin(teamId: Long, accountId: Long)
+    fun save(teamId: Long, accountId: Long)
 }

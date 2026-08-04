@@ -3,39 +3,40 @@ package sharev.team.adapter.outbound.jpa
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import sharev.common.adapter.outbound.jpa.exception.onUniqueViolation
-import sharev.team.adapter.outbound.jpa.entity.TeamJpaEntity
 import sharev.team.adapter.outbound.jpa.mapper.toDomainModel
+import sharev.team.adapter.outbound.jpa.mapper.toJpaEntity
 import sharev.team.adapter.outbound.jpa.repository.TeamRepository
 import sharev.team.application.port.outbound.LoadTeamPort
 import sharev.team.application.port.outbound.QueryTeamPort
 import sharev.team.application.port.outbound.SaveTeamPort
+import sharev.team.application.port.outbound.summary.MyTeamSummary
 import sharev.team.application.port.outbound.summary.TeamMemberSummary
-import sharev.team.application.port.outbound.summary.TeamSummary
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.Team
-import sharev.team.domain.model.TeamType
 
 @Component
 class TeamJpaAdapter(
     private val teamRepository: TeamRepository,
-) : SaveTeamPort, LoadTeamPort, QueryTeamPort {
+) : SaveTeamPort,
+    LoadTeamPort,
+    QueryTeamPort {
 
-    override fun save(title: String?, content: String, type: TeamType): Team {
+    override fun save(team: Team): Team {
         return onUniqueViolation({ TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME) }) {
-            teamRepository.save(TeamJpaEntity(title = title, content = content, type = type))
+            teamRepository.save(team.toJpaEntity())
                 .toDomainModel()
         }
     }
 
-    override fun update(teamId: Long, title: String, content: String): Team {
-        val teamJpaEntity = teamRepository.findByIdOrNull(teamId)
+    override fun updateTitleAndContent(team: Team): Team {
+        val entity = teamRepository.findByIdOrNull(team.id)
             ?: throw TeamException(TeamExceptionCode.TEAM_NOT_FOUND)
 
-        teamJpaEntity.update(title, content)
+        entity.update(checkNotNull(team.title), checkNotNull(team.content))
 
         return onUniqueViolation({ TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME) }) {
-            teamRepository.saveAndFlush(teamJpaEntity)
+            teamRepository.saveAndFlush(entity)
                 .toDomainModel()
         }
     }
@@ -50,7 +51,7 @@ class TeamJpaAdapter(
         return teamRepository.existsById(teamId)
     }
 
-    override fun findMyTeams(accountId: Long): List<TeamSummary> {
+    override fun findMyTeams(accountId: Long): List<MyTeamSummary> {
         return teamRepository.findMyTeams(accountId)
     }
 
