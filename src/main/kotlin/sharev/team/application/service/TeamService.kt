@@ -15,7 +15,6 @@ import sharev.team.application.port.outbound.*
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.Team
-import sharev.team.domain.model.TeamCertification
 
 @Service
 @Transactional(readOnly = true)
@@ -33,19 +32,8 @@ class TeamService(
 
     @Transactional
     override fun create(command: CreateTeamCommand): CreateTeamResult {
-        val team = saveTeamPort.save(
-            Team(
-                0L,
-                command.title,
-                command.content,
-                TeamCertification.NONE,
-                command.type,
-                null
-            )
-        )
-
+        val team = saveTeamPort.save(Team.create(command.title, command.content, command.type))
         saveTeamAdminPort.save(team.id, command.accountId)
-
         return team.toCreateTeamResult()
     }
 
