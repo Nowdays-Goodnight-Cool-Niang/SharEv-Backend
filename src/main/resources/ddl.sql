@@ -40,7 +40,7 @@ CREATE TABLE teams
     certification VARCHAR(20) NOT NULL, -- 'NONE', 'CERTIFICATED'
     type          VARCHAR(20) NOT NULL, -- 'PUBLIC', 'PERSONAL'
     title         TEXT        NULL,
-    content       TEXT        NOT NULL,
+    content       TEXT        NULL,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at    TIMESTAMPTZ NULL,
