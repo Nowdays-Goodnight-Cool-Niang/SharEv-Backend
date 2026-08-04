@@ -23,6 +23,10 @@ data class Team(
             throw TeamException(TeamExceptionCode.NOT_MODIFIABLE_TEAM)
         }
 
+        if (title.isBlank() || content.isBlank()) {
+            throw TeamException(TeamExceptionCode.TEAM_INFO_REQUIRED)
+        }
+
         return copy(title = title, content = content)
     }
 }
