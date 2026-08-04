@@ -57,7 +57,7 @@ class MemberJpaAdapter(
         }
     }
 
-    override fun saveTeamAdmin(teamId: Long, accountId: Long) {
+    override fun save(teamId: Long, accountId: Long) {
         val team = teamRepository.findByIdOrNull(teamId)
             ?: throw TeamException(TeamExceptionCode.TEAM_NOT_FOUND)
         val account = accountRepository.findByIdOrNull(accountId)
