@@ -23,9 +23,9 @@ enum class TeamExceptionCode(
         ExceptionCategory.NOT_FOUND,
         "팀이 존재하지 않습니다."
     ),
-    PERSONAL_TEAM_NOT_MODIFIABLE(
+    NOT_MODIFIABLE_TEAM(
         ExceptionCategory.FORBIDDEN,
-        "개인 팀은 수정할 수 없습니다."
+        "수정 가능한 팀 형태가 아닙니다."
     ),
     TEAM_INFO_REQUIRED(
         ExceptionCategory.BAD_REQUEST,
