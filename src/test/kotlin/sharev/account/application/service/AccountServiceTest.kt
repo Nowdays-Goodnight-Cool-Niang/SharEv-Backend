@@ -11,7 +11,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import sharev.account.application.port.inbound.command.DeleteAccountCommand
 import sharev.account.application.port.inbound.command.UpdateAccountInfoCommand
-import sharev.account.application.port.outbound.CheckHandleDuplicatedPort
 import sharev.account.application.port.outbound.DeleteAccountPort
 import sharev.account.application.port.outbound.UpdateAccountHandlePort
 import sharev.account.application.port.outbound.UpdateAccountPort
@@ -26,14 +25,12 @@ class AccountServiceTest {
     private val deleteAccountPort = mock(DeleteAccountPort::class.java)
     private val publishEventPort = mock(PublishEventPort::class.java)
     private val updateAccountHandlePort = mock(UpdateAccountHandlePort::class.java)
-    private val checkHandleDuplicatedPort = mock(CheckHandleDuplicatedPort::class.java)
 
     private val accountService = AccountService(
         updateAccountPort,
         deleteAccountPort,
         publishEventPort,
         updateAccountHandlePort,
-        checkHandleDuplicatedPort,
     )
 
     // ───────────── updateAccountInfo ─────────────
