@@ -6,17 +6,14 @@ import sharev.member.application.port.inbound.command.*
 import sharev.member.application.port.inbound.mapper.*
 import sharev.member.application.port.inbound.result.*
 import sharev.member.application.port.inbound.usecase.*
-import sharev.member.application.port.outbound.DeleteMemberPort
-import sharev.member.application.port.outbound.LoadAccountForMemberPort
-import sharev.member.application.port.outbound.LoadMemberPort
-import sharev.member.application.port.outbound.SaveMemberPort
+import sharev.member.application.port.outbound.*
 import sharev.member.domain.exception.MemberException
 import sharev.member.domain.exception.MemberExceptionCode
 import sharev.member.domain.model.Member
 import sharev.member.domain.model.MemberRole
 import sharev.member.domain.model.MemberStatus
-import sharev.team.application.port.outbound.CheckTeamMemberPort
 import sharev.team.application.port.outbound.LoadTeamPort
+import sharev.team.application.port.outbound.TeamAccessPort
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 
@@ -28,7 +25,8 @@ class MemberService(
     private val saveMemberPort: SaveMemberPort,
     private val deleteMemberPort: DeleteMemberPort,
     private val loadAccountForMemberPort: LoadAccountForMemberPort,
-    private val checkTeamMemberPort: CheckTeamMemberPort,
+    private val teamAccessPort: TeamAccessPort,
+    private val checkMemberPort: CheckMemberPort,
 ) : GetMembersUseCase,
     InviteMemberUseCase,
     AcceptInvitationUseCase,
@@ -42,7 +40,7 @@ class MemberService(
             return false
         }
 
-        return checkTeamMemberPort.isAdminMember(accountId, teamId)
+        return teamAccessPort.canManage(accountId, teamId)
     }
 
     override fun getMembers(command: GetMembersCommand): List<MemberResult> {
@@ -56,9 +54,9 @@ class MemberService(
     override fun invite(command: InviteMemberCommand): InviteMemberResult {
         validateTeamAdmin(command.accountId, command.teamId)
 
-        val targetAccountId = loadAccountForMemberPort.loadAccountIdByEmail(command.email)
+        val targetAccountId = loadAccountForMemberPort.loadAccountIdByHandle(command.handle)
 
-        if (checkTeamMemberPort.isMember(targetAccountId, command.teamId)) {
+        if (checkMemberPort.isMember(targetAccountId, command.teamId)) {
             throw MemberException(MemberExceptionCode.MEMBER_ALREADY_EXISTS)
         }
 
@@ -128,14 +126,14 @@ class MemberService(
     }
 
     private fun validateTeamMember(accountId: Long, teamId: Long) {
-        if (!checkTeamMemberPort.isMember(accountId, teamId)) {
-            throw TeamException(TeamExceptionCode.NOT_TEAM_MEMBER)
+        if (!teamAccessPort.hasAccess(accountId, teamId)) {
+            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS)
         }
     }
 
     private fun validateTeamAdmin(accountId: Long, teamId: Long) {
-        if (!checkTeamMemberPort.isAdminMember(accountId, teamId)) {
-            throw TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER)
+        if (!teamAccessPort.canManage(accountId, teamId)) {
+            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE)
         }
     }
 

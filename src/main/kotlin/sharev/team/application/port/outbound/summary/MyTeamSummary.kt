@@ -2,9 +2,9 @@ package sharev.team.application.port.outbound.summary
 
 import java.time.LocalDateTime
 
-data class TeamSummary(
+data class MyTeamSummary(
     val id: Long,
-    val title: String,
+    val title: String?,
     val content: String?,
     val createdAt: LocalDateTime?,
     val memberRole: String,

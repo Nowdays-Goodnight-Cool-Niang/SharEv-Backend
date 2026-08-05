@@ -14,6 +14,7 @@ import sharev.team.application.port.inbound.usecase.UpdateTeamInfoUseCase
 import sharev.team.application.port.outbound.*
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
+import sharev.team.domain.model.Team
 
 @Service
 @Transactional(readOnly = true)
@@ -21,9 +22,9 @@ class TeamService(
     private val saveTeamPort: SaveTeamPort,
     private val loadTeamPort: LoadTeamPort,
     private val queryTeamPort: QueryTeamPort,
-    private val saveTeamAdminMemberPort: SaveTeamAdminMemberPort,
-    private val checkTeamMemberPort: CheckTeamMemberPort,
-    private val loadGatheringSummaryPort: LoadGatheringSummaryPort,
+    private val saveTeamAdminPort: SaveTeamAdminPort,
+    private val teamAccessPort: TeamAccessPort,
+    private val queryGatheringPort: QueryGatheringPort,
 ) : CreateTeamUseCase,
     GetMyTeamsUseCase,
     GetTeamDetailUseCase,
@@ -31,12 +32,8 @@ class TeamService(
 
     @Transactional
     override fun create(command: CreateTeamCommand): CreateTeamResult {
-        val team = saveTeamPort.save(command.title, command.content)
-        saveTeamAdminMemberPort.saveTeamAdmin(
-            team.id,
-            command.accountId,
-        )
-
+        val team = saveTeamPort.save(Team.create(command.title, command.content, command.type))
+        saveTeamAdminPort.save(team.id, command.accountId)
         return team.toCreateTeamResult()
     }
 
@@ -56,21 +53,24 @@ class TeamService(
 
     @Transactional
     override fun updateTeamInfo(command: UpdateTeamInfoCommand): TeamUpdateInfoResult {
-        if (!checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)) {
-            throw TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER)
+        if (!teamAccessPort.canManage(command.accountId, command.teamId)) {
+            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE)
         }
 
-        val team = saveTeamPort.update(command.teamId, command.title, command.content)
-        return TeamUpdateInfoResult(team.title, team.content)
+        val team = loadTeamPort.load(command.teamId)
+
+        val updatedTeam = saveTeamPort.updateTitleAndContent(team.updateInfo(command.title, command.content))
+
+        return TeamUpdateInfoResult(checkNotNull(updatedTeam.title), checkNotNull(updatedTeam.content))
     }
 
     override fun getTeamDetail(accountId: Long, teamId: Long): TeamDetailResult {
-        if (!checkTeamMemberPort.isMember(accountId, teamId)) {
-            throw TeamException(TeamExceptionCode.NOT_TEAM_MEMBER)
+        if (!teamAccessPort.hasAccess(accountId, teamId)) {
+            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS)
         }
 
         val team = loadTeamPort.load(teamId)
-        val gatherings = loadGatheringSummaryPort.loadByTeam(teamId)
+        val gatherings = queryGatheringPort.findByTeam(teamId)
         val members = queryTeamPort.findTeamMembers(teamId)
 
         return TeamDetailResult(
@@ -79,7 +79,7 @@ class TeamService(
             content = team.content,
             createdAt = team.createdAt,
             headcount = members.size,
-            certification = team.teamCertification,
+            certification = team.certification,
             gatherings = gatherings.map {
                 GatheringInfoResult(it.title, it.startAt, it.endAt, it.place)
             },

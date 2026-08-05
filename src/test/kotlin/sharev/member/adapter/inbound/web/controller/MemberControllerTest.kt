@@ -75,9 +75,9 @@ class MemberControllerTest : ControllerTestSupport() {
     @DisplayName("멤버 초대")
     fun invite() {
         val teamId = 1L
-        val dto = InviteMemberRequest("newuser@test.com")
+        val dto = InviteMemberRequest("new+user")
 
-        given(mockBean<InviteMemberUseCase>().invite(InviteMemberCommand(1L, teamId, dto.email)))
+        given(mockBean<InviteMemberUseCase>().invite(InviteMemberCommand(1L, teamId, dto.handle)))
             .willReturn(InviteMemberResult(2L, MemberRole.COMMON, MemberStatus.INVITE))
 
         val request = RestDocumentationRequestBuilders.post("/teams/{teamId}/members", teamId)
@@ -86,16 +86,16 @@ class MemberControllerTest : ControllerTestSupport() {
 
         mockMvc.perform(request)
             .andDo(print())
-            .andExpect(status().isCreated())
+            .andExpect(status().isOk())
             .andDo(
                 documentResource(
                     "inviteMember",
                     resource(
                         ResourceSnippetParameters.builder()
                             .summary("멤버 초대")
-                            .description("이메일로 팀에 멤버를 초대합니다. 팀 관리자만 초대할 수 있습니다. 초대된 멤버는 INVITE 상태로 생성됩니다.")
+                            .description("handle로 팀에 멤버를 초대합니다. 팀 관리자만 초대할 수 있습니다. 초대된 멤버는 INVITE 상태로 생성됩니다.")
                             .pathParameters(parameterWithName("teamId").description("팀 ID"))
-                            .requestFields(fieldWithPath("email").type(STRING).description("초대할 사용자의 이메일"))
+                            .requestFields(fieldWithPath("handle").type(STRING).description("초대할 사용자의 handle"))
                             .responseFields(
                                 fieldWithPath("memberId").type(NUMBER).description("생성된 멤버 ID"),
                                 fieldWithPath("role").type(STRING).description("역할 (ADMIN, COMMON)"),
@@ -116,8 +116,8 @@ class MemberControllerTest : ControllerTestSupport() {
         val teamId = 1L
         val dto = InviteMemberRequest("newuser@test.com")
 
-        given(mockBean<InviteMemberUseCase>().invite(InviteMemberCommand(1L, teamId, dto.email)))
-            .willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
+        given(mockBean<InviteMemberUseCase>().invite(InviteMemberCommand(1L, teamId, dto.handle)))
+            .willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
 
         val request = RestDocumentationRequestBuilders.post("/teams/{teamId}/members", teamId)
             .content(objectMapper.writeValueAsString(dto))
@@ -247,7 +247,7 @@ class MemberControllerTest : ControllerTestSupport() {
         val dto = UpdateMemberRoleRequest(role)
 
         given(mockBean<UpdateMemberRoleUseCase>().updateRole(UpdateMemberRoleCommand(1L, teamId, memberId, role)))
-            .willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
+            .willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
 
         val request = RestDocumentationRequestBuilders
             .patch("/teams/{teamId}/members/{memberId}/role", teamId, memberId)
@@ -302,7 +302,7 @@ class MemberControllerTest : ControllerTestSupport() {
         val memberId = 2L
 
         given(mockBean<RemoveMemberUseCase>().removeMember(RemoveMemberCommand(1L, teamId, memberId)))
-            .willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
+            .willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
 
         val request = RestDocumentationRequestBuilders.delete("/teams/{teamId}/members/{memberId}", teamId, memberId)
             .contentType(MediaType.APPLICATION_JSON)

@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 data class TeamInfoResponse(
     val id: Long,
-    val title: String,
+    val title: String?,
     val content: String?,
     val createdAt: LocalDateTime?,
     val memberRole: String,

@@ -15,7 +15,7 @@ import sharev.gathering.application.port.outbound.*
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.exception.GatheringExceptionCode
 import sharev.gathering.domain.model.Gathering
-import sharev.team.application.port.outbound.CheckTeamMemberPort
+import sharev.team.application.port.outbound.TeamAccessPort
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import java.util.*
@@ -27,7 +27,7 @@ class GatheringService(
     private val saveGatheringPort: SaveGatheringPort,
     private val loadGatheringPort: LoadGatheringPort,
     private val loadIntroduceTemplatePort: LoadIntroduceTemplatePort,
-    private val checkTeamMemberPort: CheckTeamMemberPort,
+    private val teamAccessPort: TeamAccessPort,
     private val loadParticipatedGatheringsPort: LoadParticipatedGatheringsPort,
 ) : CheckGatheringParticipantUseCase,
     CreateGatheringUseCase,
@@ -44,7 +44,7 @@ class GatheringService(
 
     @Transactional
     override fun create(command: CreateGatheringCommand): CreateGatheringResult {
-        validateTeamAdmin(command.accountId, command.teamId)
+        validateTeamManage(command.accountId, command.teamId)
 
         return saveGatheringPort.save(
             Gathering(
@@ -76,14 +76,14 @@ class GatheringService(
     }
 
     override fun getTeamGatherings(accountId: Long, teamId: Long): List<GatheringDetailResult> {
-        validateTeamMember(accountId, teamId)
+        validateTeamAccess(accountId, teamId)
 
         return loadGatheringPort.loadAllByTeam(teamId)
             .map { it.toDetailResult() }
     }
 
     override fun getTeamGathering(accountId: Long, teamId: Long, gatheringId: UUID): GatheringDetailResult {
-        validateTeamMember(accountId, teamId)
+        validateTeamAccess(accountId, teamId)
 
         val gathering = loadGatheringPort.load(gatheringId)
 
@@ -96,7 +96,7 @@ class GatheringService(
 
     @Transactional
     override fun update(command: UpdateGatheringCommand): GatheringDetailResult {
-        validateTeamAdmin(command.accountId, command.teamId)
+        validateTeamManage(command.accountId, command.teamId)
 
         return saveGatheringPort.update(
             Gathering(
@@ -119,7 +119,7 @@ class GatheringService(
 
     @Transactional
     override fun delete(accountId: Long, teamId: Long, gatheringId: UUID): DeleteGatheringResult {
-        validateTeamAdmin(accountId, teamId)
+        validateTeamManage(accountId, teamId)
         validateGatheringBelongsToTeam(teamId, gatheringId)
 
         saveGatheringPort.softDelete(gatheringId)
@@ -143,15 +143,15 @@ class GatheringService(
         }
     }
 
-    private fun validateTeamMember(accountId: Long, teamId: Long) {
-        if (!checkTeamMemberPort.isMember(accountId, teamId)) {
-            throw TeamException(TeamExceptionCode.NOT_TEAM_MEMBER)
+    private fun validateTeamAccess(accountId: Long, teamId: Long) {
+        if (!teamAccessPort.hasAccess(accountId, teamId)) {
+            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS)
         }
     }
 
-    private fun validateTeamAdmin(accountId: Long, teamId: Long) {
-        if (!checkTeamMemberPort.isAdminMember(accountId, teamId)) {
-            throw TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER)
+    private fun validateTeamManage(accountId: Long, teamId: Long) {
+        if (!teamAccessPort.canManage(accountId, teamId)) {
+            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE)
         }
     }
 }

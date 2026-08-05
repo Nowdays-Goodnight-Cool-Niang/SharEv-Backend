@@ -1,23 +1,32 @@
 -- ============================================
 -- Accounts (독립적 테이블)
 -- ============================================
-INSERT INTO "accounts" ("account_id", "role", "name", "email", "created_at", "updated_at")
+-- handle: PUBLIC 팀 생성/초대에 필요한 VERIFIED 권한의 전제 (^[a-zA-Z0-9_]{4,20}$, UNIQUE)
+INSERT INTO "accounts" ("account_id", "role", "name", "email", "handle", "created_at", "updated_at")
     OVERRIDING SYSTEM VALUE
-VALUES (1, 'ADMIN', '관리자', 'admin@example.com', NOW(), NOW()),
-       (2, 'USER', '홍길동', 'hong@example.com', NOW(), NOW()),
-       (3, 'USER', '김철수', 'kim@example.com', NOW(), NOW()),
-       (4, 'USER', '이영희', 'lee@example.com', NOW(), NOW()),
-       (5, 'USER', '박민수', 'park@example.com', NOW(), NOW());
+VALUES (1, 'ADMIN', '관리자', 'admin@example.com', 'admin', NOW(), NOW()),
+       (2, 'USER', '홍길동', 'hong@example.com', 'honggildong', NOW(), NOW()),
+       (3, 'USER', '김철수', 'kim@example.com', 'kimchulsoo', NOW(), NOW()),
+       (4, 'USER', '이영희', 'lee@example.com', 'leeyounghee', NOW(), NOW()),
+       (5, 'USER', '박민수', 'park@example.com', 'parkminsoo', NOW(), NOW());
 
 -- ============================================
 -- Teams (독립적 테이블)
+--   - PUBLIC  : 사용자가 웹에서 생성한 공개 팀 (title/content 필수)
+--   - PERSONAL: 회원가입 시 계정당 1개씩 자동 생성되는 개인 팀 (title NULL, content '')
 -- ============================================
-INSERT INTO "teams" ("team_id", "certification", "title", "content", "created_at", "updated_at")
+INSERT INTO "teams" ("team_id", "certification", "type", "title", "content", "created_at", "updated_at")
     OVERRIDING SYSTEM VALUE
-VALUES (1, 'CERTIFICATED', '개발팀', '백엔드 개발을 담당하는 팀입니다.', NOW(), NOW()),
-       (2, 'NONE', '디자인팀', 'UI/UX 디자인을 담당하는 팀입니다.', NOW(), NOW()),
-       (3, 'CERTIFICATED', '기획팀', '서비스 기획을 담당하는 팀입니다.', NOW(), NOW()),
-       (4, 'NONE', '마케팅팀', '마케팅을 담당하는 팀입니다.', NOW(), NOW());
+VALUES (1, 'CERTIFICATED', 'PUBLIC', '개발팀', '백엔드 개발을 담당하는 팀입니다.', NOW(), NOW()),
+       (2, 'NONE', 'PUBLIC', '디자인팀', 'UI/UX 디자인을 담당하는 팀입니다.', NOW(), NOW()),
+       (3, 'CERTIFICATED', 'PUBLIC', '기획팀', '서비스 기획을 담당하는 팀입니다.', NOW(), NOW()),
+       (4, 'NONE', 'PUBLIC', '마케팅팀', '마케팅을 담당하는 팀입니다.', NOW(), NOW()),
+       -- 개인 팀: 각 계정(1~5)의 회원가입 시 자동 생성된 팀 (title NULL, content '')
+       (5, 'NONE', 'PERSONAL', NULL, '', NOW(), NOW()),
+       (6, 'NONE', 'PERSONAL', NULL, '', NOW(), NOW()),
+       (7, 'NONE', 'PERSONAL', NULL, '', NOW(), NOW()),
+       (8, 'NONE', 'PERSONAL', NULL, '', NOW(), NOW()),
+       (9, 'NONE', 'PERSONAL', NULL, '', NOW(), NOW());
 
 -- ============================================
 -- OAuth Accounts (accounts 참조)
@@ -40,7 +49,14 @@ VALUES (1, 1, 1, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
        (4, 2, 2, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
        (5, 2, 4, 'INVITE', 'COMMON', NOW(), NOW()),
        (6, 3, 1, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
-       (7, 3, 5, 'ACTIVATE', 'COMMON', NOW(), NOW());
+       (7, 3, 5, 'ACTIVATE', 'COMMON', NOW(), NOW()),
+       (8, 4, 4, 'ACTIVATE', 'ADMIN', NOW(), NOW()), -- 마케팅팀 생성자(모든 PUBLIC 팀은 생성 시 ADMIN 멤버가 생김)
+       -- 개인 팀 소유자: 본인 개인 팀(team 5~9)의 유일한 멤버, 항상 ACTIVATE/ADMIN
+       (9, 5, 1, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
+       (10, 6, 2, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
+       (11, 7, 3, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
+       (12, 8, 4, 'ACTIVATE', 'ADMIN', NOW(), NOW()),
+       (13, 9, 5, 'ACTIVATE', 'ADMIN', NOW(), NOW());
 
 -- ============================================
 -- Gatherings (teams 참조)

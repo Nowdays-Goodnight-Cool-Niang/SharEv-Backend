@@ -38,11 +38,14 @@ CREATE TABLE teams
 (
     team_id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     certification VARCHAR(20) NOT NULL, -- 'NONE', 'CERTIFICATED'
-    title         TEXT        NOT NULL,
-    content       TEXT        NOT NULL,
+    type          VARCHAR(20) NOT NULL, -- 'PUBLIC', 'PERSONAL'
+    title         TEXT        NULL,
+    content       TEXT        NULL,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    deleted_at    TIMESTAMPTZ NULL
+    deleted_at    TIMESTAMPTZ NULL,
+
+    CONSTRAINT ck_teams_public_title CHECK (type <> 'PUBLIC' OR (title IS NOT NULL AND btrim(title) <> ''))
 );
 
 CREATE UNIQUE INDEX uk_teams_title_active ON teams (title) WHERE deleted_at IS NULL;

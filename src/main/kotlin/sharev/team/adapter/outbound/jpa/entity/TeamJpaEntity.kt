@@ -5,6 +5,7 @@ import org.hibernate.annotations.SoftDelete
 import org.hibernate.annotations.SoftDeleteType
 import sharev.common.adapter.outbound.jpa.entity.BaseTimeEntity
 import sharev.team.domain.model.TeamCertification
+import sharev.team.domain.model.TeamType
 
 @Entity
 @Table(name = "teams")
@@ -17,14 +18,18 @@ class TeamJpaEntity(
     val id: Long? = null,
 
     @Column
+    var title: String?,
+
+    @Column
+    var content: String?,
+
+    @Column
     @Enumerated(EnumType.STRING)
     var certification: TeamCertification = TeamCertification.NONE,
 
-    @Column(unique = true)
-    var title: String,
-
     @Column
-    var content: String,
+    @Enumerated(EnumType.STRING)
+    val type: TeamType,
 ) : BaseTimeEntity() {
 
     fun update(title: String, content: String) {
