@@ -83,7 +83,7 @@ class TeamServiceTest {
     // ───────────── getTeamDetail ─────────────
 
     @Test
-    @DisplayName("팀 멤버가 아니면 getTeamDetail 시 NOT_TEAM_MEMBER 예외가 발생한다")
+    @DisplayName("팀 멤버가 아니면 getTeamDetail 시 UNAUTHORIZED_TEAM_ACCESS 예외가 발생한다")
     fun getTeamDetail_throwsException_whenNotTeamMember() {
         val accountId = 10L
         val teamId = 1L
@@ -138,7 +138,7 @@ class TeamServiceTest {
     // ───────────── updateTeamInfo ─────────────
 
     @Test
-    @DisplayName("admin이 아니면 updateTeamInfo 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다")
+    @DisplayName("admin이 아니면 updateTeamInfo 시 UNAUTHORIZED_TEAM_MANAGE 예외가 발생한다")
     fun updateInfo_throwsException_whenNotAdmin() {
         val command = UpdateTeamInfoCommand(10L, 1L, "새 제목", "내용")
 
