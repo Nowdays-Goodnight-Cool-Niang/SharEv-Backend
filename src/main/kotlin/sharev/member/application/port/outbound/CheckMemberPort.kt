@@ -1,5 +1,5 @@
 package sharev.member.application.port.outbound
 
 fun interface CheckMemberPort {
-    fun isMember(teamId: Long, accountId: Long): Boolean
+    fun isMember(accountId: Long, teamId: Long): Boolean
 }

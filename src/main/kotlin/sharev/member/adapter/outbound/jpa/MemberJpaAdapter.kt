@@ -143,7 +143,7 @@ class MemberJpaAdapter(
         return account.id!!
     }
 
-    override fun isMember(teamId: Long, accountId: Long): Boolean {
+    override fun isMember(accountId: Long, teamId: Long): Boolean {
         return memberRepository.existsByTeamIdAndAccountId(teamId, accountId)
     }
 }
