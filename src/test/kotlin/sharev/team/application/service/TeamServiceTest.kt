@@ -7,53 +7,55 @@ import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
 import sharev.member.domain.model.MemberRole
 import sharev.team.application.port.inbound.command.CreateTeamCommand
 import sharev.team.application.port.inbound.command.GetMyTeamsCommand
 import sharev.team.application.port.inbound.command.UpdateTeamInfoCommand
 import sharev.team.application.port.outbound.*
 import sharev.team.application.port.outbound.summary.GatheringSummary
+import sharev.team.application.port.outbound.summary.MyTeamSummary
 import sharev.team.application.port.outbound.summary.TeamMemberSummary
-import sharev.team.application.port.outbound.summary.TeamSummary
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.Team
 import sharev.team.domain.model.TeamCertification
+import sharev.team.domain.model.TeamType
 import java.time.LocalDateTime
 
 class TeamServiceTest {
     private val saveTeamPort = mock(SaveTeamPort::class.java)
     private val loadTeamPort = mock(LoadTeamPort::class.java)
     private val queryTeamPort = mock(QueryTeamPort::class.java)
-    private val saveTeamAdminMemberPort = mock(SaveTeamAdminMemberPort::class.java)
-    private val checkTeamMemberPort = mock(CheckTeamMemberPort::class.java)
-    private val loadGatheringSummaryPort = mock(LoadGatheringSummaryPort::class.java)
+    private val saveTeamAdminPort = mock(SaveTeamAdminPort::class.java)
+    private val teamAccessPort = mock(TeamAccessPort::class.java)
+    private val queryGatheringPort = mock(QueryGatheringPort::class.java)
 
     private val teamService = TeamService(
         saveTeamPort,
         loadTeamPort,
         queryTeamPort,
-        saveTeamAdminMemberPort,
-        checkTeamMemberPort,
-        loadGatheringSummaryPort,
+        saveTeamAdminPort,
+        teamAccessPort,
+        queryGatheringPort,
     )
 
     // ───────────── create ─────────────
 
     @Test
     @DisplayName("팀 생성 시 팀을 저장하고 admin 멤버를 자동 생성한다")
-    fun create_savesTeamAndCreatesAdminMember() {
+    fun create_PublicTeam_savesTeamAndCreatesAdminMember() {
         val accountId = 10L
-        val command = CreateTeamCommand(accountId, "새 팀", "설명")
-        val savedTeam = team(1L, command.title, command.content)
+        val command = CreateTeamCommand(accountId, "새 팀", "설명", TeamType.PUBLIC)
+        val savedTeam = team(1L, command.title!!, command.content!!)
 
-        given(saveTeamPort.save(command.title, command.content))
+        given(saveTeamPort.save(Team.create(command.title, command.content, command.type)))
             .willReturn(savedTeam)
 
         val result = teamService.create(command)
 
         assertThat(result.teamId).isEqualTo(savedTeam.id)
-        then(saveTeamAdminMemberPort).should().saveTeamAdmin(savedTeam.id, accountId)
+        then(saveTeamAdminPort).should().save(savedTeam.id, accountId)
     }
 
     // ───────────── getMyTeams ─────────────
@@ -81,18 +83,18 @@ class TeamServiceTest {
     // ───────────── getTeamDetail ─────────────
 
     @Test
-    @DisplayName("팀 멤버가 아니면 getTeamDetail 시 NOT_TEAM_MEMBER 예외가 발생한다")
+    @DisplayName("팀 멤버가 아니면 getTeamDetail 시 UNAUTHORIZED_TEAM_ACCESS 예외가 발생한다")
     fun getTeamDetail_throwsException_whenNotTeamMember() {
         val accountId = 10L
         val teamId = 1L
 
-        given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(false)
+        given(teamAccessPort.hasAccess(accountId, teamId)).willReturn(false)
 
         assertThatThrownBy { teamService.getTeamDetail(accountId, teamId) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS.name)
             })
 
         then(loadTeamPort).shouldHaveNoInteractions()
@@ -114,9 +116,9 @@ class TeamServiceTest {
             teamMemberSummary(name = "이영희", email = "lee@test.com", role = MemberRole.COMMON),
         )
 
-        given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.hasAccess(accountId, teamId)).willReturn(true)
         given(loadTeamPort.load(teamId)).willReturn(existingTeam)
-        given(loadGatheringSummaryPort.loadByTeam(teamId)).willReturn(gatheringSummaries)
+        given(queryGatheringPort.findByTeam(teamId)).willReturn(gatheringSummaries)
         given(queryTeamPort.findTeamMembers(teamId)).willReturn(memberSummaries)
 
         val result = teamService.getTeamDetail(accountId, teamId)
@@ -136,18 +138,18 @@ class TeamServiceTest {
     // ───────────── updateTeamInfo ─────────────
 
     @Test
-    @DisplayName("admin이 아니면 updateTeamInfo 시 NOT_TEAM_ADMIN_MEMBER 예외가 발생한다")
-    fun updateTeamInfo_throwsException_whenNotAdmin() {
+    @DisplayName("admin이 아니면 updateTeamInfo 시 UNAUTHORIZED_TEAM_MANAGE 예외가 발생한다")
+    fun updateInfo_throwsException_whenNotAdmin() {
         val command = UpdateTeamInfoCommand(10L, 1L, "새 제목", "내용")
 
-        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId))
+        given(teamAccessPort.canManage(command.accountId, command.teamId))
             .willReturn(false)
 
         assertThatThrownBy { teamService.updateTeamInfo(command) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE.name)
             })
 
         then(saveTeamPort).shouldHaveNoInteractions()
@@ -155,21 +157,24 @@ class TeamServiceTest {
 
     @Test
     @DisplayName("admin이면 updateTeamInfo 시 팀 제목을 수정하고 결과를 반환한다")
-    fun updateTeamInfo_updatesTitle_whenAdmin() {
+    fun updateInfo_updatesTitle_whenAdmin() {
         val newTitle = "수정된 팀 이름"
         val newContent = "수정된 내용"
         val command = UpdateTeamInfoCommand(10L, 1L, newTitle, newContent)
+        val beforeTeam = team(command.teamId, "수정 전 이름", "수정 전 내용")
         val updatedTeam = team(command.teamId, newTitle, newContent)
 
-        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId))
+        given(teamAccessPort.canManage(command.accountId, command.teamId))
             .willReturn(true)
-        given(saveTeamPort.update(command.teamId, newTitle, newContent))
+        given(loadTeamPort.load(command.teamId))
+            .willReturn(beforeTeam)
+        given(saveTeamPort.updateTitleAndContent(team(beforeTeam.id, newTitle, newContent)))
             .willReturn(updatedTeam)
 
         val result = teamService.updateTeamInfo(command)
 
         assertThat(result.title).isEqualTo(newTitle)
-        then(saveTeamPort).should().update(command.teamId, newTitle, newContent)
+        then(saveTeamPort).should().updateTitleAndContent(any())
     }
 
     // ───────────── helpers ─────────────
@@ -180,16 +185,17 @@ class TeamServiceTest {
         content: String,
     ) = Team(
         id = id,
-        teamCertification = TeamCertification.NONE,
         title = title,
         content = content,
+        certification = TeamCertification.NONE,
+        type = TeamType.PUBLIC,
         createdAt = LocalDateTime.of(2026, 1, 1, 0, 0),
     )
 
     private fun teamSummary(
         id: Long,
         title: String,
-    ) = TeamSummary(
+    ) = MyTeamSummary(
         id = id,
         title = title,
         content = null,
@@ -213,7 +219,7 @@ class TeamServiceTest {
         role: MemberRole = MemberRole.COMMON,
     ) = TeamMemberSummary(
         name = name,
-        email = email,
         role = role,
+        email = email,
     )
 }

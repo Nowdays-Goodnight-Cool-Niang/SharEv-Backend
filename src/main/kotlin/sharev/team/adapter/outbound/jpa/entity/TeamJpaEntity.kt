@@ -18,18 +18,18 @@ class TeamJpaEntity(
     val id: Long? = null,
 
     @Column
+    var title: String?,
+
+    @Column
+    var content: String?,
+
+    @Column
     @Enumerated(EnumType.STRING)
     var certification: TeamCertification = TeamCertification.NONE,
 
     @Column
     @Enumerated(EnumType.STRING)
     val type: TeamType,
-
-    @Column(unique = true)
-    var title: String?,
-
-    @Column
-    var content: String,
 ) : BaseTimeEntity() {
 
     fun update(title: String, content: String) {

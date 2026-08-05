@@ -17,18 +17,21 @@ import sharev.account.domain.model.Account
 import sharev.account.domain.model.AccountRole
 import sharev.account.domain.model.OAuthAccount
 import sharev.account.domain.model.OAuthProvider
+import sharev.common.application.port.outbound.PublishEventPort
 
 class OAuthAccountServiceTest {
     private val loadOAuthAccountPort = mock(LoadOAuthAccountPort::class.java)
     private val saveOAuthAccountPort = mock(SaveOAuthAccountPort::class.java)
     private val loadAccountPort = mock(LoadAccountPort::class.java)
     private val saveAccountPort = mock(SaveAccountPort::class.java)
+    private val publishEventPort = mock(PublishEventPort::class.java)
 
     private val oAuthAccountService = OAuthAccountService(
         loadOAuthAccountPort,
         saveOAuthAccountPort,
         loadAccountPort,
         saveAccountPort,
+        publishEventPort,
     )
 
     // ───────────── login ─────────────

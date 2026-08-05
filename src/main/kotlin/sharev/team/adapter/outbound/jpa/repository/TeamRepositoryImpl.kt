@@ -3,8 +3,8 @@ package sharev.team.adapter.outbound.jpa.repository
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Repository
 import sharev.member.domain.model.MemberRole
+import sharev.team.application.port.outbound.summary.MyTeamSummary
 import sharev.team.application.port.outbound.summary.TeamMemberSummary
-import sharev.team.application.port.outbound.summary.TeamSummary
 import java.time.LocalDateTime
 
 @Repository
@@ -12,7 +12,7 @@ class TeamRepositoryImpl(
     private val entityManager: EntityManager,
 ) : TeamRepositoryCustom {
 
-    override fun findMyTeams(accountId: Long): List<TeamSummary> {
+    override fun findMyTeams(accountId: Long): List<MyTeamSummary> {
         val rows = entityManager.createQuery(
             """
             select t.id, t.title, t.content, t.createdAt, m.role,
@@ -27,7 +27,7 @@ class TeamRepositoryImpl(
             .resultList
 
         return rows.map { row ->
-            TeamSummary(
+            MyTeamSummary(
                 id = row[0] as Long,
                 title = row[1] as String,
                 content = row[2] as String?,

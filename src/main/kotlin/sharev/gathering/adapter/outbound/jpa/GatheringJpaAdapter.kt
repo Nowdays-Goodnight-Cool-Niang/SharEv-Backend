@@ -17,7 +17,7 @@ import sharev.gathering.domain.model.Gathering
 import sharev.gathering.domain.model.IntroduceTemplate
 import sharev.gathering.domain.model.IntroduceTemplateContent
 import sharev.team.adapter.outbound.jpa.repository.TeamRepository
-import sharev.team.application.port.outbound.LoadGatheringSummaryPort
+import sharev.team.application.port.outbound.QueryGatheringPort
 import sharev.team.application.port.outbound.summary.GatheringSummary
 import sharev.team.domain.exception.TeamException
 import java.util.*
@@ -32,7 +32,7 @@ class GatheringJpaAdapter(
 ) : SaveGatheringPort,
     LoadGatheringPort,
     LoadIntroduceTemplatePort,
-    LoadGatheringSummaryPort {
+    QueryGatheringPort {
 
     override fun save(gathering: Gathering): Gathering {
         val team = teamRepository.findByIdOrNull(gathering.teamId)
@@ -124,7 +124,7 @@ class GatheringJpaAdapter(
             .toDomainModel()
     }
 
-    override fun loadByTeam(teamId: Long): List<GatheringSummary> {
+    override fun findByTeam(teamId: Long): List<GatheringSummary> {
         return loadAllByTeam(teamId).map {
             GatheringSummary(it.title, it.startAt, it.endAt, it.place)
         }

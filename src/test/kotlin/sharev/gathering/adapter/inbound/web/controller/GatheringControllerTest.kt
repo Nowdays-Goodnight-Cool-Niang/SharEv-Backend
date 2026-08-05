@@ -258,7 +258,7 @@ class GatheringControllerTest : ControllerTestSupport() {
             LocalDateTime.of(2025, 3, 19, 23, 59),
         )
 
-        willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
+        willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
             .given(mockBean<CreateGatheringUseCase>()).create(
                 CreateGatheringCommand(
                     1L,
@@ -325,7 +325,7 @@ class GatheringControllerTest : ControllerTestSupport() {
         val teamId = 1L
 
         given(mockBean<GetTeamGatheringUseCase>().getTeamGatherings(1L, teamId))
-            .willThrow(TeamException(TeamExceptionCode.NOT_TEAM_MEMBER))
+            .willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS))
 
         val request = RestDocumentationRequestBuilders.get("/teams/{teamId}/gatherings", teamId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -489,7 +489,7 @@ class GatheringControllerTest : ControllerTestSupport() {
                     requireNotNull(dto.registerEndAt),
                 )
             )
-        ).willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
+        ).willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
 
         val request = RestDocumentationRequestBuilders.patch(
             "/teams/{teamId}/gatherings/{gatheringId}",
@@ -550,7 +550,7 @@ class GatheringControllerTest : ControllerTestSupport() {
         val teamId = 1L
         val gatheringId = UUID.randomUUID()
 
-        willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
+        willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
             .given(mockBean<DeleteGatheringUseCase>())
             .delete(1L, teamId, gatheringId)
 

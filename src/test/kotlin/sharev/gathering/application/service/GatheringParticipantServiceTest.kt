@@ -14,18 +14,14 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
-import sharev.gathering.application.port.outbound.CheckGatheringParticipantPort
-import sharev.gathering.application.port.outbound.LoadGatheringPort
-import sharev.gathering.application.port.outbound.LoadIntroduceTemplatePort
-import sharev.gathering.application.port.outbound.LoadParticipatedGatheringsPort
-import sharev.gathering.application.port.outbound.SaveGatheringPort
+import sharev.gathering.application.port.outbound.*
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.exception.GatheringExceptionCode
 import sharev.gathering.domain.model.Gathering
 import sharev.gathering.domain.model.GatheringVisible
 import sharev.gathering.domain.model.IntroduceTemplate
 import sharev.gathering.domain.model.IntroduceTemplateContent
-import sharev.team.application.port.outbound.CheckTeamMemberPort
+import sharev.team.application.port.outbound.TeamAccessPort
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import java.time.LocalDateTime
@@ -36,7 +32,7 @@ class GatheringParticipantServiceTest {
     private val saveGatheringPort = mock(SaveGatheringPort::class.java)
     private val loadGatheringPort = mock(LoadGatheringPort::class.java)
     private val loadIntroduceTemplatePort = mock(LoadIntroduceTemplatePort::class.java)
-    private val checkTeamMemberPort = mock(CheckTeamMemberPort::class.java)
+    private val teamAccessPort = mock(TeamAccessPort::class.java)
     private val loadParticipatedGatheringsPort = mock(LoadParticipatedGatheringsPort::class.java)
 
     private val gatheringParticipantService = GatheringService(
@@ -44,7 +40,7 @@ class GatheringParticipantServiceTest {
         saveGatheringPort,
         loadGatheringPort,
         loadIntroduceTemplatePort,
-        checkTeamMemberPort,
+        teamAccessPort,
         loadParticipatedGatheringsPort,
     )
 
@@ -55,13 +51,13 @@ class GatheringParticipantServiceTest {
     fun create_throwsException_whenNotAdmin() {
         val command = createGatheringCommand()
 
-        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)).willReturn(false)
+        given(teamAccessPort.canManage(command.accountId, command.teamId)).willReturn(false)
 
         assertThatThrownBy { gatheringParticipantService.create(command) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE.name)
             })
 
         then(saveGatheringPort).shouldHaveNoInteractions()
@@ -73,7 +69,7 @@ class GatheringParticipantServiceTest {
         val command = createGatheringCommand()
         val savedGathering = gathering(id = UUID.randomUUID(), command = command)
 
-        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)).willReturn(true)
+        given(teamAccessPort.canManage(command.accountId, command.teamId)).willReturn(true)
         given(saveGatheringPort.save(gathering(Gathering.NEW_ID, command))).willReturn(savedGathering)
 
         val result = gatheringParticipantService.create(command)
@@ -160,13 +156,13 @@ class GatheringParticipantServiceTest {
         val accountId = 1L
         val teamId = 2L
 
-        given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(false)
+        given(teamAccessPort.hasAccess(accountId, teamId)).willReturn(false)
 
         assertThatThrownBy { gatheringParticipantService.getTeamGatherings(accountId, teamId) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS.name)
             })
 
         then(loadGatheringPort).shouldHaveNoInteractions()
@@ -182,7 +178,7 @@ class GatheringParticipantServiceTest {
             gathering(id = UUID.randomUUID(), teamId = teamId, title = "행사2"),
         )
 
-        given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.hasAccess(accountId, teamId)).willReturn(true)
         given(loadGatheringPort.loadAllByTeam(teamId)).willReturn(gatheringList)
 
         val result = gatheringParticipantService.getTeamGatherings(accountId, teamId)
@@ -201,13 +197,13 @@ class GatheringParticipantServiceTest {
         val teamId = 2L
         val gatheringId = UUID.randomUUID()
 
-        given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(false)
+        given(teamAccessPort.hasAccess(accountId, teamId)).willReturn(false)
 
         assertThatThrownBy { gatheringParticipantService.getTeamGathering(accountId, teamId, gatheringId) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS.name)
             })
 
         then(loadGatheringPort).shouldHaveNoInteractions()
@@ -222,7 +218,7 @@ class GatheringParticipantServiceTest {
         val gatheringId = UUID.randomUUID()
         val gatheringInOtherTeam = gathering(gatheringId, teamId = otherTeamId)
 
-        given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.hasAccess(accountId, teamId)).willReturn(true)
         given(loadGatheringPort.load(gatheringId)).willReturn(gatheringInOtherTeam)
 
         assertThatThrownBy { gatheringParticipantService.getTeamGathering(accountId, teamId, gatheringId) }
@@ -241,7 +237,7 @@ class GatheringParticipantServiceTest {
         val gatheringId = UUID.randomUUID()
         val existingGathering = gathering(gatheringId, teamId = teamId)
 
-        given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.hasAccess(accountId, teamId)).willReturn(true)
         given(loadGatheringPort.load(gatheringId)).willReturn(existingGathering)
 
         val result = gatheringParticipantService.getTeamGathering(accountId, teamId, gatheringId)
@@ -257,13 +253,13 @@ class GatheringParticipantServiceTest {
     fun update_throwsException_whenNotAdmin() {
         val command = updateGatheringCommand()
 
-        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)).willReturn(false)
+        given(teamAccessPort.canManage(command.accountId, command.teamId)).willReturn(false)
 
         assertThatThrownBy { gatheringParticipantService.update(command) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE.name)
             })
 
         then(saveGatheringPort).should(never()).update(any())
@@ -276,7 +272,7 @@ class GatheringParticipantServiceTest {
         val updatedGathering = gathering(command.gatheringId, teamId = command.teamId, title = command.title)
         val captor = argumentCaptor<Gathering>()
 
-        given(checkTeamMemberPort.isAdminMember(command.accountId, command.teamId)).willReturn(true)
+        given(teamAccessPort.canManage(command.accountId, command.teamId)).willReturn(true)
         given(saveGatheringPort.update(any())).willReturn(updatedGathering)
 
         val result = gatheringParticipantService.update(command)
@@ -309,13 +305,13 @@ class GatheringParticipantServiceTest {
         val teamId = 2L
         val gatheringId = UUID.randomUUID()
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(false)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(false)
 
         assertThatThrownBy { gatheringParticipantService.delete(accountId, teamId, gatheringId) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE.name)
             })
 
         then(saveGatheringPort).should(never()).softDelete(any())
@@ -330,7 +326,7 @@ class GatheringParticipantServiceTest {
         val gatheringId = UUID.randomUUID()
         val gatheringInOtherTeam = gathering(gatheringId, teamId = otherTeamId)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadGatheringPort.load(gatheringId)).willReturn(gatheringInOtherTeam)
 
         assertThatThrownBy { gatheringParticipantService.delete(accountId, teamId, gatheringId) }
@@ -351,7 +347,7 @@ class GatheringParticipantServiceTest {
         val gatheringId = UUID.randomUUID()
         val existingGathering = gathering(gatheringId, teamId = teamId)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadGatheringPort.load(gatheringId)).willReturn(existingGathering)
 
         val result = gatheringParticipantService.delete(accountId, teamId, gatheringId)

@@ -33,6 +33,7 @@ import sharev.team.application.port.inbound.usecase.UpdateTeamInfoUseCase
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.TeamCertification
+import sharev.team.domain.model.TeamType
 import java.time.LocalDateTime
 
 class TeamControllerTest : ControllerTestSupport() {
@@ -41,7 +42,7 @@ class TeamControllerTest : ControllerTestSupport() {
     @DisplayName("팀 생성")
     fun createTeam() {
         val requestDto = CreateTeamRequest("새로운 팀", "설명")
-        given(mockBean<CreateTeamUseCase>().create(CreateTeamCommand(1L, "새로운 팀", "설명")))
+        given(mockBean<CreateTeamUseCase>().create(CreateTeamCommand(1L, "새로운 팀", "설명", TeamType.PUBLIC)))
             .willReturn(CreateTeamResult(1L))
 
         val request = RestDocumentationRequestBuilders.post("/teams")
@@ -205,7 +206,7 @@ class TeamControllerTest : ControllerTestSupport() {
     @Test
     @WithCustomMockUser
     @DisplayName("팀 정보 수정 실패 - 팀 미존재 혹은 속하지 않음")
-    fun updateTeamInfoTeamFail() {
+    fun updateTeamInfoFail() {
         val requestDto = UpdateTeamRequest("수정된 팀 이름", "수정된 설명")
 
         willThrow(TeamException(TeamExceptionCode.TEAM_NOT_FOUND))
@@ -224,10 +225,10 @@ class TeamControllerTest : ControllerTestSupport() {
     @Test
     @WithCustomMockUser
     @DisplayName("팀 정보 수정 실패 - 권한 없음")
-    fun updateTeamInfoRoleFail() {
+    fun updateInfoRoleFail() {
         val requestDto = UpdateTeamRequest("수정된 팀 이름", "수정된 설명")
 
-        willThrow(TeamException(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER))
+        willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
             .given(mockBean<UpdateTeamInfoUseCase>())
             .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title, requestDto.content))
 
@@ -243,7 +244,7 @@ class TeamControllerTest : ControllerTestSupport() {
     @Test
     @WithCustomMockUser
     @DisplayName("팀 정보 수정")
-    fun updateTeamInfo() {
+    fun updateInfo() {
         val updateTitle = "수정된 팀 이름"
         val updateContent = "수정된 팀 설명"
         val requestDto = UpdateTeamRequest(updateTitle, updateContent)

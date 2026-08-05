@@ -14,7 +14,7 @@ import sharev.team.application.port.inbound.usecase.UpdateTeamInfoUseCase
 import sharev.team.application.port.outbound.*
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
-import sharev.team.domain.model.TeamType
+import sharev.team.domain.model.Team
 
 @Service
 @Transactional(readOnly = true)
@@ -24,7 +24,7 @@ class TeamService(
     private val queryTeamPort: QueryTeamPort,
     private val saveTeamAdminPort: SaveTeamAdminPort,
     private val teamAccessPort: TeamAccessPort,
-    private val loadGatheringSummaryPort: LoadGatheringSummaryPort,
+    private val queryGatheringPort: QueryGatheringPort,
 ) : CreateTeamUseCase,
     GetMyTeamsUseCase,
     GetTeamDetailUseCase,
@@ -32,9 +32,8 @@ class TeamService(
 
     @Transactional
     override fun create(command: CreateTeamCommand): CreateTeamResult {
-        val team = saveTeamPort.save(command.title, command.content, command.type)
-        saveTeamAdminPort.saveTeamAdmin(team.id, command.accountId)
-
+        val team = saveTeamPort.save(Team.create(command.title, command.content, command.type))
+        saveTeamAdminPort.save(team.id, command.accountId)
         return team.toCreateTeamResult()
     }
 
@@ -60,12 +59,9 @@ class TeamService(
 
         val team = loadTeamPort.load(command.teamId)
 
-        if (team.teamType == TeamType.PERSONAL) {
-            throw TeamException(TeamExceptionCode.PERSONAL_TEAM_NOT_MODIFIABLE)
-        }
+        val updatedTeam = saveTeamPort.updateTitleAndContent(team.updateInfo(command.title, command.content))
 
-        val updateTeam = saveTeamPort.update(command.teamId, command.title, command.content)
-        return TeamUpdateInfoResult(updateTeam.title, updateTeam.content)
+        return TeamUpdateInfoResult(checkNotNull(updatedTeam.title), checkNotNull(updatedTeam.content))
     }
 
     override fun getTeamDetail(accountId: Long, teamId: Long): TeamDetailResult {
@@ -74,7 +70,7 @@ class TeamService(
         }
 
         val team = loadTeamPort.load(teamId)
-        val gatherings = loadGatheringSummaryPort.loadByTeam(teamId)
+        val gatherings = queryGatheringPort.findByTeam(teamId)
         val members = queryTeamPort.findTeamMembers(teamId)
 
         return TeamDetailResult(
@@ -83,7 +79,7 @@ class TeamService(
             content = team.content,
             createdAt = team.createdAt,
             headcount = members.size,
-            certification = team.teamCertification,
+            certification = team.certification,
             gatherings = gatherings.map {
                 GatheringInfoResult(it.title, it.startAt, it.endAt, it.place)
             },

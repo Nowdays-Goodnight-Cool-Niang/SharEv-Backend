@@ -6,11 +6,7 @@ import sharev.member.application.port.inbound.command.*
 import sharev.member.application.port.inbound.mapper.*
 import sharev.member.application.port.inbound.result.*
 import sharev.member.application.port.inbound.usecase.*
-import sharev.member.application.port.outbound.CheckMemberPort
-import sharev.member.application.port.outbound.DeleteMemberPort
-import sharev.member.application.port.outbound.LoadAccountForMemberPort
-import sharev.member.application.port.outbound.LoadMemberPort
-import sharev.member.application.port.outbound.SaveMemberPort
+import sharev.member.application.port.outbound.*
 import sharev.member.domain.exception.MemberException
 import sharev.member.domain.exception.MemberExceptionCode
 import sharev.member.domain.model.Member
@@ -60,7 +56,7 @@ class MemberService(
 
         val targetAccountId = loadAccountForMemberPort.loadAccountIdByHandle(command.handle)
 
-        if (checkMemberPort.isMember(command.teamId, targetAccountId)) {
+        if (checkMemberPort.isMember(targetAccountId, command.teamId)) {
             throw MemberException(MemberExceptionCode.MEMBER_ALREADY_EXISTS)
         }
 

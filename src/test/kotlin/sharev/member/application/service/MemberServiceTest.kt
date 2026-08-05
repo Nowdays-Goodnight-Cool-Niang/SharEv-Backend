@@ -8,23 +8,15 @@ import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
-import sharev.member.application.port.inbound.command.AcceptInvitationCommand
-import sharev.member.application.port.inbound.command.GetMembersCommand
-import sharev.member.application.port.inbound.command.InviteMemberCommand
-import sharev.member.application.port.inbound.command.LeaveTeamCommand
-import sharev.member.application.port.inbound.command.RemoveMemberCommand
-import sharev.member.application.port.inbound.command.UpdateMemberRoleCommand
-import sharev.member.application.port.outbound.DeleteMemberPort
-import sharev.member.application.port.outbound.LoadAccountForMemberPort
-import sharev.member.application.port.outbound.LoadMemberPort
-import sharev.member.application.port.outbound.SaveMemberPort
+import sharev.member.application.port.inbound.command.*
+import sharev.member.application.port.outbound.*
 import sharev.member.domain.exception.MemberException
 import sharev.member.domain.exception.MemberExceptionCode
 import sharev.member.domain.model.Member
 import sharev.member.domain.model.MemberRole
 import sharev.member.domain.model.MemberStatus
-import sharev.team.application.port.outbound.CheckTeamMemberPort
 import sharev.team.application.port.outbound.LoadTeamPort
+import sharev.team.application.port.outbound.TeamAccessPort
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 
@@ -34,7 +26,8 @@ class MemberServiceTest {
     private val saveMemberPort = mock(SaveMemberPort::class.java)
     private val deleteMemberPort = mock(DeleteMemberPort::class.java)
     private val loadAccountForMemberPort = mock(LoadAccountForMemberPort::class.java)
-    private val checkTeamMemberPort = mock(CheckTeamMemberPort::class.java)
+    private val teamAccessPort = mock(TeamAccessPort::class.java)
+    private val checkMemberPort = mock(CheckMemberPort::class.java)
 
     private val memberService = MemberService(
         loadTeamPort,
@@ -42,7 +35,8 @@ class MemberServiceTest {
         saveMemberPort,
         deleteMemberPort,
         loadAccountForMemberPort,
-        checkTeamMemberPort,
+        teamAccessPort,
+        checkMemberPort,
     )
 
     // ───────────── isAdmin ─────────────
@@ -58,7 +52,7 @@ class MemberServiceTest {
         val result = memberService.isAdmin(teamId, accountId)
 
         assertThat(result).isFalse()
-        then(checkTeamMemberPort).shouldHaveNoInteractions()
+        then(teamAccessPort).shouldHaveNoInteractions()
     }
 
     @Test
@@ -68,7 +62,7 @@ class MemberServiceTest {
         val accountId = 10L
 
         given(loadTeamPort.exists(teamId)).willReturn(true)
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
 
         val result = memberService.isAdmin(teamId, accountId)
 
@@ -82,7 +76,7 @@ class MemberServiceTest {
         val accountId = 10L
 
         given(loadTeamPort.exists(teamId)).willReturn(true)
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(false)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(false)
 
         val result = memberService.isAdmin(teamId, accountId)
 
@@ -98,13 +92,13 @@ class MemberServiceTest {
         val teamId = 1L
         val command = GetMembersCommand(accountId = accountId, teamId = teamId)
 
-        given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(false)
+        given(teamAccessPort.hasAccess(accountId, teamId)).willReturn(false)
 
         assertThatThrownBy { memberService.getMembers(command) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS.name)
             })
 
         then(loadMemberPort).shouldHaveNoInteractions()
@@ -121,7 +115,7 @@ class MemberServiceTest {
             member(id = 2L, teamId = teamId, accountId = 20L),
         )
 
-        given(checkTeamMemberPort.isMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.hasAccess(accountId, teamId)).willReturn(true)
         given(loadMemberPort.loadAllByTeam(teamId)).willReturn(members)
 
         val result = memberService.getMembers(command)
@@ -138,15 +132,15 @@ class MemberServiceTest {
     fun invite_throwsException_whenNotAdmin() {
         val accountId = 10L
         val teamId = 1L
-        val command = InviteMemberCommand(accountId = accountId, teamId = teamId, email = "target@test.com")
+        val command = InviteMemberCommand(accountId = accountId, teamId = teamId, handle = "target")
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(false)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(false)
 
         assertThatThrownBy { memberService.invite(command) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE.name)
             })
 
         then(saveMemberPort).shouldHaveNoInteractions()
@@ -158,12 +152,12 @@ class MemberServiceTest {
         val accountId = 10L
         val teamId = 1L
         val targetAccountId = 20L
-        val email = "target@test.com"
-        val command = InviteMemberCommand(accountId = accountId, teamId = teamId, email = email)
+        val handle = "target"
+        val command = InviteMemberCommand(accountId = accountId, teamId = teamId, handle = handle)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
-        given(loadAccountForMemberPort.loadAccountIdByEmail(email)).willReturn(targetAccountId)
-        given(checkTeamMemberPort.isMember(targetAccountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
+        given(loadAccountForMemberPort.loadAccountIdByHandle(handle)).willReturn(targetAccountId)
+        given(checkMemberPort.isMember(targetAccountId, teamId)).willReturn(true)
 
         assertThatThrownBy { memberService.invite(command) }
             .isInstanceOf(MemberException::class.java)
@@ -181,14 +175,22 @@ class MemberServiceTest {
         val accountId = 10L
         val teamId = 1L
         val targetAccountId = 20L
-        val email = "target@test.com"
-        val command = InviteMemberCommand(accountId = accountId, teamId = teamId, email = email)
-        val savedMember = member(id = 99L, teamId = teamId, accountId = targetAccountId, status = MemberStatus.INVITE, role = MemberRole.COMMON)
+        val handle = "target"
+        val command = InviteMemberCommand(accountId = accountId, teamId = teamId, handle = handle)
+        val savedMember = member(
+            id = 99L,
+            teamId = teamId,
+            accountId = targetAccountId,
+            status = MemberStatus.INVITE,
+            role = MemberRole.COMMON
+        )
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
-        given(loadAccountForMemberPort.loadAccountIdByEmail(email)).willReturn(targetAccountId)
-        given(checkTeamMemberPort.isMember(targetAccountId, teamId)).willReturn(false)
-        given(saveMemberPort.save(teamId, targetAccountId, MemberStatus.INVITE, MemberRole.COMMON)).willReturn(savedMember)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
+        given(loadAccountForMemberPort.loadAccountIdByHandle(handle)).willReturn(targetAccountId)
+        given(teamAccessPort.hasAccess(targetAccountId, teamId)).willReturn(false)
+        given(saveMemberPort.save(teamId, targetAccountId, MemberStatus.INVITE, MemberRole.COMMON)).willReturn(
+            savedMember
+        )
 
         val result = memberService.invite(command)
 
@@ -227,7 +229,8 @@ class MemberServiceTest {
         val memberId = 1L
         val command = AcceptInvitationCommand(accountId = accountId, teamId = teamId)
         val invitedMember = member(id = memberId, teamId = teamId, accountId = accountId, status = MemberStatus.INVITE)
-        val activatedMember = member(id = memberId, teamId = teamId, accountId = accountId, status = MemberStatus.ACTIVATE)
+        val activatedMember =
+            member(id = memberId, teamId = teamId, accountId = accountId, status = MemberStatus.ACTIVATE)
 
         given(loadMemberPort.loadByTeamAndAccount(teamId, accountId)).willReturn(invitedMember)
         given(saveMemberPort.activate(memberId)).willReturn(activatedMember)
@@ -305,15 +308,16 @@ class MemberServiceTest {
     fun updateRole_throwsException_whenNotAdmin() {
         val accountId = 10L
         val teamId = 1L
-        val command = UpdateMemberRoleCommand(accountId = accountId, teamId = teamId, memberId = 2L, role = MemberRole.ADMIN)
+        val command =
+            UpdateMemberRoleCommand(accountId = accountId, teamId = teamId, memberId = 2L, role = MemberRole.ADMIN)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(false)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(false)
 
         assertThatThrownBy { memberService.updateRole(command) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE.name)
             })
 
         then(saveMemberPort).shouldHaveNoInteractions()
@@ -326,10 +330,16 @@ class MemberServiceTest {
         val teamId = 1L
         val otherTeamId = 99L
         val targetMemberId = 2L
-        val command = UpdateMemberRoleCommand(accountId = accountId, teamId = teamId, memberId = targetMemberId, role = MemberRole.COMMON)
-        val memberInOtherTeam = member(id = targetMemberId, teamId = otherTeamId, accountId = 20L, role = MemberRole.ADMIN)
+        val command = UpdateMemberRoleCommand(
+            accountId = accountId,
+            teamId = teamId,
+            memberId = targetMemberId,
+            role = MemberRole.COMMON
+        )
+        val memberInOtherTeam =
+            member(id = targetMemberId, teamId = otherTeamId, accountId = 20L, role = MemberRole.ADMIN)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadMemberPort.load(targetMemberId)).willReturn(memberInOtherTeam)
 
         assertThatThrownBy { memberService.updateRole(command) }
@@ -348,10 +358,15 @@ class MemberServiceTest {
         val accountId = 10L
         val teamId = 1L
         val targetMemberId = 2L
-        val command = UpdateMemberRoleCommand(accountId = accountId, teamId = teamId, memberId = targetMemberId, role = MemberRole.COMMON)
+        val command = UpdateMemberRoleCommand(
+            accountId = accountId,
+            teamId = teamId,
+            memberId = targetMemberId,
+            role = MemberRole.COMMON
+        )
         val lastAdminMember = member(id = targetMemberId, teamId = teamId, accountId = 20L, role = MemberRole.ADMIN)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadMemberPort.load(targetMemberId)).willReturn(lastAdminMember)
         given(loadMemberPort.countByTeamAndRole(teamId, MemberRole.ADMIN)).willReturn(1L)
 
@@ -372,11 +387,12 @@ class MemberServiceTest {
         val teamId = 1L
         val targetMemberId = 2L
         val newRole = MemberRole.COMMON
-        val command = UpdateMemberRoleCommand(accountId = accountId, teamId = teamId, memberId = targetMemberId, role = newRole)
+        val command =
+            UpdateMemberRoleCommand(accountId = accountId, teamId = teamId, memberId = targetMemberId, role = newRole)
         val targetMember = member(id = targetMemberId, teamId = teamId, accountId = 20L, role = MemberRole.ADMIN)
         val updatedMember = member(id = targetMemberId, teamId = teamId, accountId = 20L, role = newRole)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadMemberPort.load(targetMemberId)).willReturn(targetMember)
         given(loadMemberPort.countByTeamAndRole(teamId, MemberRole.ADMIN)).willReturn(2L)
         given(saveMemberPort.updateRole(targetMemberId, newRole)).willReturn(updatedMember)
@@ -395,11 +411,12 @@ class MemberServiceTest {
         val teamId = 1L
         val targetMemberId = 2L
         val newRole = MemberRole.ADMIN
-        val command = UpdateMemberRoleCommand(accountId = accountId, teamId = teamId, memberId = targetMemberId, role = newRole)
+        val command =
+            UpdateMemberRoleCommand(accountId = accountId, teamId = teamId, memberId = targetMemberId, role = newRole)
         val targetMember = member(id = targetMemberId, teamId = teamId, accountId = 20L, role = MemberRole.COMMON)
         val updatedMember = member(id = targetMemberId, teamId = teamId, accountId = 20L, role = newRole)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadMemberPort.load(targetMemberId)).willReturn(targetMember)
         given(saveMemberPort.updateRole(targetMemberId, newRole)).willReturn(updatedMember)
 
@@ -419,13 +436,13 @@ class MemberServiceTest {
         val teamId = 1L
         val command = RemoveMemberCommand(accountId = accountId, teamId = teamId, memberId = 2L)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(false)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(false)
 
         assertThatThrownBy { memberService.removeMember(command) }
             .isInstanceOf(TeamException::class.java)
             .satisfies({ ex ->
                 val teamEx = ex as TeamException
-                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.NOT_TEAM_ADMIN_MEMBER.name)
+                assertThat(teamEx.details.code).isEqualTo(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE.name)
             })
 
         then(deleteMemberPort).shouldHaveNoInteractions()
@@ -440,7 +457,7 @@ class MemberServiceTest {
         val command = RemoveMemberCommand(accountId = accountId, teamId = teamId, memberId = memberId)
         val selfMember = member(id = memberId, teamId = teamId, accountId = accountId)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadMemberPort.load(memberId)).willReturn(selfMember)
 
         assertThatThrownBy { memberService.removeMember(command) }
@@ -462,7 +479,7 @@ class MemberServiceTest {
         val command = RemoveMemberCommand(accountId = accountId, teamId = teamId, memberId = targetMemberId)
         val lastAdminMember = member(id = targetMemberId, teamId = teamId, accountId = 20L, role = MemberRole.ADMIN)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadMemberPort.load(targetMemberId)).willReturn(lastAdminMember)
         given(loadMemberPort.countByTeamAndRole(teamId, MemberRole.ADMIN)).willReturn(1L)
 
@@ -486,7 +503,7 @@ class MemberServiceTest {
         val command = RemoveMemberCommand(accountId = accountId, teamId = teamId, memberId = targetMemberId)
         val memberInOtherTeam = member(id = targetMemberId, teamId = otherTeamId, accountId = 20L)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadMemberPort.load(targetMemberId)).willReturn(memberInOtherTeam)
 
         assertThatThrownBy { memberService.removeMember(command) }
@@ -508,7 +525,7 @@ class MemberServiceTest {
         val command = RemoveMemberCommand(accountId = accountId, teamId = teamId, memberId = targetMemberId)
         val targetMember = member(id = targetMemberId, teamId = teamId, accountId = 20L, role = MemberRole.COMMON)
 
-        given(checkTeamMemberPort.isAdminMember(accountId, teamId)).willReturn(true)
+        given(teamAccessPort.canManage(accountId, teamId)).willReturn(true)
         given(loadMemberPort.load(targetMemberId)).willReturn(targetMember)
 
         val result = memberService.removeMember(command)
