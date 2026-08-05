@@ -19,7 +19,7 @@ class InvalidRequestExceptionAdvice {
         val errorMessages = LinkedMultiValueMap<String, String>()
 
         exception.fieldErrors.forEach { fieldError ->
-            errorMessages.add(fieldError.field, calculateDefaultMessage(fieldError))
+            errorMessages.add(fieldError.field, resolveMessage(exception, fieldError))
         }
 
         return ResponseEntity.badRequest()
@@ -27,9 +27,16 @@ class InvalidRequestExceptionAdvice {
             .body(errorMessages)
     }
 
-    private fun calculateDefaultMessage(fieldError: FieldError): String {
+    private fun resolveMessage(exception: BindException, fieldError: FieldError): String {
         if (fieldError.isBindingFailure) {
-            return "유효한 값이 아닙니다."
+            val type = exception.bindingResult.getFieldType(fieldError.field)
+
+            if (type == null || !type.isEnum) {
+                return "유효한 값이 아닙니다."
+            }
+
+            val allowed = type.enumConstants.joinToString(", ") { (it as Enum<*>).name.lowercase() }
+            return "허용되는 값: $allowed"
         }
 
         return fieldError.defaultMessage

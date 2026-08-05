@@ -10,7 +10,7 @@ class CaseInsensitiveEnumConverterFactory : ConverterFactory<String, Enum<*>> {
     override fun <T : Enum<*>> getConverter(targetType: Class<T>): Converter<String, T> =
         Converter { source ->
             targetType.enumConstants.firstOrNull { it.name.equals(source.trim(), ignoreCase = true) }
-                ?: throw IllegalArgumentException("No enum constant ${targetType.simpleName}.$source")
+                ?: throw IllegalArgumentException()
         }
 }
 
