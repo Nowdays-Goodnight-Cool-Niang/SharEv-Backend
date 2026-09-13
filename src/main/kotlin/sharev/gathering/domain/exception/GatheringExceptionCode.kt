@@ -23,4 +23,16 @@ enum class GatheringExceptionCode(
         ExceptionCategory.BAD_REQUEST,
         "불일치하는 템플릿 content와 placeholder가 존재합니다. 다시 확인해 주세요."
     ),
+    INVALID_GATHERING_PERIOD_EXCEPTION(
+        ExceptionCategory.BAD_REQUEST,
+        "행사 시작 시간은 종료 시간보다 앞이어야 합니다."
+    ),
+    INVALID_GATHERING_REGISTER_START_PERIOD_EXCEPTION(
+        ExceptionCategory.BAD_REQUEST,
+        "행사 참여 시작 시간은 행사 시작 시간, 행사 종료 시간보다 앞이어야 합니다."
+    ),
+    INVALID_GATHERING_REGISTER_END_PERIOD_EXCEPTION(
+        ExceptionCategory.BAD_REQUEST,
+        "행사 참여 종료 시간은 행사 종료 시간보다 앞이어야 합니다."
+    ),
 }

@@ -6,7 +6,6 @@ import java.util.*
 
 data class UpdateGatheringCommand(
     val accountId: Long,
-    val teamId: Long,
     val gatheringId: UUID,
     val visible: GatheringVisible,
     val title: String,

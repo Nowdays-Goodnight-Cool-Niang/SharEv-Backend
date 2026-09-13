@@ -95,12 +95,12 @@ class GatheringService(
 
     @Transactional
     override fun update(command: UpdateGatheringCommand): GatheringDetailResult {
-        validateTeamManage(command.accountId, command.teamId)
+        val gathering = loadGatheringPort.load(command.gatheringId)
+
+        validateTeamManage(command.accountId, gathering.teamId)
 
         return saveGatheringPort.update(
-            Gathering(
-                id = command.gatheringId,
-                teamId = command.teamId,
+            gathering.update(
                 visible = command.visible,
                 title = command.title,
                 content = command.content,

@@ -1,5 +1,7 @@
 package sharev.gathering.domain.model
 
+import sharev.gathering.domain.exception.GatheringException
+import sharev.gathering.domain.exception.GatheringExceptionCode
 import java.time.LocalDateTime
 import java.util.*
 
@@ -20,6 +22,61 @@ data class Gathering(
 ) {
     companion object {
         val NEW_ID: UUID = UUID(0L, 0L)
+    }
+
+    fun update(
+        visible: GatheringVisible,
+        title: String,
+        content: String,
+        startAt: LocalDateTime,
+        endAt: LocalDateTime,
+        place: String,
+        imageUrl: String?,
+        gatheringUrl: String?,
+        contact: String?,
+        registerStartAt: LocalDateTime,
+        registerEndAt: LocalDateTime,
+    ): Gathering {
+        validatePeriod(startAt, endAt)
+        validateRegisterPeriod(startAt, endAt, registerStartAt, registerEndAt)
+
+        return copy(
+            visible = visible,
+            title = title,
+            content = content,
+            startAt = startAt,
+            endAt = endAt,
+            place = place,
+            imageUrl = imageUrl,
+            gatheringUrl = gatheringUrl,
+            contact = contact,
+            registerStartAt = registerStartAt,
+            registerEndAt = registerEndAt,
+        )
+    }
+
+    private fun validatePeriod(
+        startAt: LocalDateTime,
+        endAt: LocalDateTime,
+    ) {
+        if (!startAt.isBefore(endAt)) {
+            throw GatheringException(GatheringExceptionCode.INVALID_GATHERING_PERIOD_EXCEPTION)
+        }
+    }
+
+    private fun validateRegisterPeriod(
+        startAt: LocalDateTime,
+        endAt: LocalDateTime,
+        registerStartAt: LocalDateTime,
+        registerEndAt: LocalDateTime,
+    ) {
+        if (!registerStartAt.isBefore(startAt) || !registerStartAt.isBefore(endAt)) {
+            throw GatheringException(GatheringExceptionCode.INVALID_GATHERING_REGISTER_START_PERIOD_EXCEPTION)
+        }
+
+        if (!registerEndAt.isBefore(endAt)) {
+            throw GatheringException(GatheringExceptionCode.INVALID_GATHERING_REGISTER_END_PERIOD_EXCEPTION)
+        }
     }
 
     fun progressStatus(now: LocalDateTime): PeriodStatus = when {

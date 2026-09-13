@@ -81,7 +81,6 @@ class GatheringController(
 
     @PatchMapping("/gatherings/{gatheringId}")
     fun updateGathering(
-        @PathVariable teamId: Long,
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
         @Valid @RequestBody request: UpdateGatheringRequest,
@@ -90,7 +89,6 @@ class GatheringController(
             updateGatheringUseCase.update(
                 request.toCommand(
                     accountPrincipal.id,
-                    teamId,
                     gatheringId
                 )
             ).toResponse()

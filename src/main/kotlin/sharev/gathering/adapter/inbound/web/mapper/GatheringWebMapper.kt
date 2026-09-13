@@ -28,9 +28,8 @@ fun CreateGatheringRequest.toCommand(accountId: Long) = CreateGatheringCommand(
     registerEndAt = requireNotNull(registerEndAt),
 )
 
-fun UpdateGatheringRequest.toCommand(accountId: Long, teamId: Long, gatheringId: UUID) = UpdateGatheringCommand(
+fun UpdateGatheringRequest.toCommand(accountId: Long, gatheringId: UUID) = UpdateGatheringCommand(
     accountId = accountId,
-    teamId = teamId,
     gatheringId = gatheringId,
     visible = requireNotNull(visible),
     title = requireNotNull(title),
