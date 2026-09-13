@@ -54,15 +54,13 @@ class GatheringController(
         )
     }
 
-    // TODO: body에 teamId가 있어야 함
     @PostMapping("/gatherings")
     fun createGathering(
-        @PathVariable teamId: Long,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
         @Valid @RequestBody request: CreateGatheringRequest,
     ): ResponseEntity<CreateGatheringResponse> {
         val response = createGatheringUseCase.create(
-            request.toCommand(accountPrincipal.id, teamId)
+            request.toCommand(accountPrincipal.id)
         ).toResponse()
 
         return ResponseEntity.status(HttpStatus.CREATED)

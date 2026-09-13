@@ -7,6 +7,9 @@ import java.time.LocalDateTime
 
 data class CreateGatheringRequest(
     @field:NotNull
+    val teamId: Long?,
+
+    @field:NotNull
     val visible: GatheringVisible?,
 
     @field:NotBlank

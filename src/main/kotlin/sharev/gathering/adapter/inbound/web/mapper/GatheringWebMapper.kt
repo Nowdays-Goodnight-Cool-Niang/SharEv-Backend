@@ -12,9 +12,9 @@ import java.util.*
 
 fun ParticipantResult.toResponse() = ParticipantResponse(isParticipant)
 
-fun CreateGatheringRequest.toCommand(accountId: Long, teamId: Long) = CreateGatheringCommand(
+fun CreateGatheringRequest.toCommand(accountId: Long) = CreateGatheringCommand(
     accountId = accountId,
-    teamId = teamId,
+    teamId = requireNotNull(teamId),
     visible = requireNotNull(visible),
     title = requireNotNull(title),
     content = requireNotNull(content),
