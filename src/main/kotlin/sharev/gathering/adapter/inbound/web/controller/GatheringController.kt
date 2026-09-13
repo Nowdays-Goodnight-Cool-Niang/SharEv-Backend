@@ -18,7 +18,7 @@ import sharev.gathering.adapter.inbound.web.mapper.toResponse
 import sharev.gathering.application.port.inbound.usecase.*
 import java.util.*
 
-@RestController
+@RestController("/gatherings")
 class GatheringController(
     private val createGatheringUseCase: CreateGatheringUseCase,
     private val updateGatheringUseCase: UpdateGatheringUseCase,
@@ -29,7 +29,7 @@ class GatheringController(
     private val getGatheringUseCase: GetGatheringUseCase,
 ) {
 
-    @GetMapping("/gatherings")
+    @GetMapping
     fun allGatherings(
         @ModelAttribute getGatheringRequest: GetGatheringRequest,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal?,
@@ -43,7 +43,7 @@ class GatheringController(
         )
     }
 
-    @GetMapping("/gatherings/{gatheringId}")
+    @GetMapping("/{gatheringId}")
     fun isParticipant(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
@@ -54,7 +54,7 @@ class GatheringController(
         )
     }
 
-    @PostMapping("/gatherings")
+    @PostMapping
     fun createGathering(
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
         @Valid @RequestBody request: CreateGatheringRequest,
@@ -67,7 +67,7 @@ class GatheringController(
             .body(response)
     }
 
-    @GetMapping("/gatherings/{gatheringId}")
+    @GetMapping("/{gatheringId}")
     fun getGathering(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal?,
@@ -79,7 +79,7 @@ class GatheringController(
         )
     }
 
-    @PatchMapping("/gatherings/{gatheringId}")
+    @PatchMapping("/{gatheringId}")
     fun updateGathering(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
@@ -95,7 +95,7 @@ class GatheringController(
         )
     }
 
-    @DeleteMapping("/gatherings/{gatheringId}")
+    @DeleteMapping("/{gatheringId}")
     fun deleteGathering(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
@@ -106,7 +106,7 @@ class GatheringController(
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/gatherings/{gatheringId}/template")
+    @GetMapping("/{gatheringId}/template")
     fun getTemplate(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
