@@ -117,9 +117,10 @@ class GatheringService(
     }
 
     @Transactional
-    override fun delete(accountId: Long, teamId: Long, gatheringId: UUID): DeleteGatheringResult {
-        validateTeamManage(accountId, teamId)
-        validateGatheringBelongsToTeam(teamId, gatheringId)
+    override fun delete(accountId: Long, gatheringId: UUID): DeleteGatheringResult {
+        val gathering = loadGatheringPort.load(gatheringId)
+
+        validateTeamManage(accountId, gathering.teamId)
 
         saveGatheringPort.softDelete(gatheringId)
         return DeleteGatheringResult(gatheringId)
@@ -132,14 +133,6 @@ class GatheringService(
 
         return loadIntroduceTemplatePort.loadLatest(gatheringId)
             .toResult()
-    }
-
-    private fun validateGatheringBelongsToTeam(teamId: Long, gatheringId: UUID) {
-        val gathering = loadGatheringPort.load(gatheringId)
-
-        if (gathering.teamId != teamId) {
-            throw GatheringException(GatheringExceptionCode.GATHERING_NOT_FOUND)
-        }
     }
 
     private fun validateTeamManage(accountId: Long, teamId: Long) {

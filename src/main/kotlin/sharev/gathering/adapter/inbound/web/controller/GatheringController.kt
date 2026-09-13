@@ -97,12 +97,11 @@ class GatheringController(
 
     @DeleteMapping("/gatherings/{gatheringId}")
     fun deleteGathering(
-        @PathVariable teamId: Long,
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
     ): ResponseEntity<DeleteGatheringResponse> {
         val response = deleteGatheringUseCase.delete(
-            accountPrincipal.id, teamId, gatheringId
+            accountPrincipal.id, gatheringId
         ).toResponse()
         return ResponseEntity.ok(response)
     }

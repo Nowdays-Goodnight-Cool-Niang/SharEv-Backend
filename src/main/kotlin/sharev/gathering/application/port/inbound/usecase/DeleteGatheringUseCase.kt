@@ -4,5 +4,5 @@ import sharev.gathering.application.port.inbound.result.DeleteGatheringResult
 import java.util.*
 
 fun interface DeleteGatheringUseCase {
-    fun delete(accountId: Long, teamId: Long, gatheringId: UUID): DeleteGatheringResult
+    fun delete(accountId: Long, gatheringId: UUID): DeleteGatheringResult
 }
