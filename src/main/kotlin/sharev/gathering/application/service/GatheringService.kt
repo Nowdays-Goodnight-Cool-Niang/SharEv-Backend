@@ -17,6 +17,7 @@ import sharev.gathering.application.port.outbound.*
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.exception.GatheringExceptionCode
 import sharev.gathering.domain.model.Gathering
+import sharev.gathering.domain.model.GatheringVisible
 import sharev.team.application.port.outbound.TeamAccessPort
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
@@ -33,11 +34,11 @@ class GatheringService(
     private val loadParticipatedGatheringsPort: LoadParticipatedGatheringsPort,
 ) : CheckGatheringParticipantUseCase,
     CreateGatheringUseCase,
-    GetTeamGatheringUseCase,
     UpdateGatheringUseCase,
     DeleteGatheringUseCase,
     GetIntroduceTemplateUseCase,
-    GetGatheringsUseCase {
+    GetGatheringsUseCase,
+    GetGatheringUseCase {
 
     override fun isParticipant(accountId: Long, gatheringId: UUID): ParticipantResult {
         return ParticipantResult(checkGatheringParticipantPort.isParticipant(gatheringId, accountId))
@@ -74,19 +75,18 @@ class GatheringService(
             .map { it.toDetailResult() }
     }
 
-    override fun getTeamGatherings(accountId: Long, teamId: Long): List<GatheringDetailResult> {
-        validateTeamAccess(accountId, teamId)
-
-        return loadGatheringPort.loadAllByTeam(teamId)
-            .map { it.toDetailResult() }
-    }
-
-    override fun getTeamGathering(accountId: Long, teamId: Long, gatheringId: UUID): GatheringDetailResult {
-        validateTeamAccess(accountId, teamId)
-
+    override fun getGathering(accountId: Long?, gatheringId: UUID): GatheringDetailResult {
         val gathering = loadGatheringPort.load(gatheringId)
 
-        if (gathering.teamId != teamId) {
+        if (gathering.visible == GatheringVisible.PUBLIC) {
+            return gathering.toDetailResult()
+        }
+
+        if (accountId == null) {
+            throw GatheringException(GatheringExceptionCode.GATHERING_NOT_FOUND)
+        }
+
+        if (!teamAccessPort.hasAccess(accountId, gathering.teamId)) {
             throw GatheringException(GatheringExceptionCode.GATHERING_NOT_FOUND)
         }
 
@@ -139,12 +139,6 @@ class GatheringService(
 
         if (gathering.teamId != teamId) {
             throw GatheringException(GatheringExceptionCode.GATHERING_NOT_FOUND)
-        }
-    }
-
-    private fun validateTeamAccess(accountId: Long, teamId: Long) {
-        if (!teamAccessPort.hasAccess(accountId, teamId)) {
-            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS)
         }
     }
 

@@ -21,12 +21,12 @@ import java.util.*
 @RestController
 class GatheringController(
     private val createGatheringUseCase: CreateGatheringUseCase,
-    private val getTeamGatheringUseCase: GetTeamGatheringUseCase,
     private val updateGatheringUseCase: UpdateGatheringUseCase,
     private val deleteGatheringUseCase: DeleteGatheringUseCase,
     private val getIntroduceTemplateUseCase: GetIntroduceTemplateUseCase,
     private val checkGatheringParticipantUseCase: CheckGatheringParticipantUseCase,
     private val getGatheringsUseCase: GetGatheringsUseCase,
+    private val getGatheringUseCase: GetGatheringUseCase,
 ) {
 
     @GetMapping("/gatherings")
@@ -67,16 +67,14 @@ class GatheringController(
             .body(response)
     }
 
-    // TODO: teamId는 제외하는 대신 조회 가능한 행사인지 파악해야 함(팀에 속하지 않은 채 private 조회하거나 등)
     @GetMapping("/gatherings/{gatheringId}")
     fun getGathering(
-        @PathVariable teamId: Long,
         @PathVariable gatheringId: UUID,
-        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
+        @AuthenticationPrincipal accountPrincipal: AccountPrincipal?,
     ): ResponseEntity<GatheringDetailResponse> {
         return ResponseEntity.ok(
-            getTeamGatheringUseCase.getTeamGathering(
-                accountPrincipal.id, teamId, gatheringId
+            getGatheringUseCase.getGathering(
+                accountPrincipal?.id, gatheringId
             ).toResponse()
         )
     }
