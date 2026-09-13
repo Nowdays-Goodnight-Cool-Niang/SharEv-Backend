@@ -1,10 +1,10 @@
-package sharev.gathering.adapter.inbound.web.dto.response
+package sharev.gathering.application.port.outbound.summary
 
 import sharev.gathering.domain.model.GatheringVisible
 import java.time.LocalDateTime
 import java.util.*
 
-data class GatheringDetailResponse(
+data class GatheringDetailSummary(
     val id: UUID,
     val teamId: Long,
     val teamTitle: String?,

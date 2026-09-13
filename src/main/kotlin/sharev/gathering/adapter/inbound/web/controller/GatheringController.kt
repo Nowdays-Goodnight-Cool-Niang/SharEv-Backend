@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import sharev.common.adapter.inbound.security.model.AccountPrincipal
 import sharev.gathering.adapter.inbound.web.dto.request.CreateGatheringRequest
+import sharev.gathering.adapter.inbound.web.dto.request.GetGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.request.UpdateGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.response.*
 import sharev.gathering.adapter.inbound.web.mapper.toCommand
@@ -25,28 +26,20 @@ class GatheringController(
     private val deleteGatheringUseCase: DeleteGatheringUseCase,
     private val getIntroduceTemplateUseCase: GetIntroduceTemplateUseCase,
     private val checkGatheringParticipantUseCase: CheckGatheringParticipantUseCase,
-    private val getParticipatedGatheringsUseCase: GetParticipatedGatheringsUseCase,
     private val getGatheringsUseCase: GetGatheringsUseCase,
 ) {
 
     @GetMapping("/gatherings")
     fun allGatherings(
+        @ModelAttribute getGatheringRequest: GetGatheringRequest,
+        @AuthenticationPrincipal accountPrincipal: AccountPrincipal?,
         @PageableDefault(size = 20) pageable: Pageable,
     ): ResponseEntity<Page<GatheringDetailResponse>> {
         return ResponseEntity.ok(
-            getGatheringsUseCase.getGatherings(pageable)
-                .map { it.toResponse() }
-        )
-    }
-
-    @GetMapping("/gatherings/me")
-    fun participatedGatherings(
-        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-        @PageableDefault(size = 20) pageable: Pageable,
-    ): ResponseEntity<Page<GatheringDetailResponse>> {
-        return ResponseEntity.ok(
-            getParticipatedGatheringsUseCase.getParticipatedGatherings(accountPrincipal.id, pageable)
-                .map { it.toResponse() }
+            getGatheringsUseCase.getGatherings(
+                getGatheringRequest.toCommand(accountPrincipal?.id),
+                pageable
+            ).map { it.toResponse() }
         )
     }
 
@@ -61,7 +54,8 @@ class GatheringController(
         )
     }
 
-    @PostMapping("/teams/{teamId}/gatherings")
+    // TODO: body에 teamId가 있어야 함
+    @PostMapping("/gatherings")
     fun createGathering(
         @PathVariable teamId: Long,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
@@ -75,22 +69,8 @@ class GatheringController(
             .body(response)
     }
 
-    // TODO: 템플릿 업데이트
-    // TODO: content와 placeholder key가 다르다면 에러
-    // TODO: 이전 content key와 업데이트 key 일치(혹은 부분일치) 시 단순 템플릿 변경이므로 버전 그대로, 다르다면(추가된 게 있다면) 버전 업
-
-    @GetMapping("/teams/{teamId}/gatherings")
-    fun getTeamGatherings(
-        @PathVariable teamId: Long,
-        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-    ): ResponseEntity<List<GatheringDetailResponse>> {
-        return ResponseEntity.ok(
-            getTeamGatheringUseCase.getTeamGatherings(accountPrincipal.id, teamId)
-                .map { it.toResponse() }
-        )
-    }
-
-    @GetMapping("/teams/{teamId}/gatherings/{gatheringId}")
+    // TODO: teamId는 제외하는 대신 조회 가능한 행사인지 파악해야 함(팀에 속하지 않은 채 private 조회하거나 등)
+    @GetMapping("/gatherings/{gatheringId}")
     fun getGathering(
         @PathVariable teamId: Long,
         @PathVariable gatheringId: UUID,
@@ -103,7 +83,7 @@ class GatheringController(
         )
     }
 
-    @PatchMapping("/teams/{teamId}/gatherings/{gatheringId}")
+    @PatchMapping("/gatherings/{gatheringId}")
     fun updateGathering(
         @PathVariable teamId: Long,
         @PathVariable gatheringId: UUID,
@@ -121,7 +101,7 @@ class GatheringController(
         )
     }
 
-    @DeleteMapping("/teams/{teamId}/gatherings/{gatheringId}")
+    @DeleteMapping("/gatherings/{gatheringId}")
     fun deleteGathering(
         @PathVariable teamId: Long,
         @PathVariable gatheringId: UUID,
@@ -144,4 +124,8 @@ class GatheringController(
             ).toResponse()
         )
     }
+
+    // TODO: 템플릿 업데이트
+    // TODO: content와 placeholder key가 다르다면 에러
+    // TODO: 이전 content key와 업데이트 key 일치(혹은 부분일치) 시 단순 템플릿 변경이므로 버전 그대로, 다르다면(추가된 게 있다면) 버전 업
 }

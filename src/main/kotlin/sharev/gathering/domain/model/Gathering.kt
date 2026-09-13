@@ -21,4 +21,16 @@ data class Gathering(
     companion object {
         val NEW_ID: UUID = UUID(0L, 0L)
     }
+
+    fun progressStatus(now: LocalDateTime): PeriodStatus = when {
+        now < startAt -> PeriodStatus.UPCOMING
+        endAt < now -> PeriodStatus.ENDED
+        else -> PeriodStatus.ONGOING
+    }
+
+    fun registrationStatus(now: LocalDateTime): PeriodStatus = when {
+        now < registerStartAt -> PeriodStatus.UPCOMING
+        registerEndAt < now -> PeriodStatus.ENDED
+        else -> PeriodStatus.ONGOING
+    }
 }

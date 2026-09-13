@@ -9,9 +9,11 @@ import sharev.gathering.adapter.outbound.jpa.entity.IntroduceTemplateJpaEntity
 import sharev.gathering.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.gathering.adapter.outbound.jpa.repository.GatheringRepository
 import sharev.gathering.adapter.outbound.jpa.repository.IntroduceTemplateRepository
+import sharev.gathering.application.port.outbound.LoadGatheringFilter
 import sharev.gathering.application.port.outbound.LoadGatheringPort
 import sharev.gathering.application.port.outbound.LoadIntroduceTemplatePort
 import sharev.gathering.application.port.outbound.SaveGatheringPort
+import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.model.Gathering
 import sharev.gathering.domain.model.IntroduceTemplate
@@ -99,9 +101,8 @@ class GatheringJpaAdapter(
             ?: throw GatheringException(GatheringCode.GATHERING_NOT_FOUND)
     }
 
-    override fun loadAll(pageable: Pageable): Page<Gathering> {
-        return gatheringRepository.findAll(pageable)
-            .map { it.toDomainModel() }
+    override fun loadAll(filter: LoadGatheringFilter, pageable: Pageable): Page<GatheringDetailSummary> {
+        return gatheringRepository.searchGatheringDetails(filter, pageable)
     }
 
     override fun loadAllByTeam(teamId: Long): List<Gathering> {

@@ -1,9 +1,11 @@
 package sharev.gathering.adapter.inbound.web.mapper
 
 import sharev.gathering.adapter.inbound.web.dto.request.CreateGatheringRequest
+import sharev.gathering.adapter.inbound.web.dto.request.GetGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.request.UpdateGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.response.*
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
+import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.inbound.result.*
 import java.util.*
@@ -63,6 +65,9 @@ fun DeleteGatheringResult.toResponse() = DeleteGatheringResponse(gatheringId)
 
 fun GatheringDetailResult.toResponse() = GatheringDetailResponse(
     id,
+    teamId,
+    teamTitle,
+    ownerHandle,
     visible,
     title,
     content,
@@ -77,3 +82,12 @@ fun GatheringDetailResult.toResponse() = GatheringDetailResponse(
 )
 
 fun IntroduceTemplateResult.toResponse() = IntroduceTemplateResponse(version, text, fieldPlaceholders)
+
+fun GetGatheringRequest.toCommand(accountId: Long?) = GetGatheringCommand(
+    accountId,
+    participated,
+    teamId,
+    visibility,
+    progress,
+    registration,
+)

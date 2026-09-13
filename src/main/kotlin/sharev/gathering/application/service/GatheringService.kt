@@ -5,9 +5,11 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
+import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.inbound.mapper.toCreateGatheringResult
 import sharev.gathering.application.port.inbound.mapper.toDetailResult
+import sharev.gathering.application.port.inbound.mapper.toFilter
 import sharev.gathering.application.port.inbound.mapper.toResult
 import sharev.gathering.application.port.inbound.result.*
 import sharev.gathering.application.port.inbound.usecase.*
@@ -35,7 +37,6 @@ class GatheringService(
     UpdateGatheringUseCase,
     DeleteGatheringUseCase,
     GetIntroduceTemplateUseCase,
-    GetParticipatedGatheringsUseCase,
     GetGatheringsUseCase {
 
     override fun isParticipant(accountId: Long, gatheringId: UUID): ParticipantResult {
@@ -65,13 +66,11 @@ class GatheringService(
         ).toCreateGatheringResult()
     }
 
-    override fun getParticipatedGatherings(accountId: Long, pageable: Pageable): Page<GatheringDetailResult> {
-        return loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId, pageable)
-            .map { it.toDetailResult() }
-    }
-
-    override fun getGatherings(pageable: Pageable): Page<GatheringDetailResult> {
-        return loadGatheringPort.loadAll(pageable)
+    override fun getGatherings(
+        getGatheringCommand: GetGatheringCommand,
+        pageable: Pageable
+    ): Page<GatheringDetailResult> {
+        return loadGatheringPort.loadAll(getGatheringCommand.toFilter(), pageable)
             .map { it.toDetailResult() }
     }
 

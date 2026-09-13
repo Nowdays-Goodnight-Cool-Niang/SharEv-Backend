@@ -5,6 +5,6 @@ import sharev.gathering.adapter.outbound.jpa.entity.GatheringJpaEntity
 import sharev.team.adapter.outbound.jpa.entity.TeamJpaEntity
 import java.util.*
 
-interface GatheringRepository : JpaRepository<GatheringJpaEntity, UUID> {
+interface GatheringRepository : JpaRepository<GatheringJpaEntity, UUID>, GatheringRepositoryCustom {
     fun findAllByTeam(team: TeamJpaEntity): List<GatheringJpaEntity>
 }
