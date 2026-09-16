@@ -99,12 +99,12 @@ CREATE TABLE introduce_templates
     introduce_template_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     gathering_id          UUID        NOT NULL,
     version               INT         NOT NULL,
-    content               JSONB       NOT NULL,
+    content               TEXT        NOT NULL,
+    placeholders          JSONB       NOT NULL,
     created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT fk_introduce_templates_gatherings FOREIGN KEY (gathering_id) REFERENCES gatherings (gathering_id),
-    CONSTRAINT uk_introduce_templates_gathering_version UNIQUE (gathering_id, version)
+    CONSTRAINT fk_introduce_templates_gatherings FOREIGN KEY (gathering_id) REFERENCES gatherings (gathering_id)
 );
 
 CREATE TABLE cards
