@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
 import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
+import sharev.gathering.application.port.inbound.command.UpdateIntroduceTemplateCommand
 import sharev.gathering.application.port.inbound.mapper.toCreateGatheringResult
 import sharev.gathering.application.port.inbound.mapper.toDetailResult
 import sharev.gathering.application.port.inbound.mapper.toFilter
@@ -31,14 +32,15 @@ class GatheringService(
     private val loadGatheringPort: LoadGatheringPort,
     private val loadIntroduceTemplatePort: LoadIntroduceTemplatePort,
     private val teamAccessPort: TeamAccessPort,
-    private val loadParticipatedGatheringsPort: LoadParticipatedGatheringsPort,
+    private val saveIntroduceTemplatePort: SaveIntroduceTemplatePort,
 ) : CheckGatheringParticipantUseCase,
     CreateGatheringUseCase,
     UpdateGatheringUseCase,
     DeleteGatheringUseCase,
     GetIntroduceTemplateUseCase,
     GetGatheringsUseCase,
-    GetGatheringUseCase {
+    GetGatheringUseCase,
+    UpdateIntroduceTemplateUseCase {
 
     override fun isParticipant(accountId: Long, gatheringId: UUID): ParticipantResult {
         return ParticipantResult(checkGatheringParticipantPort.isParticipant(gatheringId, accountId))
@@ -139,5 +141,13 @@ class GatheringService(
         if (!teamAccessPort.canManage(accountId, teamId)) {
             throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE)
         }
+    }
+
+    @Transactional
+    override fun updateTemplate(command: UpdateIntroduceTemplateCommand): IntroduceTemplateResult {
+        val latestTemplate = loadIntroduceTemplatePort.loadLatest(command.gatheringId)
+        val newTemplate = latestTemplate.update(command.content, command.placeholders)
+        return saveIntroduceTemplatePort.save(newTemplate)
+            .toResult()
     }
 }

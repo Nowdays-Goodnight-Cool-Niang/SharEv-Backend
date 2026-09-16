@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotNull
 
 data class UpdateIntroduceTemplateRequest(
     @field:NotBlank
-    val text: String?,
+    val content: String?,
 
     @field:NotNull
-    val fieldPlaceholders: Map<String, String>?,
+    val placeholders: Map<String, String>?,
 ) {
 }

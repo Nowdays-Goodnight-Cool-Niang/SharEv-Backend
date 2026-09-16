@@ -7,5 +7,5 @@ import java.util.*
 interface IntroduceTemplateRepository : JpaRepository<IntroduceTemplateJpaEntity, Long> {
     fun findByGatheringIdAndVersion(gatheringId: UUID, version: Int): Optional<IntroduceTemplateJpaEntity>
 
-    fun findTopByGatheringIdOrderByVersionDesc(gatheringId: UUID): Optional<IntroduceTemplateJpaEntity>
+    fun findTopByGatheringIdOrderByIdDesc(gatheringId: UUID): Optional<IntroduceTemplateJpaEntity>
 }

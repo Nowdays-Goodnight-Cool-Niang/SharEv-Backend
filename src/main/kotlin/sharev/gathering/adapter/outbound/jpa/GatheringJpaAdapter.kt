@@ -9,15 +9,11 @@ import sharev.gathering.adapter.outbound.jpa.entity.IntroduceTemplateJpaEntity
 import sharev.gathering.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.gathering.adapter.outbound.jpa.repository.GatheringRepository
 import sharev.gathering.adapter.outbound.jpa.repository.IntroduceTemplateRepository
-import sharev.gathering.application.port.outbound.LoadGatheringFilter
-import sharev.gathering.application.port.outbound.LoadGatheringPort
-import sharev.gathering.application.port.outbound.LoadIntroduceTemplatePort
-import sharev.gathering.application.port.outbound.SaveGatheringPort
+import sharev.gathering.application.port.outbound.*
 import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.model.Gathering
 import sharev.gathering.domain.model.IntroduceTemplate
-import sharev.gathering.domain.model.IntroduceTemplateContent
 import sharev.team.adapter.outbound.jpa.repository.TeamRepository
 import sharev.team.application.port.outbound.QueryGatheringPort
 import sharev.team.application.port.outbound.summary.GatheringSummary
@@ -34,7 +30,8 @@ class GatheringJpaAdapter(
 ) : SaveGatheringPort,
     LoadGatheringPort,
     LoadIntroduceTemplatePort,
-    QueryGatheringPort {
+    QueryGatheringPort,
+    SaveIntroduceTemplatePort {
 
     override fun save(gathering: Gathering): Gathering {
         val team = teamRepository.findByIdOrNull(gathering.teamId)
@@ -61,7 +58,8 @@ class GatheringJpaAdapter(
             IntroduceTemplateJpaEntity(
                 gathering = gatheringJpaEntity,
                 version = 0,
-                content = IntroduceTemplateContent("", emptyMap()),
+                content = "",
+                placeholders = emptyMap(),
             )
         )
 
@@ -114,7 +112,7 @@ class GatheringJpaAdapter(
     }
 
     override fun loadLatest(gatheringId: UUID): IntroduceTemplate {
-        return introduceTemplateRepository.findTopByGatheringIdOrderByVersionDesc(gatheringId)
+        return introduceTemplateRepository.findTopByGatheringIdOrderByIdDesc(gatheringId)
             .orElseThrow { GatheringException(GatheringCode.INTRODUCE_TEMPLATE_NOT_FOUND) }
             .toDomainModel()
     }
@@ -140,5 +138,20 @@ class GatheringJpaAdapter(
         }
 
         return gathering
+    }
+
+    override fun save(introduceTemplate: IntroduceTemplate): IntroduceTemplate {
+        val gathering = gatheringRepository.findByIdOrNull(introduceTemplate.gatheringId)
+            ?: throw GatheringException(GatheringCode.GATHERING_NOT_FOUND)
+
+        return introduceTemplateRepository.save(
+            IntroduceTemplateJpaEntity(
+                introduceTemplate.id,
+                gathering,
+                introduceTemplate.version,
+                introduceTemplate.content,
+                introduceTemplate.placeholders,
+            )
+        ).toDomainModel()
     }
 }

@@ -12,9 +12,11 @@ import sharev.common.adapter.inbound.security.model.AccountPrincipal
 import sharev.gathering.adapter.inbound.web.dto.request.CreateGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.request.GetGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.request.UpdateGatheringRequest
+import sharev.gathering.adapter.inbound.web.dto.request.UpdateIntroduceTemplateRequest
 import sharev.gathering.adapter.inbound.web.dto.response.*
 import sharev.gathering.adapter.inbound.web.mapper.toCommand
 import sharev.gathering.adapter.inbound.web.mapper.toResponse
+import sharev.gathering.application.port.inbound.mapper.toCommand
 import sharev.gathering.application.port.inbound.usecase.*
 import java.util.*
 
@@ -27,6 +29,7 @@ class GatheringController(
     private val checkGatheringParticipantUseCase: CheckGatheringParticipantUseCase,
     private val getGatheringsUseCase: GetGatheringsUseCase,
     private val getGatheringUseCase: GetGatheringUseCase,
+    private val updateIntroduceTemplateUseCase: UpdateIntroduceTemplateUseCase,
 ) {
 
     @GetMapping
@@ -118,7 +121,16 @@ class GatheringController(
         )
     }
 
-    // TODO: 템플릿 업데이트
-    // TODO: content와 placeholder key가 다르다면 에러
-    // TODO: 이전 content key와 업데이트 key 일치(혹은 부분일치) 시 단순 템플릿 변경이므로 버전 그대로, 다르다면(추가된 게 있다면) 버전 업
+    @PostMapping("/{gatheringId}/template")
+    fun updateTemplate(
+        @PathVariable gatheringId: UUID,
+        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
+        @RequestBody request: UpdateIntroduceTemplateRequest,
+    ): ResponseEntity<IntroduceTemplateResponse> {
+        return ResponseEntity.ok(
+            updateIntroduceTemplateUseCase.updateTemplate(
+                request.toCommand(gatheringId)
+            ).toResponse()
+        )
+    }
 }

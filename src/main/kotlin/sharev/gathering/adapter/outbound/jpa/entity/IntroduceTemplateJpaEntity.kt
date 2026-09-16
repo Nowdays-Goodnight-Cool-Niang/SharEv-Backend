@@ -4,7 +4,6 @@ import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import sharev.common.adapter.outbound.jpa.entity.BaseTimeEntity
-import sharev.gathering.domain.model.IntroduceTemplateContent
 
 @Entity
 @Table(name = "introduce_templates")
@@ -22,31 +21,12 @@ class IntroduceTemplateJpaEntity(
     @Column(nullable = false)
     val version: Int,
 
+    @Column(nullable = false)
+    val content: String,
+
     @Column
     @JdbcTypeCode(SqlTypes.JSON)
-    var content: IntroduceTemplateContent,
+    var placeholders: Map<String, String>,
 ) : BaseTimeEntity() {
 
-    fun validateIntroduce(version: Int, introduce: Map<String, String>): Boolean {
-        if (this.version != version) {
-            return false
-        }
-
-        val introduceFields = introduce.keys
-        val introduceTemplateFields = content.getFields()
-
-        if (introduceTemplateFields.size != introduceFields.size) {
-            return false
-        }
-
-        return introduceFields.subtract(introduceTemplateFields).isEmpty()
-    }
-
-    fun updateContent(newContent: IntroduceTemplateContent) {
-        if (!content.hasSameFields(newContent.fieldPlaceholders)) {
-            throw IllegalArgumentException("필드 구조가 다르면 업데이트할 수 없소")
-        }
-
-        content = newContent
-    }
 }

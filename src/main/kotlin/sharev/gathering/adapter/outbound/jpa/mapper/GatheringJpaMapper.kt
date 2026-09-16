@@ -26,4 +26,5 @@ fun IntroduceTemplateJpaEntity.toDomainModel() = IntroduceTemplate(
     gatheringId = requireNotNull(gathering.id),
     version = version,
     content = content,
+    placeholders = placeholders,
 )

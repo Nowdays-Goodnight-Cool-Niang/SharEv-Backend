@@ -80,7 +80,7 @@ fun GatheringDetailResult.toResponse() = GatheringDetailResponse(
     registerEndAt,
 )
 
-fun IntroduceTemplateResult.toResponse() = IntroduceTemplateResponse(version, text, fieldPlaceholders)
+fun IntroduceTemplateResult.toResponse() = IntroduceTemplateResponse(version, text, placeholders)
 
 fun GetGatheringRequest.toCommand(accountId: Long?) = GetGatheringCommand(
     accountId,
