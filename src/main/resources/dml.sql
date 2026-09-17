@@ -143,149 +143,127 @@ VALUES ('a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         NOW());
 
 -- ============================================
--- Introduce Templates (gatherings 참조)
+-- Introductions (gatherings 참조)
+--   흐름: 관리자 첫 작성 시 introduction 생성(version 1) → fields(키) 변경 시 새 버전 행 append
+--   - 구성 완료 PUBLIC 행사만 introduction 보유 (version 1)
+--   - 미구성 행사(PRIVATE 내부 미팅 45b2 등)는 introduction 행 없음
 -- ============================================
-INSERT INTO "introduce_templates" ("introduce_template_id",
-                                   "gathering_id",
-                                   "version",
-                                   "content",
-                                   "created_at",
-                                   "updated_at")
+INSERT INTO "introductions" ("introduction_id",
+                             "gathering_id",
+                             "version",
+                             "source",
+                             "fields",
+                             "created_at",
+                             "updated_at")
     OVERRIDING SYSTEM VALUE
 VALUES (1,
         'a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
-        0,
+        1,
+        '안녕하세요, ${company}에서 ${role}로 일하는 ${name}입니다. 주력 기술은 ${techStack}이며, 개발 경력은 ${career}년입니다.',
         '{
-          "sections": [
-            {
-              "title": "자기소개",
-              "fields": [
-                "이름",
-                "회사",
-                "직책"
-              ]
-            },
-            {
-              "title": "경력",
-              "fields": [
-                "경력년수",
-                "주요기술"
-              ]
-            }
-          ]
+          "name": {"placeholder": "이름을 입력해주세요"},
+          "company": {"placeholder": "소속 회사를 입력해주세요"},
+          "role": {"placeholder": "직무를 입력해주세요 (예: 백엔드 개발자)"},
+          "techStack": {"placeholder": "주력 기술 스택을 입력해주세요"},
+          "career": {"placeholder": "개발 경력(년)을 입력해주세요"}
         }'::JSONB,
         NOW(),
         NOW()),
        (2,
         'd8f1e6c3-9a7b-4d4f-b6e1-5c8e3b7d2e0a'::UUID,
-        0,
+        1,
+        '${company}의 ${name}입니다. ${specialty} 디자인을 전문으로 하며, 주로 ${tool}을 사용합니다.',
         '{
-          "sections": [
-            {
-              "title": "포트폴리오",
-              "fields": [
-                "작품링크",
-                "설명"
-              ]
-            },
-            {
-              "title": "연락처",
-              "fields": [
-                "이메일",
-                "전화번호"
-              ]
-            }
-          ]
+          "name": {"placeholder": "이름을 입력해주세요"},
+          "company": {"placeholder": "소속을 입력해주세요"},
+          "specialty": {"placeholder": "전문 분야를 입력해주세요 (예: 모바일 UX)"},
+          "tool": {"placeholder": "주로 사용하는 디자인 툴을 입력해주세요"}
         }'::JSONB,
         NOW(),
         NOW()),
        (3,
         'e9f2e7c4-0b8c-5e5f-c7f2-6d9f4e8c3f1b'::UUID,
-        0,
+        1,
+        '안녕하세요, ${organization} 소속 ${name}입니다. ${interest} 분야에 관심이 있으며, 이번 세미나에서 ${goal}을 얻어가고 싶습니다.',
         '{
-          "sections": [
-            {
-              "title": "기획 경험",
-              "fields": [
-                "프로젝트명",
-                "역할"
-              ]
-            },
-            {
-              "title": "관심사",
-              "fields": [
-                "도메인",
-                "기술"
-              ]
-            }
-          ]
+          "name": {"placeholder": "이름을 입력해주세요"},
+          "organization": {"placeholder": "소속을 입력해주세요"},
+          "interest": {"placeholder": "관심 분야를 입력해주세요"},
+          "goal": {"placeholder": "세미나 참여 목표를 입력해주세요"}
         }'::JSONB,
         NOW(),
         NOW());
 
 -- ============================================
 -- Cards (gatherings, accounts 참조)
+--   흐름: join(pin 부여, 아직 미작성) → updateIntroduce(introduction_version + field_values 작성)
+--   모든 카드는 구성된 introduction(version 1)에 맞춰 작성 완료 상태 (field_values 키 = 해당 행사 fields)
 -- ============================================
-INSERT INTO "cards" ("card_id", "gathering_id", "account_id", "pin_number", "template_version", "introduction_text")
+INSERT INTO "cards" ("card_id", "gathering_id", "account_id", "pin_number", "introduction_version", "field_values")
     OVERRIDING SYSTEM VALUE
 VALUES (1,
         'a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         2,
         1234,
-        0,
+        1,
         '{
           "name": "홍길동",
-          "company": "ABC 회사",
-          "position": "시니어 개발자",
-          "bio": "10년차 백엔드 개발자입니다."
+          "company": "ABC 소프트웨어",
+          "role": "시니어 백엔드 개발자",
+          "techStack": "Spring Boot, JPA, Kotlin",
+          "career": "10"
         }'::JSONB),
        (2,
         'a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         3,
         5678,
-        0,
+        1,
         '{
           "name": "김철수",
-          "company": "XYZ 회사",
-          "position": "주니어 개발자",
-          "bio": "Spring Boot를 배우고 싶습니다."
+          "company": "XYZ 스타트업",
+          "role": "주니어 백엔드 개발자",
+          "techStack": "Java, Spring MVC",
+          "career": "2"
         }'::JSONB),
        (3,
         'd8f1e6c3-9a7b-4d4f-b6e1-5c8e3b7d2e0a'::UUID,
         4,
         9012,
-        0,
+        1,
         '{
           "name": "이영희",
           "company": "디자인 스튜디오",
-          "position": "UI 디자이너",
-          "bio": "사용자 경험을 중시하는 디자이너입니다."
+          "specialty": "모바일 UX/UI",
+          "tool": "Figma"
         }'::JSONB),
        (4,
         'e9f2e7c4-0b8c-5e5f-c7f2-6d9f4e8c3f1b'::UUID,
         5,
         3456,
-        0,
+        1,
         '{
           "name": "박민수",
-          "company": "기획 회사",
-          "position": "프로덕트 매니저",
-          "bio": "사용자 중심의 기획을 추구합니다."
+          "organization": "기획 컴퍼니",
+          "interest": "애자일 프로덕트 기획",
+          "goal": "실전 기획 방법론"
         }'::JSONB),
        (5,
         'a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         1,
-        NULL,
-        0,
+        2468,
+        1,
         '{
           "name": "관리자",
-          "company": "시스템",
-          "position": "시스템 관리자",
-          "bio": "시스템을 관리합니다."
+          "company": "쿨냥이",
+          "role": "인프라 엔지니어",
+          "techStack": "Kubernetes, PostgreSQL",
+          "career": "8"
         }'::JSONB);
 
 -- ============================================
 -- Connections (cards 참조)
+--   흐름: 같은 행사 내 카드 열람 시 양방향(A→B, B→A) 쌍으로 생성, 상태 REGISTRATION, memo 없음
+--   (Spring Boot 워크샵 a81bc 참가자 카드 1·2·5 간 연결)
 -- ============================================
 INSERT INTO "connections" ("connection_id",
                            "my_card_id",
@@ -299,28 +277,28 @@ VALUES (1,
         1,
         2,
         'REGISTRATION',
-        '좋은 만남이었습니다!',
+        NULL,
         NOW(),
         NOW()),
        (2,
-        1,
-        3,
-        'STAR',
-        '나중에 연락하겠습니다.',
-        NOW(),
-        NOW()),
-       (3,
         2,
         1,
         'REGISTRATION',
         NULL,
         NOW(),
         NOW()),
+       (3,
+        1,
+        5,
+        'REGISTRATION',
+        NULL,
+        NOW(),
+        NOW()),
        (4,
-        3,
-        4,
-        'STAR',
-        '디자인 관련 협업 가능합니다.',
+        5,
+        1,
+        'REGISTRATION',
+        NULL,
         NOW(),
         NOW());
 
@@ -355,8 +333,8 @@ VALUES (1, '서비스가 매우 유용합니다. 계속 발전시켜 주세요!'
 SELECT setval(pg_get_serial_sequence('accounts', 'account_id'), (SELECT MAX(account_id) FROM accounts));
 SELECT setval(pg_get_serial_sequence('teams', 'team_id'), (SELECT MAX(team_id) FROM teams));
 SELECT setval(pg_get_serial_sequence('members', 'member_id'), (SELECT MAX(member_id) FROM members));
-SELECT setval(pg_get_serial_sequence('introduce_templates', 'introduce_template_id'),
-              (SELECT MAX(introduce_template_id) FROM introduce_templates));
+SELECT setval(pg_get_serial_sequence('introductions', 'introduction_id'),
+              (SELECT MAX(introduction_id) FROM introductions));
 SELECT setval(pg_get_serial_sequence('cards', 'card_id'), (SELECT MAX(card_id) FROM cards));
 SELECT setval(pg_get_serial_sequence('connections', 'connection_id'), (SELECT MAX(connection_id) FROM connections));
 SELECT setval(pg_get_serial_sequence('feedbacks', 'feedback_id'), (SELECT MAX(feedback_id) FROM feedbacks));
