@@ -125,6 +125,14 @@ class MemberJpaAdapter(
         return member.role == MemberRole.ADMIN && member.status == MemberStatus.ACTIVATE
     }
 
+    override fun loadManageableTeamIds(accountId: Long): List<Long> {
+        return memberRepository.findAllByAccountIdAndRoleAndStatus(
+            accountId,
+            MemberRole.ADMIN,
+            MemberStatus.ACTIVATE
+        ).map { it.team.id!! }
+    }
+
     override fun countByTeamAndRole(teamId: Long, role: MemberRole): Long {
         val team = teamRepository.findByIdOrNull(teamId)
             ?: throw TeamException(TeamExceptionCode.TEAM_NOT_FOUND)

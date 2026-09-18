@@ -102,6 +102,15 @@ class GatheringJpaAdapter(
             .map { it.toDomainModel() }
     }
 
+    override fun loadAllByTeams(teamId: List<Long>, pageable: Pageable): Page<GatheringDetailSummary> {
+
+        if (teamId.isEmpty()) {
+            return Page.empty(pageable)
+        }
+
+        return gatheringRepository.searchByTeamIds(teamId, pageable)
+    }
+
     override fun loadLatestIntroduction(gatheringId: UUID): Introduction {
         return loadLatestIntroductionOrNull(gatheringId)
             ?: throw GatheringException(GatheringCode.INTRODUCTION_NOT_FOUND)

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import sharev.member.adapter.outbound.jpa.entity.MemberJpaEntity
 import sharev.member.domain.model.MemberRole
+import sharev.member.domain.model.MemberStatus
 import sharev.team.adapter.outbound.jpa.entity.TeamJpaEntity
 
 interface MemberRepository : JpaRepository<MemberJpaEntity, Long> {
@@ -16,4 +17,10 @@ interface MemberRepository : JpaRepository<MemberJpaEntity, Long> {
     fun findAllByTeam(team: TeamJpaEntity): List<MemberJpaEntity>
 
     fun countByTeamAndRole(team: TeamJpaEntity, role: MemberRole): Long
+
+    fun findAllByAccountIdAndRoleAndStatus(
+        accountId: Long,
+        role: MemberRole,
+        status: MemberStatus
+    ): List<MemberJpaEntity>
 }

@@ -10,4 +10,5 @@ interface LoadGatheringPort {
     fun load(gatheringId: UUID): Gathering
     fun loadAll(filter: LoadGatheringFilter, pageable: Pageable): Page<GatheringDetailSummary>
     fun loadAllByTeam(teamId: Long): List<Gathering>
+    fun loadAllByTeams(teamId: List<Long>, pageable: Pageable): Page<GatheringDetailSummary>
 }

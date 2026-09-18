@@ -79,6 +79,15 @@ class GatheringService(
             .map { it.toDetailResult() }
     }
 
+    override fun getManagedGatherings(
+        accountId: Long,
+        pageable: Pageable
+    ): Page<GatheringDetailResult> {
+        val teamIds = teamAccessPort.loadManageableTeamIds(accountId)
+        return loadGatheringPort.loadAllByTeams(teamIds, pageable)
+            .map { it.toDetailResult() }
+    }
+
     override fun getGathering(accountId: Long?, gatheringId: UUID): GatheringDetailResult {
         val gathering = loadGatheringPort.load(gatheringId)
 

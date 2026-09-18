@@ -68,6 +68,52 @@ class GatheringRepositoryImpl(
         return PageableExecutionUtils.getPage(content, pageable) { countQuery.singleResult }
     }
 
+    override fun searchByTeamIds(teamIds: List<Long>, pageable: Pageable): Page<GatheringDetailSummary> {
+        val content = entityManager.createQuery(
+            """
+            SELECT new sharev.gathering.application.port.outbound.summary.GatheringDetailSummary(
+                gathering.id,
+                gathering.team.id,
+                gathering.team.title,
+                (
+                    SELECT member.account.handle FROM MemberJpaEntity member
+                    WHERE member.team = gathering.team AND member.role = :adminRole AND member.team.type = :personalType
+                ),
+                gathering.visible,
+                gathering.title,
+                gathering.content,
+                gathering.startAt,
+                gathering.endAt,
+                gathering.place,
+                gathering.imageUrl,
+                gathering.gatheringUrl,
+                gathering.contact,
+                gathering.registerStartAt,
+                gathering.registerEndAt
+            )
+            FROM GatheringJpaEntity gathering
+            WHERE gathering.team.id IN :teamIds
+            ${orderBy(pageable.sort)}
+            """.trimIndent(),
+            GatheringDetailSummary::class.java,
+        ).apply {
+            setParameter("adminRole", MemberRole.ADMIN)
+            setParameter("personalType", TeamType.PERSONAL)
+            setParameter("teamIds", teamIds)
+            firstResult = pageable.offset.toInt()
+            maxResults = pageable.pageSize
+        }.resultList
+
+        val countQuery = entityManager.createQuery(
+            "SELECT COUNT(gathering) FROM GatheringJpaEntity gathering WHERE gathering.team.id IN :teamIds",
+            Long::class.javaObjectType,
+        ).apply {
+            setParameter("teamIds", teamIds)
+        }
+
+        return PageableExecutionUtils.getPage(content, pageable) { countQuery.singleResult }
+    }
+
     private data class DynamicWhere(val clause: String, val params: Map<String, Any>)
 
     private fun buildWhere(filter: LoadGatheringFilter, now: LocalDateTime): DynamicWhere {
