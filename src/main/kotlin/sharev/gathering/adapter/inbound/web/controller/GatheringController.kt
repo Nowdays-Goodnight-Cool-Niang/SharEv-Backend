@@ -20,7 +20,8 @@ import sharev.gathering.adapter.inbound.web.mapper.toResponse
 import sharev.gathering.application.port.inbound.usecase.*
 import java.util.*
 
-@RestController("/gatherings")
+@RestController
+@RequestMapping("/gatherings")
 class GatheringController(
     private val createGatheringUseCase: CreateGatheringUseCase,
     private val updateGatheringUseCase: UpdateGatheringUseCase,
