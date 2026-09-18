@@ -1,8 +1,6 @@
 package sharev.connection.adapter.outbound.jpa.entity
 
 import jakarta.persistence.*
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import sharev.card.adapter.outbound.jpa.entity.CardJpaEntity
 import sharev.common.adapter.outbound.jpa.entity.BaseTimeEntity
@@ -26,9 +24,8 @@ class ConnectionJpaEntity(
     @JoinColumn(name = "other_card_id")
     val otherCard: CardJpaEntity,
 
-    @Column(columnDefinition = "card_connection_status")
+    @Column
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     val status: ConnectionStatusType = ConnectionStatusType.REGISTRATION,
 
     @Column
