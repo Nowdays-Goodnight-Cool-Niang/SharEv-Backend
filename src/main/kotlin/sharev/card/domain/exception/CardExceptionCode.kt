@@ -19,7 +19,7 @@ enum class CardExceptionCode(
         ExceptionCategory.BAD_REQUEST,
         "명함이 완성되지 않았습니다."
     ),
-    INVALID_INTRODUCE_TEMPLATE(
+    INVALID_FIELD_VALUES(
         ExceptionCategory.BAD_REQUEST,
         "작성된 소개문이 템플릿과 일치하지 않습니다."
     ),

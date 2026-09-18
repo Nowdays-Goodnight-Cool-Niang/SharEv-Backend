@@ -12,11 +12,10 @@ import sharev.common.adapter.inbound.security.model.AccountPrincipal
 import sharev.gathering.adapter.inbound.web.dto.request.CreateGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.request.GetGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.request.UpdateGatheringRequest
-import sharev.gathering.adapter.inbound.web.dto.request.UpdateIntroduceTemplateRequest
+import sharev.gathering.adapter.inbound.web.dto.request.UpsertIntroductionRequest
 import sharev.gathering.adapter.inbound.web.dto.response.*
 import sharev.gathering.adapter.inbound.web.mapper.toCommand
 import sharev.gathering.adapter.inbound.web.mapper.toResponse
-import sharev.gathering.application.port.inbound.mapper.toCommand
 import sharev.gathering.application.port.inbound.usecase.*
 import java.util.*
 
@@ -25,11 +24,11 @@ class GatheringController(
     private val createGatheringUseCase: CreateGatheringUseCase,
     private val updateGatheringUseCase: UpdateGatheringUseCase,
     private val deleteGatheringUseCase: DeleteGatheringUseCase,
-    private val getIntroduceTemplateUseCase: GetIntroduceTemplateUseCase,
+    private val getIntroductionUseCase: GetIntroductionUseCase,
     private val checkGatheringParticipantUseCase: CheckGatheringParticipantUseCase,
     private val getGatheringsUseCase: GetGatheringsUseCase,
     private val getGatheringUseCase: GetGatheringUseCase,
-    private val updateIntroduceTemplateUseCase: UpdateIntroduceTemplateUseCase,
+    private val upsertIntroductionUseCase: UpsertIntroductionUseCase,
 ) {
 
     @GetMapping
@@ -46,7 +45,7 @@ class GatheringController(
         )
     }
 
-    @GetMapping("/{gatheringId}")
+    @GetMapping("/{gatheringId}/participant")
     fun isParticipant(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
@@ -109,27 +108,27 @@ class GatheringController(
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/{gatheringId}/template")
-    fun getTemplate(
+    @GetMapping("/{gatheringId}/introduction")
+    fun getIntroduction(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-    ): ResponseEntity<IntroduceTemplateResponse> {
+    ): ResponseEntity<IntroductionResponse> {
         return ResponseEntity.ok(
-            getIntroduceTemplateUseCase.getLatestTemplate(
+            getIntroductionUseCase.getLatestIntroduction(
                 gatheringId, accountPrincipal.id
             ).toResponse()
         )
     }
 
-    @PostMapping("/{gatheringId}/template")
-    fun updateTemplate(
+    @PutMapping("/{gatheringId}/introduction")
+    fun upsertIntroduction(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-        @RequestBody request: UpdateIntroduceTemplateRequest,
-    ): ResponseEntity<IntroduceTemplateResponse> {
+        @RequestBody request: UpsertIntroductionRequest,
+    ): ResponseEntity<IntroductionResponse> {
         return ResponseEntity.ok(
-            updateIntroduceTemplateUseCase.updateTemplate(
-                request.toCommand(gatheringId)
+            upsertIntroductionUseCase.upsertIntroduction(
+                request.toCommand(accountPrincipal.id, gatheringId)
             ).toResponse()
         )
     }

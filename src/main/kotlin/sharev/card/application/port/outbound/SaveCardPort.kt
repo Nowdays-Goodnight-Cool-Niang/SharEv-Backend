@@ -5,9 +5,9 @@ import java.util.*
 
 interface SaveCardPort {
     fun join(gatheringId: UUID, accountId: Long, pinNumber: Int): Card
-    fun updateIntroductionText(
+    fun updateFieldValues(
         cardId: Long,
-        templateVersion: Int,
-        introductionText: Map<String, String>,
+        introductionVersion: Int,
+        fieldValues: Map<String, String>,
     ): Card
 }

@@ -28,15 +28,15 @@ class CardJpaEntity(
     var pinNumber: Int?,
 
     @Column
-    var templateVersion: Int? = null,
+    var introductionVersion: Int? = null,
 
     @Column
     @JdbcTypeCode(SqlTypes.JSON)
-    var introductionText: Map<String, String>? = null,
+    var fieldValues: Map<String, String>? = null,
 ) : BaseTimeEntity() {
 
-    fun updateIntroductionText(templateVersion: Int, introductionText: Map<String, String>) {
-        this.templateVersion = templateVersion
-        this.introductionText = introductionText
+    fun updateFieldValues(introductionVersion: Int, fieldValues: Map<String, String>) {
+        this.introductionVersion = introductionVersion
+        this.fieldValues = fieldValues
     }
 }

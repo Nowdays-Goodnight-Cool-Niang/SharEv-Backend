@@ -12,8 +12,8 @@ import java.util.*
 fun UpdateCardIntroduceRequest.toCommand(gatheringId: UUID, accountId: Long) = UpdateCardInfoCommand(
     gatheringId = gatheringId,
     accountId = accountId,
-    templateVersion = requireNotNull(version),
-    introductionText = requireNotNull(introductionText),
+    introductionVersion = requireNotNull(version),
+    fieldValues = requireNotNull(fieldValues),
 )
 
 fun CardResult.toResponse() = CardResponse(
@@ -22,16 +22,16 @@ fun CardResult.toResponse() = CardResponse(
     name = name,
     email = email,
     linkUrls = linkUrls,
-    lastIntroduceTemplateVersion = lastIntroduceTemplateVersion,
-    nowIntroduceTemplateVersion = nowIntroduceTemplateVersion,
-    introduceTemplateContentText = introduceTemplateContentText,
-    introductionText = introductionText,
+    lastIntroductionVersion = lastIntroductionVersion,
+    nowIntroductionVersion = nowIntroductionVersion,
+    introductionSource = introductionSource,
+    fieldValues = fieldValues,
 )
 
 fun JoinCardResult.toResponse() = JoinCardResponse(cardId, pinNumber)
 
 fun ParticipantFlagResult.toResponse() = ParticipantFlagResponse(isParticipant)
 
-fun UpdateCardInfoResult.toResponse() = UpdateCardIntroduceResponse(templateVersion, introductionText)
+fun UpdateCardInfoResult.toResponse() = UpdateCardIntroduceResponse(introductionVersion, fieldValues)
 
 fun Int.toMyPinNumberResponse() = MyPinNumberResponse(this)

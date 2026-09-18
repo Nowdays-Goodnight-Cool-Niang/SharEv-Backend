@@ -4,14 +4,15 @@ import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import sharev.common.adapter.outbound.jpa.entity.BaseTimeEntity
+import sharev.gathering.domain.model.FieldSpec
 
 @Entity
-@Table(name = "introduce_templates")
-class IntroduceTemplateJpaEntity(
+@Table(name = "introductions")
+class IntroductionJpaEntity(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "introduce_template_id")
+    @Column(name = "introduction_id")
     val id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -22,11 +23,9 @@ class IntroduceTemplateJpaEntity(
     val version: Int,
 
     @Column(nullable = false)
-    val content: String,
+    val source: String,
 
-    @Column
+    @Column(nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
-    var placeholders: Map<String, String>,
-) : BaseTimeEntity() {
-
-}
+    val fields: Map<String, FieldSpec>,
+) : BaseTimeEntity()

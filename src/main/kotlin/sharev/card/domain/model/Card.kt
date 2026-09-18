@@ -11,25 +11,23 @@ data class Card(
     val accountName: String,
     val accountEmail: String,
     val pinNumber: Int?,
-    val templateVersion: Int?,
-    val introductionText: Map<String, String>?,
+    val introductionVersion: Int?,
+    val fieldValues: Map<String, String>?,
 ) {
-    fun validateIntroductionText(
-        currentTemplateVersion: Int,
-        templateFields: Set<String>,
-        templateVersion: Int,
-        introductionText: Map<String, String>,
+    fun validateFieldValues(
+        currentIntroductionVersion: Int,
+        fieldNames: Set<String>,
+        introductionVersion: Int,
+        fieldValues: Map<String, String>,
     ) {
-        if (currentTemplateVersion != templateVersion) {
-            throw CardException(CardExceptionCode.INVALID_INTRODUCE_TEMPLATE)
+        if (currentIntroductionVersion != introductionVersion) {
+            throw CardException(CardExceptionCode.INVALID_FIELD_VALUES)
         }
 
-        val introduceFields = introductionText.keys
-
-        if (templateFields.size != introduceFields.size || introduceFields.subtract(templateFields).isNotEmpty()) {
-            throw CardException(CardExceptionCode.INVALID_INTRODUCE_TEMPLATE)
+        if (fieldNames != fieldValues) {
+            throw CardException(CardExceptionCode.INVALID_FIELD_VALUES)
         }
     }
 
-    fun isCompleted(): Boolean = pinNumber != null && introductionText != null
+    fun isCompleted(): Boolean = pinNumber != null && fieldValues != null
 }

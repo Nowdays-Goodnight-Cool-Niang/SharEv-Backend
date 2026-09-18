@@ -51,15 +51,15 @@ class CardJpaAdapter(
         }
     }
 
-    override fun updateIntroductionText(
+    override fun updateFieldValues(
         cardId: Long,
-        templateVersion: Int,
-        introductionText: Map<String, String>,
+        introductionVersion: Int,
+        fieldValues: Map<String, String>,
     ): Card {
         val card = cardRepository.findByIdOrNull(cardId)
             ?: throw CardException(CardCode.CARD_NOT_FOUND)
 
-        card.updateIntroductionText(templateVersion, introductionText)
+        card.updateFieldValues(introductionVersion, fieldValues)
 
         return card.toDomainModel()
     }

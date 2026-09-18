@@ -1,13 +1,13 @@
 package sharev.gathering.adapter.inbound.web.mapper
 
-import sharev.gathering.adapter.inbound.web.dto.request.CreateGatheringRequest
-import sharev.gathering.adapter.inbound.web.dto.request.GetGatheringRequest
-import sharev.gathering.adapter.inbound.web.dto.request.UpdateGatheringRequest
+import sharev.gathering.adapter.inbound.web.dto.request.*
 import sharev.gathering.adapter.inbound.web.dto.response.*
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
 import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
+import sharev.gathering.application.port.inbound.command.UpsertIntroductionCommand
 import sharev.gathering.application.port.inbound.result.*
+import sharev.gathering.domain.model.FieldSpec
 import java.util.*
 
 fun ParticipantResult.toResponse() = ParticipantResponse(isParticipant)
@@ -80,7 +80,15 @@ fun GatheringDetailResult.toResponse() = GatheringDetailResponse(
     registerEndAt,
 )
 
-fun IntroduceTemplateResult.toResponse() = IntroduceTemplateResponse(version, text, placeholders)
+fun IntroductionResult.toResponse() = IntroductionResponse(
+    version,
+    source,
+    fields.mapValues { (_, field) -> field.toResponse() }
+)
+
+fun FieldSpec.toResponse() = FieldSpecResponse(
+    placeholder,
+)
 
 fun GetGatheringRequest.toCommand(accountId: Long?) = GetGatheringCommand(
     accountId,
@@ -89,4 +97,15 @@ fun GetGatheringRequest.toCommand(accountId: Long?) = GetGatheringCommand(
     visibility,
     progress,
     registration,
+)
+
+fun UpsertIntroductionRequest.toCommand(accountId: Long, gatheringId: UUID) = UpsertIntroductionCommand(
+    accountId,
+    gatheringId,
+    requireNotNull(source),
+    requireNotNull(fields).mapValues { (_, field) -> field.toModel() }
+)
+
+fun FieldSpecRequest.toModel() = FieldSpec(
+    placeholder,
 )

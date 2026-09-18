@@ -9,5 +9,5 @@ data class UpdateCardIntroduceRequest(
     val version: Int?,
 
     @field:NotNull
-    val introductionText: Map<String, String>?,
+    val fieldValues: Map<String, String>?,
 )

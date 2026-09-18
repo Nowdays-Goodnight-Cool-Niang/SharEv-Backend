@@ -1,17 +1,14 @@
 package sharev.gathering.application.port.inbound.mapper
 
-import sharev.gathering.adapter.inbound.web.dto.request.UpdateIntroduceTemplateRequest
 import sharev.gathering.application.port.inbound.command.GetGatheringCommand
-import sharev.gathering.application.port.inbound.command.UpdateIntroduceTemplateCommand
 import sharev.gathering.application.port.inbound.result.CreateGatheringResult
 import sharev.gathering.application.port.inbound.result.GatheringDetailResult
-import sharev.gathering.application.port.inbound.result.IntroduceTemplateResult
+import sharev.gathering.application.port.inbound.result.IntroductionResult
 import sharev.gathering.application.port.outbound.LoadGatheringFilter
 import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.model.Gathering
 import sharev.gathering.domain.model.GatheringVisible
-import sharev.gathering.domain.model.IntroduceTemplate
-import java.util.*
+import sharev.gathering.domain.model.Introduction
 
 fun Gathering.toCreateGatheringResult() = CreateGatheringResult(
     id,
@@ -65,10 +62,10 @@ fun GatheringDetailSummary.toDetailResult() = GatheringDetailResult(
     registerEndAt = registerEndAt,
 )
 
-fun IntroduceTemplate.toResult() = IntroduceTemplateResult(
+fun Introduction.toResult() = IntroductionResult(
     version = version,
-    text = content,
-    placeholders = placeholders,
+    source = template.source,
+    fields = template.fields,
 )
 
 fun GetGatheringCommand.toFilter(): LoadGatheringFilter {
@@ -95,9 +92,3 @@ fun calculateParticipated(authenticated: Boolean, visibility: GatheringVisible?,
 
     return participated
 }
-
-fun UpdateIntroduceTemplateRequest.toCommand(gatheringId: UUID) = UpdateIntroduceTemplateCommand(
-    gatheringId,
-    requireNotNull(content),
-    requireNotNull(placeholders),
-)

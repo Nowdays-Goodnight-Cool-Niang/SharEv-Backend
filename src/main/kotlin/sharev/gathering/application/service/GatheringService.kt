@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
 import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
-import sharev.gathering.application.port.inbound.command.UpdateIntroduceTemplateCommand
+import sharev.gathering.application.port.inbound.command.UpsertIntroductionCommand
 import sharev.gathering.application.port.inbound.mapper.toCreateGatheringResult
 import sharev.gathering.application.port.inbound.mapper.toDetailResult
 import sharev.gathering.application.port.inbound.mapper.toFilter
@@ -19,6 +19,8 @@ import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.exception.GatheringExceptionCode
 import sharev.gathering.domain.model.Gathering
 import sharev.gathering.domain.model.GatheringVisible
+import sharev.gathering.domain.model.Introduction
+import sharev.gathering.domain.model.Template
 import sharev.team.application.port.outbound.TeamAccessPort
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
@@ -30,17 +32,17 @@ class GatheringService(
     private val checkGatheringParticipantPort: CheckGatheringParticipantPort,
     private val saveGatheringPort: SaveGatheringPort,
     private val loadGatheringPort: LoadGatheringPort,
-    private val loadIntroduceTemplatePort: LoadIntroduceTemplatePort,
+    private val loadIntroductionPort: LoadIntroductionPort,
     private val teamAccessPort: TeamAccessPort,
-    private val saveIntroduceTemplatePort: SaveIntroduceTemplatePort,
+    private val saveIntroductionPort: SaveIntroductionPort,
 ) : CheckGatheringParticipantUseCase,
     CreateGatheringUseCase,
     UpdateGatheringUseCase,
     DeleteGatheringUseCase,
-    GetIntroduceTemplateUseCase,
+    GetIntroductionUseCase,
     GetGatheringsUseCase,
     GetGatheringUseCase,
-    UpdateIntroduceTemplateUseCase {
+    UpsertIntroductionUseCase {
 
     override fun isParticipant(accountId: Long, gatheringId: UUID): ParticipantResult {
         return ParticipantResult(checkGatheringParticipantPort.isParticipant(gatheringId, accountId))
@@ -128,12 +130,12 @@ class GatheringService(
         return DeleteGatheringResult(gatheringId)
     }
 
-    override fun getLatestTemplate(gatheringId: UUID, accountId: Long): IntroduceTemplateResult {
+    override fun getLatestIntroduction(gatheringId: UUID, accountId: Long): IntroductionResult {
         if (!checkGatheringParticipantPort.isParticipant(gatheringId, accountId)) {
             throw GatheringException(GatheringExceptionCode.GATHERING_PARTICIPANT_NOT_FOUND)
         }
 
-        return loadIntroduceTemplatePort.loadLatest(gatheringId)
+        return loadIntroductionPort.loadLatestIntroduction(gatheringId)
             .toResult()
     }
 
@@ -144,10 +146,15 @@ class GatheringService(
     }
 
     @Transactional
-    override fun updateTemplate(command: UpdateIntroduceTemplateCommand): IntroduceTemplateResult {
-        val latestTemplate = loadIntroduceTemplatePort.loadLatest(command.gatheringId)
-        val newTemplate = latestTemplate.update(command.content, command.placeholders)
-        return saveIntroduceTemplatePort.save(newTemplate)
+    override fun upsertIntroduction(command: UpsertIntroductionCommand): IntroductionResult {
+        val gathering = loadGatheringPort.load(command.gatheringId)
+        validateTeamManage(command.accountId, gathering.teamId)
+
+        val latest = loadIntroductionPort.loadLatestIntroductionOrNull(command.gatheringId)
+        val introduction = latest?.update(Template(command.source, command.fields))
+            ?: Introduction.create(command.gatheringId, Template(command.source, command.fields))
+
+        return saveIntroductionPort.save(introduction)
             .toResult()
     }
 }
