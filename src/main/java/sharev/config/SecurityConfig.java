@@ -61,7 +61,9 @@ public class SecurityConfig {
                     .permitAll();
             authorizeRequests.requestMatchers("/swagger-ui/**")
                     .permitAll();
-            authorizeRequests.requestMatchers(HttpMethod.GET)
+            authorizeRequests.requestMatchers(HttpMethod.GET, "/gatherings/managed")
+                    .hasRole("VERIFIED");
+            authorizeRequests.requestMatchers(HttpMethod.GET, "/gatherings", "/gatherings/*")
                     .permitAll();
             authorizeRequests.requestMatchers(HttpMethod.POST, "/signup", "/login")
                     .permitAll();
