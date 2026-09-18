@@ -7,7 +7,6 @@ import sharev.gathering.application.port.inbound.result.IntroductionResult
 import sharev.gathering.application.port.outbound.LoadGatheringFilter
 import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.model.Gathering
-import sharev.gathering.domain.model.GatheringVisible
 import sharev.gathering.domain.model.Introduction
 
 fun Gathering.toCreateGatheringResult() = CreateGatheringResult(
@@ -68,27 +67,11 @@ fun Introduction.toResult() = IntroductionResult(
     fields = template.fields,
 )
 
-fun GetGatheringCommand.toFilter(): LoadGatheringFilter {
-    val authenticated = accountId != null
-
-    return LoadGatheringFilter(
-        accountId = accountId,
-        participated = calculateParticipated(authenticated, visibility, participated),
-        teamId = teamId,
-        visible = if (authenticated) visibility else GatheringVisible.PUBLIC,
-        progress = progress,
-        registration = registration,
-    )
-}
-
-fun calculateParticipated(authenticated: Boolean, visibility: GatheringVisible?, participated: Boolean?): Boolean? {
-    if (!authenticated) {
-        return false
-    }
-
-    if (visibility == GatheringVisible.PRIVATE) {
-        return true
-    }
-
-    return participated
-}
+fun GetGatheringCommand.toFilter() = LoadGatheringFilter(
+    accountId = accountId,
+    participated = participated,
+    teamId = teamId,
+    visible = visibility,
+    progress = progress,
+    registration = registration,
+)

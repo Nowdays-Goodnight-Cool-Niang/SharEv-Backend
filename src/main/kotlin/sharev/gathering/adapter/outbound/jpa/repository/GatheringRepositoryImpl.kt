@@ -8,6 +8,7 @@ import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
 import sharev.gathering.application.port.outbound.LoadGatheringFilter
 import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
+import sharev.gathering.domain.model.GatheringVisible
 import sharev.gathering.domain.model.PeriodStatus
 import sharev.member.domain.model.MemberRole
 import sharev.team.domain.model.TeamType
@@ -73,6 +74,18 @@ class GatheringRepositoryImpl(
         val sb = StringBuilder()
         val params = mutableMapOf<String, Any>()
 
+        params["publicVisible"] = GatheringVisible.PUBLIC
+        if (filter.accountId != null) {
+            sb.append(
+                " AND (gathering.visible = :publicVisible" +
+                        " OR EXISTS (SELECT 1 FROM CardJpaEntity ac" +
+                        " WHERE ac.gathering = gathering AND ac.account.id = :accessAccountId))"
+            )
+            params["accessAccountId"] = filter.accountId
+        } else {
+            sb.append(" AND gathering.visible = :publicVisible")
+        }
+
         filter.teamId?.let { sb.append(" AND gathering.team.id = :teamId"); params["teamId"] = it }
         filter.visible?.let { sb.append(" AND gathering.visible = :visible"); params["visible"] = it }
 
@@ -92,11 +105,14 @@ class GatheringRepositoryImpl(
             }
             params["now"] = now
         }
-        filter.participated?.let {
-            val exists =
-                "EXISTS (SELECT 1 FROM CardJpaEntity c WHERE c.gathering = gathering AND c.account.id = :accountId)"
-            sb.append(if (it) " AND $exists" else " AND NOT $exists")
-            params["accountId"] = requireNotNull(filter.accountId)
+
+        if (filter.accountId != null) {
+            filter.participated?.let {
+                val exists =
+                    "EXISTS (SELECT 1 FROM CardJpaEntity c WHERE c.gathering = gathering AND c.account.id = :accountId)"
+                sb.append(if (it) " AND $exists" else " AND NOT $exists")
+                params["accountId"] = filter.accountId
+            }
         }
 
         return DynamicWhere(sb.toString(), params)
