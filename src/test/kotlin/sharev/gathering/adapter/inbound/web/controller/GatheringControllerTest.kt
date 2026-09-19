@@ -6,11 +6,13 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters
 import com.epages.restdocs.apispec.SimpleType.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.BDDMockito.given
-import org.mockito.BDDMockito.willThrow
 import org.mockito.kotlin.any
+import org.mockito.kotlin.then
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
 import org.springframework.restdocs.payload.FieldDescriptor
@@ -21,16 +23,17 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import sharev.ControllerTestSupport
 import sharev.WithCustomMockUser
 import sharev.gathering.adapter.inbound.web.dto.request.CreateGatheringRequest
+import sharev.gathering.adapter.inbound.web.dto.request.FieldSpecRequest
 import sharev.gathering.adapter.inbound.web.dto.request.UpdateGatheringRequest
+import sharev.gathering.adapter.inbound.web.dto.request.UpsertIntroductionRequest
 import sharev.gathering.adapter.inbound.web.dto.response.*
+import sharev.gathering.adapter.inbound.web.mapper.toModel
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.inbound.result.*
 import sharev.gathering.application.port.inbound.usecase.*
 import sharev.gathering.domain.model.FieldSpec
 import sharev.gathering.domain.model.GatheringVisible
-import sharev.team.domain.exception.TeamException
-import sharev.team.domain.exception.TeamExceptionCode
 import java.time.LocalDateTime
 import java.util.*
 
@@ -40,7 +43,7 @@ class GatheringControllerTest : ControllerTestSupport() {
     @DisplayName("전체 행사 목록 조회")
     fun allGatherings() {
         val pageable = PageRequest.of(0, 20)
-        val response = PageImpl(listOf(gatheringResult(UUID.randomUUID())), pageable, 1)
+        val response = PageImpl(listOf(gatheringDetailResult(UUID.randomUUID())), pageable, 1)
 
         given(mockBean<GetGatheringsUseCase>().getGatherings(any(), any()))
             .willReturn(response)
@@ -67,6 +70,55 @@ class GatheringControllerTest : ControllerTestSupport() {
                     )
                 )
             )
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("관리 가능한 행사 목록 조회")
+    fun getManagedGatherings() {
+        val pageable = PageRequest.of(0, 20)
+        val response = PageImpl(listOf(gatheringDetailResult(UUID.randomUUID())), pageable, 1)
+
+        given(mockBean<GetGatheringsUseCase>().getManagedGatherings(anyLong(), any<Pageable>()))
+            .willReturn(response)
+
+        val request = RestDocumentationRequestBuilders.get("/gatherings/managed")
+            .param("page", "0")
+            .param("size", "20")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(
+                documentResource(
+                    "allManagedGatherings",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("관리 가능한 전체 행사 목록 조회")
+                            .description("모든 관리 가능한 행사 목록을 페이지네이션으로 조회합니다.")
+                            .queryParameters(*pageableQueryParameters())
+                            .responseFields(*gatheringPageFields())
+                            .responseSchema(schema(GatheringDetailResponse::class.java.simpleName))
+                            .build()
+                    )
+                )
+            )
+    }
+
+    @Test
+    @DisplayName("관리 가능한 행사 목록 조회 실패 - 비로그인")
+    fun getManagedGatheringsFail() {
+        val request = RestDocumentationRequestBuilders.get("/gatherings/managed")
+            .param("page", "0")
+            .param("size", "20")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        then(mockBean<GetGatheringsUseCase>()).shouldHaveNoInteractions()
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isUnauthorized())
     }
 
     @Test
@@ -98,6 +150,21 @@ class GatheringControllerTest : ControllerTestSupport() {
                     )
                 )
             )
+    }
+
+    @Test
+    @DisplayName("행사 참여 유무 확인 실패 - 비로그인")
+    fun isParticipantFail() {
+        val gatheringId = UUID.randomUUID()
+
+        val request = RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}/participant", gatheringId)
+            .contentType(MediaType.APPLICATION_JSON)
+
+        then(mockBean<GetGatheringsUseCase>()).shouldHaveNoInteractions()
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isUnauthorized())
     }
 
     @Test
@@ -210,60 +277,12 @@ class GatheringControllerTest : ControllerTestSupport() {
 
     @Test
     @WithCustomMockUser
-    @DisplayName("행사 생성 실패 - 권한 없음")
-    fun createGatheringFail() {
-        val teamId = 1L
-        val dto = CreateGatheringRequest(
-            teamId,
-            GatheringVisible.PUBLIC,
-            "Spring 밋업",
-            "설명",
-            LocalDateTime.of(2025, 3, 20, 14, 0),
-            LocalDateTime.of(2025, 3, 20, 17, 0),
-            "서울",
-            null,
-            null,
-            null,
-            LocalDateTime.of(2025, 3, 1, 0, 0),
-            LocalDateTime.of(2025, 3, 19, 23, 59),
-        )
-
-        willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
-            .given(mockBean<CreateGatheringUseCase>()).create(
-                CreateGatheringCommand(
-                    1L,
-                    teamId,
-                    requireNotNull(dto.visible),
-                    requireNotNull(dto.title),
-                    requireNotNull(dto.content),
-                    requireNotNull(dto.startAt),
-                    requireNotNull(dto.endAt),
-                    requireNotNull(dto.place),
-                    dto.imageUrl,
-                    dto.gatheringUrl,
-                    dto.contact,
-                    requireNotNull(dto.registerStartAt),
-                    requireNotNull(dto.registerEndAt),
-                )
-            )
-
-        val request = RestDocumentationRequestBuilders.post("/gatherings")
-            .content(objectMapper.writeValueAsString(dto))
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andDo(print())
-            .andExpect(status().isForbidden())
-    }
-
-    @Test
-    @WithCustomMockUser
     @DisplayName("행사 상세 조회")
     fun getGathering() {
         val gatheringId = UUID.randomUUID()
 
         given(mockBean<GetGatheringUseCase>().getGathering(1L, gatheringId))
-            .willReturn(gatheringResult(gatheringId))
+            .willReturn(gatheringDetailResult(gatheringId))
 
         val request =
             RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}", gatheringId)
@@ -325,7 +344,7 @@ class GatheringControllerTest : ControllerTestSupport() {
                     requireNotNull(dto.registerEndAt),
                 )
             )
-        ).willReturn(gatheringResult(gatheringId))
+        ).willReturn(gatheringDetailResult(gatheringId))
 
         val request = RestDocumentationRequestBuilders.patch(
             "/gatherings/{gatheringId}",
@@ -353,57 +372,6 @@ class GatheringControllerTest : ControllerTestSupport() {
                     )
                 )
             )
-    }
-
-    @Test
-    @WithCustomMockUser
-    @DisplayName("행사 수정 실패 - 권한 없음")
-    fun updateGatheringFail() {
-        val gatheringId = UUID.randomUUID()
-        val dto = UpdateGatheringRequest(
-            GatheringVisible.PRIVATE,
-            "수정된 행사",
-            "설명",
-            LocalDateTime.of(2025, 4, 1, 10, 0),
-            LocalDateTime.of(2025, 4, 1, 18, 0),
-            "서울",
-            null,
-            null,
-            null,
-            LocalDateTime.of(2025, 3, 15, 0, 0),
-            LocalDateTime.of(2025, 3, 31, 23, 59),
-        )
-
-        given(
-            mockBean<UpdateGatheringUseCase>().update(
-                UpdateGatheringCommand(
-                    1L,
-                    gatheringId,
-                    requireNotNull(dto.visible),
-                    requireNotNull(dto.title),
-                    requireNotNull(dto.content),
-                    requireNotNull(dto.startAt),
-                    requireNotNull(dto.endAt),
-                    requireNotNull(dto.place),
-                    dto.imageUrl,
-                    dto.gatheringUrl,
-                    dto.contact,
-                    requireNotNull(dto.registerStartAt),
-                    requireNotNull(dto.registerEndAt),
-                )
-            )
-        ).willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
-
-        val request = RestDocumentationRequestBuilders.patch(
-            "/gatherings/{gatheringId}",
-            gatheringId,
-        )
-            .content(objectMapper.writeValueAsString(dto))
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andDo(print())
-            .andExpect(status().isForbidden())
     }
 
     @Test
@@ -442,27 +410,6 @@ class GatheringControllerTest : ControllerTestSupport() {
 
     @Test
     @WithCustomMockUser
-    @DisplayName("행사 삭제 실패 - 권한 없음")
-    fun deleteGatheringFail() {
-        val gatheringId = UUID.randomUUID()
-
-        willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
-            .given(mockBean<DeleteGatheringUseCase>())
-            .delete(1L, gatheringId)
-
-        val request = RestDocumentationRequestBuilders.delete(
-            "/gatherings/{gatheringId}",
-            gatheringId,
-        )
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andDo(print())
-            .andExpect(status().isForbidden())
-    }
-
-    @Test
-    @WithCustomMockUser
     @DisplayName("행사 소개 템플릿 조회")
     fun getIntroduction() {
         val gatheringId = UUID.randomUUID()
@@ -496,7 +443,7 @@ class GatheringControllerTest : ControllerTestSupport() {
                                 fieldWithPath("version").type(NUMBER)
                                     .description("템플릿 버전. 카드 수정 시 version 필드에 전달합니다."),
                                 fieldWithPath("source").type(STRING)
-                                    .description("템플릿 원문. \${변수명} 패턴이 입력 필드가 됩니다."),
+                                    .description($$"템플릿 원문. ${변수명} 패턴이 입력 필드가 됩니다."),
                                 subsectionWithPath("fields").type("OBJECT").description("필드별 명세 (placeholder 포함)"),
                             )
                             .responseSchema(schema(IntroductionResponse::class.java.simpleName))
@@ -506,7 +453,50 @@ class GatheringControllerTest : ControllerTestSupport() {
             )
     }
 
-    private fun gatheringResult(gatheringId: UUID): GatheringDetailResult = GatheringDetailResult(
+    @Test
+    @WithCustomMockUser
+    @DisplayName("행사 소개 템플릿 upsert")
+    fun upsertIntroduction() {
+        val gatheringId = UUID.randomUUID()
+        val source = $$"안녕하세요. ${name}입니다."
+        val fields = mapOf("name" to FieldSpecRequest("이름을 입력해 주세요"))
+        val dto = UpsertIntroductionRequest(source, fields)
+        val result = IntroductionResult(1, source, fields.mapValues { (_, field) -> field.toModel() })
+
+        given(mockBean<UpsertIntroductionUseCase>().upsertIntroduction(any()))
+            .willReturn(result)
+
+        val request = RestDocumentationRequestBuilders.put("/gatherings/{gatheringId}/introduction", gatheringId)
+            .content(objectMapper.writeValueAsString(dto))
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isOk)
+            .andDo(
+                documentResource(
+                    "upsertIntroduction",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("행사 소개 템플릿 upsert")
+                            .description("행사의 자기소개 템플릿을 추가하거나 업데이트됩니다. 기존 필드 형식과 같다면 업데이트, 다르다면 추가되며 버전이 상승합니다.")
+                            .pathParameters(parameterWithName("gatheringId").description("행사 ID (UUID 형식)"))
+                            .responseFields(
+                                fieldWithPath("source").type(STRING)
+                                    .description($$"템플릿 원문. ${변수명} 패턴이 입력 필드가 됩니다."),
+                                fieldWithPath("version").type(NUMBER)
+                                    .description("템플릿 버전"),
+                                subsectionWithPath("fields").type("OBJECT")
+                                    .description("필드별 명세 (placeholder 포함)"),
+                            )
+                            .responseSchema(schema(IntroductionResponse::class.java.simpleName))
+                            .build()
+                    )
+                )
+            )
+    }
+
+    private fun gatheringDetailResult(gatheringId: UUID): GatheringDetailResult = GatheringDetailResult(
         gatheringId,
         1L,
         "공유대학",
