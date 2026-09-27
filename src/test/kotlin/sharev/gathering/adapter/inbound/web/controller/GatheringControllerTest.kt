@@ -114,11 +114,11 @@ class GatheringControllerTest : ControllerTestSupport() {
             .param("size", "20")
             .contentType(MediaType.APPLICATION_JSON)
 
-        then(mockBean<GetGatheringsUseCase>()).shouldHaveNoInteractions()
-
         mockMvc.perform(request)
             .andDo(print())
             .andExpect(status().isUnauthorized())
+
+        then(mockBean<GetGatheringsUseCase>()).shouldHaveNoInteractions()
     }
 
     @Test
@@ -160,11 +160,11 @@ class GatheringControllerTest : ControllerTestSupport() {
         val request = RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}/participant", gatheringId)
             .contentType(MediaType.APPLICATION_JSON)
 
-        then(mockBean<GetGatheringsUseCase>()).shouldHaveNoInteractions()
-
         mockMvc.perform(request)
             .andDo(print())
             .andExpect(status().isUnauthorized())
+
+        then(mockBean<CheckGatheringParticipantUseCase>()).shouldHaveNoInteractions()
     }
 
     @Test
