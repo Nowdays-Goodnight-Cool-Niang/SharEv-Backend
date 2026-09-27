@@ -35,4 +35,8 @@ enum class GatheringExceptionCode(
         ExceptionCategory.BAD_REQUEST,
         "행사 참여 종료 시간은 행사 종료 시간보다 앞이어야 합니다."
     ),
+    INTRODUCTION_CONFLICT(
+        ExceptionCategory.CONFLICT,
+        "자기소개 템플릿이 동시에 수정되었습니다."
+    ),
 }

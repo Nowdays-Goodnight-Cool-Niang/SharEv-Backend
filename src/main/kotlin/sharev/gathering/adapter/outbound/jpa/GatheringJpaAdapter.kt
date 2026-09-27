@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
+import sharev.common.adapter.outbound.jpa.exception.onUniqueViolation
 import sharev.gathering.adapter.outbound.jpa.entity.GatheringJpaEntity
 import sharev.gathering.adapter.outbound.jpa.entity.IntroductionJpaEntity
 import sharev.gathering.adapter.outbound.jpa.mapper.toDomainModel
@@ -148,14 +149,16 @@ class GatheringJpaAdapter(
         val gathering = gatheringRepository.findByIdOrNull(introduction.gatheringId)
             ?: throw GatheringException(GatheringCode.GATHERING_NOT_FOUND)
 
-        return introductionRepository.save(
-            IntroductionJpaEntity(
-                if (introduction.id == Introduction.NEW_ID) null else introduction.id,
-                gathering,
-                introduction.version,
-                introduction.template.source,
-                introduction.template.fields,
-            )
-        ).toDomainModel()
+        return onUniqueViolation({ GatheringException(GatheringCode.INTRODUCTION_CONFLICT) }) {
+            introductionRepository.saveAndFlush(
+                IntroductionJpaEntity(
+                    if (introduction.id == Introduction.NEW_ID) null else introduction.id,
+                    gathering,
+                    introduction.version,
+                    introduction.template.source,
+                    introduction.template.fields,
+                )
+            ).toDomainModel()
+        }
     }
 }
