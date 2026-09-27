@@ -72,11 +72,11 @@ data class Gathering(
         registerStartAt: LocalDateTime,
         registerEndAt: LocalDateTime,
     ) {
-        if (!registerStartAt.isBefore(startAt) || !registerStartAt.isBefore(endAt)) {
+        if (!registerStartAt.isBefore(startAt)) {
             throw GatheringException(GatheringExceptionCode.INVALID_GATHERING_REGISTER_START_PERIOD_EXCEPTION)
         }
 
-        if (!registerEndAt.isBefore(endAt)) {
+        if (!registerStartAt.isBefore(registerEndAt) || !registerEndAt.isBefore(endAt)) {
             throw GatheringException(GatheringExceptionCode.INVALID_GATHERING_REGISTER_END_PERIOD_EXCEPTION)
         }
     }
