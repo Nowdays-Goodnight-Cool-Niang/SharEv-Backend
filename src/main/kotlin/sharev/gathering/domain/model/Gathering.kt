@@ -24,6 +24,11 @@ data class Gathering(
         val NEW_ID: UUID = UUID(0L, 0L)
     }
 
+    init {
+        validatePeriod(startAt, endAt)
+        validateRegisterPeriod(startAt, endAt, registerStartAt, registerEndAt)
+    }
+
     fun update(
         visible: GatheringVisible,
         title: String,
@@ -37,9 +42,6 @@ data class Gathering(
         registerStartAt: LocalDateTime,
         registerEndAt: LocalDateTime,
     ): Gathering {
-        validatePeriod(startAt, endAt)
-        validateRegisterPeriod(startAt, endAt, registerStartAt, registerEndAt)
-
         return copy(
             visible = visible,
             title = title,
