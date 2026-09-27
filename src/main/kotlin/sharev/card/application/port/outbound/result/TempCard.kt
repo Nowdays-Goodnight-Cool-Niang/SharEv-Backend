@@ -9,7 +9,7 @@ data class TempCard(
     val accountId: Long,
     val name: String,
     val email: String,
-    val templateVersion: Int,
-    val templateText: String,
-    val introductionText: Map<String, String>,
+    val introductionVersion: Int,
+    val introductionSource: String,
+    val fieldValues: Map<String, String>,
 )

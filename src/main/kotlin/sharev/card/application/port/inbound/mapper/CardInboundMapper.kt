@@ -7,19 +7,19 @@ import sharev.card.domain.model.CardDisplay
 
 fun Card.toCardResult(
     linkUrls: List<String>,
-    lastIntroduceTemplateVersion: Int,
-    introduceTemplateVersion: Int,
-    introduceTemplateContentText: String,
+    lastIntroductionVersion: Int,
+    nowIntroductionVersion: Int,
+    introductionSource: String,
 ) = CardResult(
     type = CardDisplay.FULL,
     cardId = id,
     name = accountName,
     email = accountEmail,
     linkUrls = linkUrls,
-    lastIntroduceTemplateVersion = lastIntroduceTemplateVersion,
-    nowIntroduceTemplateVersion = introduceTemplateVersion,
-    introduceTemplateContentText = introduceTemplateContentText,
-    introductionText = introductionText ?: emptyMap(),
+    lastIntroductionVersion = lastIntroductionVersion,
+    nowIntroductionVersion = nowIntroductionVersion,
+    introductionSource = introductionSource,
+    fieldValues = fieldValues ?: emptyMap(),
 )
 
 fun TempCard.toCardResult(
@@ -31,8 +31,8 @@ fun TempCard.toCardResult(
     name = name,
     email = if (connectionFlag) email else "",
     linkUrls = if (connectionFlag) linkUrls else emptyList(),
-    lastIntroduceTemplateVersion = lastIntroduceTemplateVersion,
-    nowIntroduceTemplateVersion = templateVersion,
-    introduceTemplateContentText = templateText,
-    introductionText = if (connectionFlag) introductionText else emptyMap(),
+    lastIntroductionVersion = lastIntroduceTemplateVersion,
+    nowIntroductionVersion = introductionVersion,
+    introductionSource = introductionSource,
+    fieldValues = if (connectionFlag) fieldValues else emptyMap(),
 )

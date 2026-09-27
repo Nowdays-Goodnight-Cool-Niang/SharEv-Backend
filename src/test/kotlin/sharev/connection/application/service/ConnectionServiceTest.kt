@@ -11,7 +11,7 @@ import sharev.card.domain.exception.CardException
 import sharev.card.domain.model.Card
 import sharev.connection.application.port.inbound.command.ConnectCardsCommand
 import sharev.connection.application.port.outbound.SaveConnectionPort
-import java.util.UUID
+import java.util.*
 
 class ConnectionServiceTest {
     private val loadCardPort = mock(LoadCardPort::class.java)
@@ -46,7 +46,7 @@ class ConnectionServiceTest {
         accountName = "name-$accountId",
         accountEmail = "account$accountId@test.com",
         pinNumber = 1234,
-        templateVersion = 1,
-        introductionText = mapOf("name" to "value"),
+        introductionVersion = 1,
+        fieldValues = mapOf("name" to "value"),
     )
 }

@@ -10,6 +10,6 @@ fun CardJpaEntity.toDomainModel() = Card(
     accountName = account.name,
     accountEmail = account.email,
     pinNumber = pinNumber,
-    templateVersion = templateVersion,
-    introductionText = introductionText,
+    introductionVersion = introductionVersion,
+    fieldValues = fieldValues,
 )

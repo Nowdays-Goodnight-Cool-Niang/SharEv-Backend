@@ -21,7 +21,7 @@ import sharev.card.domain.exception.CardExceptionCode
 import sharev.card.domain.model.Card
 import sharev.common.application.port.outbound.PublishEventPort
 import sharev.gathering.application.port.outbound.LoadGatheringPort
-import sharev.gathering.application.port.outbound.LoadIntroduceTemplatePort
+import sharev.gathering.application.port.outbound.LoadIntroductionPort
 import sharev.link.application.port.outbound.LoadLinkPort
 import java.util.*
 
@@ -32,7 +32,7 @@ class CardService(
     private val loadCardPort: LoadCardPort,
     private val queryCardPort: QueryCardPort,
     private val loadGatheringPort: LoadGatheringPort,
-    private val loadIntroduceTemplatePort: LoadIntroduceTemplatePort,
+    private val loadIntroductionPort: LoadIntroductionPort,
     private val loadAccountPort: LoadAccountPort,
     private val loadLinkPort: LoadLinkPort,
     private val publishEventPort: PublishEventPort,
@@ -76,20 +76,20 @@ class CardService(
     @Transactional
     override fun updateIntroduce(command: UpdateCardInfoCommand): UpdateCardInfoResult {
         val card = loadCardPort.loadByGatheringAndAccount(command.gatheringId, command.accountId)
-        val introduceTemplate = loadIntroduceTemplatePort.loadByGatheringAndVersion(
-            command.gatheringId, command.templateVersion,
+        val introduction = loadIntroductionPort.loadByGatheringAndVersion(
+            command.gatheringId, command.introductionVersion,
         )
 
-        card.validateIntroductionText(
-            introduceTemplate.version,
-            introduceTemplate.content.getFields(),
-            command.templateVersion,
-            command.introductionText,
+        card.validateFieldValues(
+            introduction.version,
+            introduction.template.fields.keys,
+            command.introductionVersion,
+            command.fieldValues,
         )
         val updatedCard =
-            saveCardPort.updateIntroductionText(card.id, command.templateVersion, command.introductionText)
+            saveCardPort.updateFieldValues(card.id, command.introductionVersion, command.fieldValues)
 
-        return UpdateCardInfoResult(updatedCard.templateVersion!!, updatedCard.introductionText!!)
+        return UpdateCardInfoResult(updatedCard.introductionVersion!!, updatedCard.fieldValues!!)
     }
 
     override fun getCardByPinNumber(command: GetCardByPinNumberCommand): CardResult {
@@ -117,16 +117,16 @@ class CardService(
     private fun calculateCardResult(gatheringId: UUID, card: Card): CardResult {
         val linkUrls = loadLinkPort.loadAllByAccountId(card.accountId)
             .map { it.url }
-        val latestIntroduceTemplate = loadIntroduceTemplatePort.loadLatest(gatheringId)
-        val templateVersion = card.templateVersion
+        val latestIntroduction = loadIntroductionPort.loadLatestIntroduction(gatheringId)
+        val introductionVersion = card.introductionVersion
             ?: throw CardException(CardExceptionCode.CARD_NOT_FOUND)
-        val introduceTemplate = loadIntroduceTemplatePort.loadByGatheringAndVersion(gatheringId, templateVersion)
+        val introduction = loadIntroductionPort.loadByGatheringAndVersion(gatheringId, introductionVersion)
 
         return card.toCardResult(
             linkUrls = linkUrls,
-            lastIntroduceTemplateVersion = latestIntroduceTemplate.version,
-            introduceTemplateVersion = introduceTemplate.version,
-            introduceTemplateContentText = introduceTemplate.content.text,
+            lastIntroductionVersion = latestIntroduction.version,
+            nowIntroductionVersion = introduction.version,
+            introductionSource = introduction.template.source,
         )
     }
 
@@ -140,7 +140,7 @@ class CardService(
         val tempCards = queryCardPort.searchTempCards(
             command.gatheringId, myCardId, command.snapshotTime, command.pageable,
         )
-        val latestIntroduceTemplate = loadIntroduceTemplatePort.loadLatest(command.gatheringId)
+        val latestIntroduction = loadIntroductionPort.loadLatestIntroduction(command.gatheringId)
         val accountIds = tempCards.content.map { it.accountId }.distinct()
         val accountLinks = loadLinkPort.loadAllByAccountIdIn(accountIds)
             .groupBy { it.accountId }
@@ -148,7 +148,7 @@ class CardService(
         return tempCards.map { temp ->
             temp.toCardResult(
                 accountLinks[temp.accountId]?.map { it.url }.orEmpty(),
-                latestIntroduceTemplate.version,
+                latestIntroduction.version,
             )
         }
     }

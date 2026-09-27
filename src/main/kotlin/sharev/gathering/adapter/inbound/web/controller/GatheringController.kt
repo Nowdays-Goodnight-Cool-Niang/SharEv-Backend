@@ -6,11 +6,14 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import sharev.common.adapter.inbound.security.model.AccountPrincipal
 import sharev.gathering.adapter.inbound.web.dto.request.CreateGatheringRequest
+import sharev.gathering.adapter.inbound.web.dto.request.GetGatheringRequest
 import sharev.gathering.adapter.inbound.web.dto.request.UpdateGatheringRequest
+import sharev.gathering.adapter.inbound.web.dto.request.UpsertIntroductionRequest
 import sharev.gathering.adapter.inbound.web.dto.response.*
 import sharev.gathering.adapter.inbound.web.mapper.toCommand
 import sharev.gathering.adapter.inbound.web.mapper.toResponse
@@ -18,39 +21,45 @@ import sharev.gathering.application.port.inbound.usecase.*
 import java.util.*
 
 @RestController
+@RequestMapping("/gatherings")
 class GatheringController(
     private val createGatheringUseCase: CreateGatheringUseCase,
-    private val getTeamGatheringUseCase: GetTeamGatheringUseCase,
     private val updateGatheringUseCase: UpdateGatheringUseCase,
     private val deleteGatheringUseCase: DeleteGatheringUseCase,
-    private val getIntroduceTemplateUseCase: GetIntroduceTemplateUseCase,
+    private val getIntroductionUseCase: GetIntroductionUseCase,
     private val checkGatheringParticipantUseCase: CheckGatheringParticipantUseCase,
-    private val getParticipatedGatheringsUseCase: GetParticipatedGatheringsUseCase,
     private val getGatheringsUseCase: GetGatheringsUseCase,
+    private val getGatheringUseCase: GetGatheringUseCase,
+    private val upsertIntroductionUseCase: UpsertIntroductionUseCase,
 ) {
 
-    @GetMapping("/gatherings")
+    @GetMapping
     fun allGatherings(
+        @ModelAttribute getGatheringRequest: GetGatheringRequest,
+        @AuthenticationPrincipal accountPrincipal: AccountPrincipal?,
         @PageableDefault(size = 20) pageable: Pageable,
     ): ResponseEntity<Page<GatheringDetailResponse>> {
         return ResponseEntity.ok(
-            getGatheringsUseCase.getGatherings(pageable)
-                .map { it.toResponse() }
+            getGatheringsUseCase.getGatherings(
+                getGatheringRequest.toCommand(accountPrincipal?.id),
+                pageable
+            ).map { it.toResponse() }
         )
     }
 
-    @GetMapping("/gatherings/me")
-    fun participatedGatherings(
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/managed")
+    fun getManagedGatherings(
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
         @PageableDefault(size = 20) pageable: Pageable,
     ): ResponseEntity<Page<GatheringDetailResponse>> {
         return ResponseEntity.ok(
-            getParticipatedGatheringsUseCase.getParticipatedGatherings(accountPrincipal.id, pageable)
+            getGatheringsUseCase.getManagedGatherings(accountPrincipal.id, pageable)
                 .map { it.toResponse() }
         )
     }
 
-    @GetMapping("/gatherings/{gatheringId}")
+    @GetMapping("/{gatheringId}/participant")
     fun isParticipant(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
@@ -61,51 +70,33 @@ class GatheringController(
         )
     }
 
-    @PostMapping("/teams/{teamId}/gatherings")
+    @PostMapping
     fun createGathering(
-        @PathVariable teamId: Long,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
         @Valid @RequestBody request: CreateGatheringRequest,
     ): ResponseEntity<CreateGatheringResponse> {
         val response = createGatheringUseCase.create(
-            request.toCommand(accountPrincipal.id, teamId)
+            request.toCommand(accountPrincipal.id)
         ).toResponse()
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(response)
     }
 
-    // TODO: 템플릿 업데이트
-    // TODO: content와 placeholder key가 다르다면 에러
-    // TODO: 이전 content key와 업데이트 key 일치(혹은 부분일치) 시 단순 템플릿 변경이므로 버전 그대로, 다르다면(추가된 게 있다면) 버전 업
-
-    @GetMapping("/teams/{teamId}/gatherings")
-    fun getTeamGatherings(
-        @PathVariable teamId: Long,
-        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-    ): ResponseEntity<List<GatheringDetailResponse>> {
-        return ResponseEntity.ok(
-            getTeamGatheringUseCase.getTeamGatherings(accountPrincipal.id, teamId)
-                .map { it.toResponse() }
-        )
-    }
-
-    @GetMapping("/teams/{teamId}/gatherings/{gatheringId}")
+    @GetMapping("/{gatheringId}")
     fun getGathering(
-        @PathVariable teamId: Long,
         @PathVariable gatheringId: UUID,
-        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
+        @AuthenticationPrincipal accountPrincipal: AccountPrincipal?,
     ): ResponseEntity<GatheringDetailResponse> {
         return ResponseEntity.ok(
-            getTeamGatheringUseCase.getTeamGathering(
-                accountPrincipal.id, teamId, gatheringId
+            getGatheringUseCase.getGathering(
+                accountPrincipal?.id, gatheringId
             ).toResponse()
         )
     }
 
-    @PatchMapping("/teams/{teamId}/gatherings/{gatheringId}")
+    @PatchMapping("/{gatheringId}")
     fun updateGathering(
-        @PathVariable teamId: Long,
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
         @Valid @RequestBody request: UpdateGatheringRequest,
@@ -114,33 +105,44 @@ class GatheringController(
             updateGatheringUseCase.update(
                 request.toCommand(
                     accountPrincipal.id,
-                    teamId,
                     gatheringId
                 )
             ).toResponse()
         )
     }
 
-    @DeleteMapping("/teams/{teamId}/gatherings/{gatheringId}")
+    @DeleteMapping("/{gatheringId}")
     fun deleteGathering(
-        @PathVariable teamId: Long,
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
     ): ResponseEntity<DeleteGatheringResponse> {
         val response = deleteGatheringUseCase.delete(
-            accountPrincipal.id, teamId, gatheringId
+            accountPrincipal.id, gatheringId
         ).toResponse()
         return ResponseEntity.ok(response)
     }
 
-    @GetMapping("/gatherings/{gatheringId}/template")
-    fun getTemplate(
+    @GetMapping("/{gatheringId}/introduction")
+    fun getIntroduction(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-    ): ResponseEntity<IntroduceTemplateResponse> {
+    ): ResponseEntity<IntroductionResponse> {
         return ResponseEntity.ok(
-            getIntroduceTemplateUseCase.getLatestTemplate(
+            getIntroductionUseCase.getLatestIntroduction(
                 gatheringId, accountPrincipal.id
+            ).toResponse()
+        )
+    }
+
+    @PutMapping("/{gatheringId}/introduction")
+    fun upsertIntroduction(
+        @PathVariable gatheringId: UUID,
+        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
+        @Valid @RequestBody request: UpsertIntroductionRequest,
+    ): ResponseEntity<IntroductionResponse> {
+        return ResponseEntity.ok(
+            upsertIntroductionUseCase.upsertIntroduction(
+                request.toCommand(accountPrincipal.id, gatheringId)
             ).toResponse()
         )
     }

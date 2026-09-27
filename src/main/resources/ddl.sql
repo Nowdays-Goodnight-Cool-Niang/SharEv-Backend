@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS link_click_logs CASCADE;
 DROP TABLE IF EXISTS links CASCADE;
 DROP TABLE IF EXISTS connections CASCADE;
 DROP TABLE IF EXISTS cards CASCADE;
-DROP TABLE IF EXISTS introduce_templates CASCADE;
+DROP TABLE IF EXISTS introductions CASCADE;
 DROP TABLE IF EXISTS gatherings CASCADE;
 DROP TABLE IF EXISTS members CASCADE;
 DROP TABLE IF EXISTS teams CASCADE;
@@ -94,35 +94,36 @@ CREATE TABLE gatherings
 
 CREATE INDEX idx_gatherings_team_id ON gatherings (team_id);
 
-CREATE TABLE introduce_templates
+CREATE TABLE introductions
 (
-    introduce_template_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    gathering_id          UUID        NOT NULL,
-    version               INT         NOT NULL,
-    content               JSONB       NOT NULL,
-    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    introduction_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    gathering_id    UUID        NOT NULL,
+    version         INT         NOT NULL,
+    source          TEXT        NOT NULL,
+    fields          JSONB       NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT fk_introduce_templates_gatherings FOREIGN KEY (gathering_id) REFERENCES gatherings (gathering_id),
-    CONSTRAINT uk_introduce_templates_gathering_version UNIQUE (gathering_id, version)
+    CONSTRAINT fk_introductions_gatherings FOREIGN KEY (gathering_id) REFERENCES gatherings (gathering_id),
+    CONSTRAINT uk_introductions_gathering_version UNIQUE (gathering_id, version)
 );
 
 CREATE TABLE cards
 (
-    card_id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    gathering_id      UUID        NOT NULL,
-    account_id        BIGINT      NOT NULL,
-    pin_number        INT         NULL,
-    template_version  INT         NOT NULL,
-    introduction_text JSONB       NOT NULL,
-    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    card_id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    gathering_id         UUID        NOT NULL,
+    account_id           BIGINT      NOT NULL,
+    pin_number           INT         NULL,
+    introduction_version INT         NULL,
+    field_values         JSONB       NULL,
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_cards_gatherings FOREIGN KEY (gathering_id) REFERENCES gatherings (gathering_id),
     CONSTRAINT fk_cards_account FOREIGN KEY (account_id) REFERENCES accounts (account_id) ON DELETE CASCADE,
     CONSTRAINT uk_cards_gatherings_account UNIQUE (gathering_id, account_id),
     CONSTRAINT uk_cards_gatherings_pin_number UNIQUE (gathering_id, pin_number),
-    CONSTRAINT fk_cards_template_integrity FOREIGN KEY (gathering_id, template_version) REFERENCES introduce_templates (gathering_id, version)
+    CONSTRAINT fk_cards_introduction_integrity FOREIGN KEY (gathering_id, introduction_version) REFERENCES introductions (gathering_id, version)
 );
 
 CREATE INDEX idx_cards_account_id ON cards (account_id);

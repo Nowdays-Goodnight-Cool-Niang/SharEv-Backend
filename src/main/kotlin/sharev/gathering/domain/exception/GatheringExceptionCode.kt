@@ -11,9 +11,9 @@ enum class GatheringExceptionCode(
         ExceptionCategory.NOT_FOUND,
         "이벤트가 존재하지 않습니다."
     ),
-    INTRODUCE_TEMPLATE_NOT_FOUND(
+    INTRODUCTION_NOT_FOUND(
         ExceptionCategory.NOT_FOUND,
-        "자기소개 템플릿이 존재하지 않습니다."
+        "자기소개가 존재하지 않습니다."
     ),
     GATHERING_PARTICIPANT_NOT_FOUND(
         ExceptionCategory.NOT_FOUND,
@@ -21,6 +21,22 @@ enum class GatheringExceptionCode(
     ),
     WRONG_TEMPLATE(
         ExceptionCategory.BAD_REQUEST,
-        "불일치하는 템플릿 content와 placeholder가 존재합니다. 다시 확인해 주세요."
+        "불일치하는 source와 placeholder가 존재합니다. 다시 확인해 주세요."
+    ),
+    INVALID_GATHERING_PERIOD_EXCEPTION(
+        ExceptionCategory.BAD_REQUEST,
+        "행사 시작 시간은 종료 시간보다 앞이어야 합니다."
+    ),
+    INVALID_GATHERING_REGISTER_START_PERIOD_EXCEPTION(
+        ExceptionCategory.BAD_REQUEST,
+        "행사 참여 시작 시간은 행사 시작 시간보다 앞이어야 합니다."
+    ),
+    INVALID_GATHERING_REGISTER_END_PERIOD_EXCEPTION(
+        ExceptionCategory.BAD_REQUEST,
+        "행사 참여 종료 시간은 행사 참여 시작 시간보다 뒤, 행사 종료 시간보다 앞이어야 합니다."
+    ),
+    INTRODUCTION_CONFLICT(
+        ExceptionCategory.CONFLICT,
+        "자기소개 템플릿이 동시에 수정되었습니다."
     ),
 }

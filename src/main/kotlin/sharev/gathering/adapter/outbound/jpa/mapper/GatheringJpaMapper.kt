@@ -1,9 +1,10 @@
 package sharev.gathering.adapter.outbound.jpa.mapper
 
 import sharev.gathering.adapter.outbound.jpa.entity.GatheringJpaEntity
-import sharev.gathering.adapter.outbound.jpa.entity.IntroduceTemplateJpaEntity
+import sharev.gathering.adapter.outbound.jpa.entity.IntroductionJpaEntity
 import sharev.gathering.domain.model.Gathering
-import sharev.gathering.domain.model.IntroduceTemplate
+import sharev.gathering.domain.model.Introduction
+import sharev.gathering.domain.model.Template
 
 fun GatheringJpaEntity.toDomainModel() = Gathering(
     id = requireNotNull(id),
@@ -21,9 +22,9 @@ fun GatheringJpaEntity.toDomainModel() = Gathering(
     registerEndAt = registerEndAt,
 )
 
-fun IntroduceTemplateJpaEntity.toDomainModel() = IntroduceTemplate(
+fun IntroductionJpaEntity.toDomainModel() = Introduction(
     id = requireNotNull(id),
     gatheringId = requireNotNull(gathering.id),
     version = version,
-    content = content,
+    template = Template(source, fields),
 )

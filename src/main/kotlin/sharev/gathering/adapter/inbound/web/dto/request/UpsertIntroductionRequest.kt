@@ -1,13 +1,14 @@
 package sharev.gathering.adapter.inbound.web.dto.request
 
+import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
-data class UpdateIntroduceTemplateRequest(
+data class UpsertIntroductionRequest(
     @field:NotBlank
-    val text: String?,
+    val source: String?,
 
+    @field:Valid
     @field:NotNull
-    val fieldPlaceholders: Map<String, String>?,
-) {
-}
+    val fields: Map<String, FieldSpecRequest>?,
+)

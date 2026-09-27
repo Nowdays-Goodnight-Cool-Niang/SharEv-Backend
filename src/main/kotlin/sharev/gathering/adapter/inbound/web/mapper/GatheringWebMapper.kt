@@ -1,18 +1,20 @@
 package sharev.gathering.adapter.inbound.web.mapper
 
-import sharev.gathering.adapter.inbound.web.dto.request.CreateGatheringRequest
-import sharev.gathering.adapter.inbound.web.dto.request.UpdateGatheringRequest
+import sharev.gathering.adapter.inbound.web.dto.request.*
 import sharev.gathering.adapter.inbound.web.dto.response.*
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
+import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
+import sharev.gathering.application.port.inbound.command.UpsertIntroductionCommand
 import sharev.gathering.application.port.inbound.result.*
+import sharev.gathering.domain.model.FieldSpec
 import java.util.*
 
 fun ParticipantResult.toResponse() = ParticipantResponse(isParticipant)
 
-fun CreateGatheringRequest.toCommand(accountId: Long, teamId: Long) = CreateGatheringCommand(
+fun CreateGatheringRequest.toCommand(accountId: Long) = CreateGatheringCommand(
     accountId = accountId,
-    teamId = teamId,
+    teamId = requireNotNull(teamId),
     visible = requireNotNull(visible),
     title = requireNotNull(title),
     content = requireNotNull(content),
@@ -26,9 +28,8 @@ fun CreateGatheringRequest.toCommand(accountId: Long, teamId: Long) = CreateGath
     registerEndAt = requireNotNull(registerEndAt),
 )
 
-fun UpdateGatheringRequest.toCommand(accountId: Long, teamId: Long, gatheringId: UUID) = UpdateGatheringCommand(
+fun UpdateGatheringRequest.toCommand(accountId: Long, gatheringId: UUID) = UpdateGatheringCommand(
     accountId = accountId,
-    teamId = teamId,
     gatheringId = gatheringId,
     visible = requireNotNull(visible),
     title = requireNotNull(title),
@@ -63,6 +64,9 @@ fun DeleteGatheringResult.toResponse() = DeleteGatheringResponse(gatheringId)
 
 fun GatheringDetailResult.toResponse() = GatheringDetailResponse(
     id,
+    teamId,
+    teamTitle,
+    ownerHandle,
     visible,
     title,
     content,
@@ -76,4 +80,32 @@ fun GatheringDetailResult.toResponse() = GatheringDetailResponse(
     registerEndAt,
 )
 
-fun IntroduceTemplateResult.toResponse() = IntroduceTemplateResponse(version, text, fieldPlaceholders)
+fun IntroductionResult.toResponse() = IntroductionResponse(
+    version,
+    source,
+    fields.mapValues { (_, field) -> field.toResponse() }
+)
+
+fun FieldSpec.toResponse() = FieldSpecResponse(
+    placeholder,
+)
+
+fun GetGatheringRequest.toCommand(accountId: Long?) = GetGatheringCommand(
+    accountId,
+    participated,
+    teamId,
+    visibility,
+    progress,
+    registration,
+)
+
+fun UpsertIntroductionRequest.toCommand(accountId: Long, gatheringId: UUID) = UpsertIntroductionCommand(
+    accountId,
+    gatheringId,
+    requireNotNull(source),
+    requireNotNull(fields).mapValues { (_, field) -> field.toModel() }
+)
+
+fun FieldSpecRequest.toModel() = FieldSpec(
+    placeholder,
+)

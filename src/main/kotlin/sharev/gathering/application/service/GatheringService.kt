@@ -5,9 +5,12 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
+import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
+import sharev.gathering.application.port.inbound.command.UpsertIntroductionCommand
 import sharev.gathering.application.port.inbound.mapper.toCreateGatheringResult
 import sharev.gathering.application.port.inbound.mapper.toDetailResult
+import sharev.gathering.application.port.inbound.mapper.toFilter
 import sharev.gathering.application.port.inbound.mapper.toResult
 import sharev.gathering.application.port.inbound.result.*
 import sharev.gathering.application.port.inbound.usecase.*
@@ -15,6 +18,9 @@ import sharev.gathering.application.port.outbound.*
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.exception.GatheringExceptionCode
 import sharev.gathering.domain.model.Gathering
+import sharev.gathering.domain.model.GatheringVisible
+import sharev.gathering.domain.model.Introduction
+import sharev.gathering.domain.model.Template
 import sharev.team.application.port.outbound.TeamAccessPort
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
@@ -26,17 +32,17 @@ class GatheringService(
     private val checkGatheringParticipantPort: CheckGatheringParticipantPort,
     private val saveGatheringPort: SaveGatheringPort,
     private val loadGatheringPort: LoadGatheringPort,
-    private val loadIntroduceTemplatePort: LoadIntroduceTemplatePort,
+    private val loadIntroductionPort: LoadIntroductionPort,
     private val teamAccessPort: TeamAccessPort,
-    private val loadParticipatedGatheringsPort: LoadParticipatedGatheringsPort,
+    private val saveIntroductionPort: SaveIntroductionPort,
 ) : CheckGatheringParticipantUseCase,
     CreateGatheringUseCase,
-    GetTeamGatheringUseCase,
     UpdateGatheringUseCase,
     DeleteGatheringUseCase,
-    GetIntroduceTemplateUseCase,
-    GetParticipatedGatheringsUseCase,
-    GetGatheringsUseCase {
+    GetIntroductionUseCase,
+    GetGatheringsUseCase,
+    GetGatheringUseCase,
+    UpsertIntroductionUseCase {
 
     override fun isParticipant(accountId: Long, gatheringId: UUID): ParticipantResult {
         return ParticipantResult(checkGatheringParticipantPort.isParticipant(gatheringId, accountId))
@@ -65,29 +71,35 @@ class GatheringService(
         ).toCreateGatheringResult()
     }
 
-    override fun getParticipatedGatherings(accountId: Long, pageable: Pageable): Page<GatheringDetailResult> {
-        return loadParticipatedGatheringsPort.loadParticipatedGatherings(accountId, pageable)
+    override fun getGatherings(
+        getGatheringCommand: GetGatheringCommand,
+        pageable: Pageable
+    ): Page<GatheringDetailResult> {
+        return loadGatheringPort.loadAll(getGatheringCommand.toFilter(), pageable)
             .map { it.toDetailResult() }
     }
 
-    override fun getGatherings(pageable: Pageable): Page<GatheringDetailResult> {
-        return loadGatheringPort.loadAll(pageable)
+    override fun getManagedGatherings(
+        accountId: Long,
+        pageable: Pageable
+    ): Page<GatheringDetailResult> {
+        val teamIds = teamAccessPort.loadManageableTeamIds(accountId)
+        return loadGatheringPort.loadAllByTeams(teamIds, pageable)
             .map { it.toDetailResult() }
     }
 
-    override fun getTeamGatherings(accountId: Long, teamId: Long): List<GatheringDetailResult> {
-        validateTeamAccess(accountId, teamId)
-
-        return loadGatheringPort.loadAllByTeam(teamId)
-            .map { it.toDetailResult() }
-    }
-
-    override fun getTeamGathering(accountId: Long, teamId: Long, gatheringId: UUID): GatheringDetailResult {
-        validateTeamAccess(accountId, teamId)
-
+    override fun getGathering(accountId: Long?, gatheringId: UUID): GatheringDetailResult {
         val gathering = loadGatheringPort.load(gatheringId)
 
-        if (gathering.teamId != teamId) {
+        if (gathering.visible == GatheringVisible.PUBLIC) {
+            return gathering.toDetailResult()
+        }
+
+        if (accountId == null) {
+            throw GatheringException(GatheringExceptionCode.GATHERING_NOT_FOUND)
+        }
+
+        if (!teamAccessPort.hasAccess(accountId, gathering.teamId)) {
             throw GatheringException(GatheringExceptionCode.GATHERING_NOT_FOUND)
         }
 
@@ -96,12 +108,12 @@ class GatheringService(
 
     @Transactional
     override fun update(command: UpdateGatheringCommand): GatheringDetailResult {
-        validateTeamManage(command.accountId, command.teamId)
+        val gathering = loadGatheringPort.load(command.gatheringId)
+
+        validateTeamManage(command.accountId, gathering.teamId)
 
         return saveGatheringPort.update(
-            Gathering(
-                id = command.gatheringId,
-                teamId = command.teamId,
+            gathering.update(
                 visible = command.visible,
                 title = command.title,
                 content = command.content,
@@ -118,40 +130,40 @@ class GatheringService(
     }
 
     @Transactional
-    override fun delete(accountId: Long, teamId: Long, gatheringId: UUID): DeleteGatheringResult {
-        validateTeamManage(accountId, teamId)
-        validateGatheringBelongsToTeam(teamId, gatheringId)
+    override fun delete(accountId: Long, gatheringId: UUID): DeleteGatheringResult {
+        val gathering = loadGatheringPort.load(gatheringId)
+
+        validateTeamManage(accountId, gathering.teamId)
 
         saveGatheringPort.softDelete(gatheringId)
         return DeleteGatheringResult(gatheringId)
     }
 
-    override fun getLatestTemplate(gatheringId: UUID, accountId: Long): IntroduceTemplateResult {
+    override fun getLatestIntroduction(gatheringId: UUID, accountId: Long): IntroductionResult {
         if (!checkGatheringParticipantPort.isParticipant(gatheringId, accountId)) {
             throw GatheringException(GatheringExceptionCode.GATHERING_PARTICIPANT_NOT_FOUND)
         }
 
-        return loadIntroduceTemplatePort.loadLatest(gatheringId)
+        return loadIntroductionPort.loadLatestIntroduction(gatheringId)
             .toResult()
-    }
-
-    private fun validateGatheringBelongsToTeam(teamId: Long, gatheringId: UUID) {
-        val gathering = loadGatheringPort.load(gatheringId)
-
-        if (gathering.teamId != teamId) {
-            throw GatheringException(GatheringExceptionCode.GATHERING_NOT_FOUND)
-        }
-    }
-
-    private fun validateTeamAccess(accountId: Long, teamId: Long) {
-        if (!teamAccessPort.hasAccess(accountId, teamId)) {
-            throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_ACCESS)
-        }
     }
 
     private fun validateTeamManage(accountId: Long, teamId: Long) {
         if (!teamAccessPort.canManage(accountId, teamId)) {
             throw TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE)
         }
+    }
+
+    @Transactional
+    override fun upsertIntroduction(command: UpsertIntroductionCommand): IntroductionResult {
+        val gathering = loadGatheringPort.load(command.gatheringId)
+        validateTeamManage(command.accountId, gathering.teamId)
+
+        val latest = loadIntroductionPort.loadLatestIntroductionOrNull(command.gatheringId)
+        val introduction = latest?.update(Template(command.source, command.fields))
+            ?: Introduction.create(command.gatheringId, Template(command.source, command.fields))
+
+        return saveIntroductionPort.save(introduction)
+            .toResult()
     }
 }

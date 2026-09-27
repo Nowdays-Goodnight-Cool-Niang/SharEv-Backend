@@ -8,8 +8,8 @@ data class CardResult(
     val name: String,
     val email: String,
     val linkUrls: List<String>,
-    val lastIntroduceTemplateVersion: Int,
-    val nowIntroduceTemplateVersion: Int,
-    val introduceTemplateContentText: String,
-    val introductionText: Map<String, String>,
+    val lastIntroductionVersion: Int,
+    val nowIntroductionVersion: Int,
+    val introductionSource: String,
+    val fieldValues: Map<String, String>,
 )

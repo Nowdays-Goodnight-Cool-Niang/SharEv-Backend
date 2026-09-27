@@ -96,12 +96,12 @@ class CardControllerTest : ControllerTestSupport() {
                             .pathParameters(parameterWithName("gatheringId").description("행사 ID"))
                             .requestFields(
                                 fieldWithPath("version").type(NUMBER).description("자기소개 템플릿 버전"),
-                                subsectionWithPath("introductionText").type("OBJECT")
+                                subsectionWithPath("fieldValues").type("OBJECT")
                                     .description("템플릿 변수명별 자기소개 내용"),
                             )
                             .responseFields(
-                                fieldWithPath("templateVersion").type(NUMBER).description("저장된 템플릿 버전"),
-                                subsectionWithPath("introductionText").type("OBJECT").description("저장된 자기소개 내용"),
+                                fieldWithPath("introductionVersion").type(NUMBER).description("저장된 템플릿 버전"),
+                                subsectionWithPath("fieldValues").type("OBJECT").description("저장된 자기소개 내용"),
                             )
                             .requestSchema(schema(UpdateCardIntroduceRequest::class.java.simpleName))
                             .responseSchema(schema(UpdateCardIntroduceResponse::class.java.simpleName))
@@ -164,13 +164,13 @@ class CardControllerTest : ControllerTestSupport() {
                                 fieldWithPath("content[].name").type(STRING).description("사용자 이름"),
                                 fieldWithPath("content[].email").type(STRING).description("이메일"),
                                 fieldWithPath("content[].linkUrls").type("ARRAY").description("링크 URL 목록"),
-                                fieldWithPath("content[].lastIntroduceTemplateVersion").type(NUMBER)
+                                fieldWithPath("content[].lastIntroductionVersion").type(NUMBER)
                                     .description("최신 템플릿 버전"),
-                                fieldWithPath("content[].nowIntroduceTemplateVersion").type(NUMBER)
+                                fieldWithPath("content[].nowIntroductionVersion").type(NUMBER)
                                     .description("카드에 저장된 템플릿 버전"),
-                                fieldWithPath("content[].introduceTemplateContentText").type(STRING)
+                                fieldWithPath("content[].introductionSource").type(STRING)
                                     .description("템플릿 원문"),
-                                subsectionWithPath("content[].introductionText").type("OBJECT")
+                                subsectionWithPath("content[].fieldValues").type("OBJECT")
                                     .description("자기소개 내용"),
                                 fieldWithPath("page").type("OBJECT").description("페이지 정보"),
                                 fieldWithPath("page.size").type(NUMBER).description("페이지 크기"),
@@ -301,10 +301,10 @@ class CardControllerTest : ControllerTestSupport() {
         fieldWithPath("name").type(STRING).description("사용자 이름"),
         fieldWithPath("email").type(STRING).description("이메일"),
         fieldWithPath("linkUrls").type("ARRAY").description("링크 URL 목록"),
-        fieldWithPath("lastIntroduceTemplateVersion").type(NUMBER).description("최신 템플릿 버전"),
-        fieldWithPath("nowIntroduceTemplateVersion").type(NUMBER).description("카드에 저장된 템플릿 버전"),
-        fieldWithPath("introduceTemplateContentText").type(STRING).description("템플릿 원문"),
-        subsectionWithPath("introductionText").type("OBJECT").description("자기소개 내용"),
+        fieldWithPath("lastIntroductionVersion").type(NUMBER).description("최신 템플릿 버전"),
+        fieldWithPath("nowIntroductionVersion").type(NUMBER).description("카드에 저장된 템플릿 버전"),
+        fieldWithPath("introductionSource").type(STRING).description("템플릿 원문"),
+        subsectionWithPath("fieldValues").type("OBJECT").description("자기소개 내용"),
     )
 
     companion object {
