@@ -138,7 +138,7 @@ class GatheringController(
     fun upsertIntroduction(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-        @RequestBody request: UpsertIntroductionRequest,
+        @Valid @RequestBody request: UpsertIntroductionRequest,
     ): ResponseEntity<IntroductionResponse> {
         return ResponseEntity.ok(
             upsertIntroductionUseCase.upsertIntroduction(
