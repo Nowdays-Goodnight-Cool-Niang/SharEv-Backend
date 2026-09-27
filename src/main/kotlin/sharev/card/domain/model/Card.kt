@@ -24,7 +24,7 @@ data class Card(
             throw CardException(CardExceptionCode.INVALID_FIELD_VALUES)
         }
 
-        if (fieldNames != fieldValues) {
+        if (fieldNames != fieldValues.keys) {
             throw CardException(CardExceptionCode.INVALID_FIELD_VALUES)
         }
     }
