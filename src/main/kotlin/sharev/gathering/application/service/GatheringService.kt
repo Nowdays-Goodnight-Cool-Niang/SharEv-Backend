@@ -10,7 +10,6 @@ import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpsertIntroductionCommand
 import sharev.gathering.application.port.inbound.mapper.toCreateGatheringResult
 import sharev.gathering.application.port.inbound.mapper.toDetailResult
-import sharev.gathering.application.port.inbound.mapper.toFilter
 import sharev.gathering.application.port.inbound.mapper.toResult
 import sharev.gathering.application.port.inbound.result.*
 import sharev.gathering.application.port.inbound.usecase.*
@@ -71,12 +70,20 @@ class GatheringService(
         ).toCreateGatheringResult()
     }
 
-    override fun getGatherings(
-        getGatheringCommand: GetGatheringCommand,
-        pageable: Pageable
-    ): Page<GatheringDetailResult> {
-        return loadGatheringPort.loadAll(getGatheringCommand.toFilter(), pageable)
-            .map { it.toDetailResult() }
+    override fun getGatherings(command: GetGatheringCommand, pageable: Pageable): Page<GatheringResult> {
+        val authenticated = command.accountId != null
+
+        val filter = LoadGatheringFilter(
+            accountId = command.accountId,
+            participated = command.participated.takeIf { authenticated },
+            teamId = command.teamId,
+            visible = if (authenticated) command.visibility else GatheringVisible.PUBLIC,
+            progress = command.progress,
+            registration = command.registration,
+        )
+
+        return loadGatheringPort.loadAll(filter, pageable)
+            .map { it.toResult() }
     }
 
     override fun getManagedGatherings(

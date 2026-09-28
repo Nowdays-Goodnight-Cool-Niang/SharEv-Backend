@@ -24,7 +24,7 @@ class TeamService(
     private val queryTeamPort: QueryTeamPort,
     private val saveTeamAdminPort: SaveTeamAdminPort,
     private val teamAccessPort: TeamAccessPort,
-    private val queryGatheringPort: QueryGatheringPort,
+    private val teamGatheringPort: TeamGatheringPort,
 ) : CreateTeamUseCase,
     GetMyTeamsUseCase,
     GetTeamDetailUseCase,
@@ -70,7 +70,7 @@ class TeamService(
         }
 
         val team = loadTeamPort.load(teamId)
-        val gatherings = queryGatheringPort.findByTeam(teamId)
+        val gatherings = teamGatheringPort.findGatheringsByTeamId(teamId)
         val members = queryTeamPort.findTeamMembers(teamId)
 
         return TeamDetailResult(

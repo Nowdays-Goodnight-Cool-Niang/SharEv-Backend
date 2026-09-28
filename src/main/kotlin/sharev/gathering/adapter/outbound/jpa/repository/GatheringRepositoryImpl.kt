@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
+import sharev.gathering.adapter.outbound.jpa.entity.GatheringJpaEntity
 import sharev.gathering.application.port.outbound.LoadGatheringFilter
 import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.model.GatheringVisible
@@ -19,40 +20,19 @@ class GatheringRepositoryImpl(
     private val entityManager: EntityManager,
 ) : GatheringRepositoryCustom {
 
-    override fun searchGatheringDetails(filter: LoadGatheringFilter, pageable: Pageable): Page<GatheringDetailSummary> {
+    override fun searchGatherings(filter: LoadGatheringFilter, pageable: Pageable): Page<GatheringJpaEntity> {
         val now = LocalDateTime.now()
         val where = buildWhere(filter, now)
 
         val content = entityManager.createQuery(
             """
-            SELECT new sharev.gathering.application.port.outbound.summary.GatheringDetailSummary(
-                gathering.id,
-                gathering.team.id,
-                gathering.team.title,
-                (
-                    SELECT member.account.handle FROM MemberJpaEntity member
-                    WHERE member.team = gathering.team AND member.role = :adminRole AND member.team.type = :personalType
-                ),
-                gathering.visible,
-                gathering.title,
-                gathering.content,
-                gathering.startAt,
-                gathering.endAt,
-                gathering.place,
-                gathering.imageUrl,
-                gathering.gatheringUrl,
-                gathering.contact,
-                gathering.registerStartAt,
-                gathering.registerEndAt
-            )
+            SELECT gathering
             FROM GatheringJpaEntity gathering
             WHERE 1 = 1${where.clause}
             ${orderBy(pageable.sort)}
             """.trimIndent(),
-            GatheringDetailSummary::class.java,
+            GatheringJpaEntity::class.java,
         ).apply {
-            setParameter("adminRole", MemberRole.ADMIN)
-            setParameter("personalType", TeamType.PERSONAL)
             where.params.forEach { (key, value) -> setParameter(key, value) }
             firstResult = pageable.offset.toInt()
             maxResults = pageable.pageSize
@@ -152,13 +132,12 @@ class GatheringRepositoryImpl(
             params["now"] = now
         }
 
-        if (filter.accountId != null) {
-            filter.participated?.let {
-                val exists =
-                    "EXISTS (SELECT 1 FROM CardJpaEntity c WHERE c.gathering = gathering AND c.account.id = :accountId)"
-                sb.append(if (it) " AND $exists" else " AND NOT $exists")
-                params["accountId"] = filter.accountId
-            }
+        filter.participated?.let {
+            val accountId = requireNotNull(filter.accountId) { "participated 필터에는 accountId가 필요합니다." }
+            val exists =
+                "EXISTS (SELECT 1 FROM CardJpaEntity c WHERE c.gathering = gathering AND c.account.id = :accountId)"
+            sb.append(if (it) " AND $exists" else " AND NOT $exists")
+            params["accountId"] = accountId
         }
 
         return DynamicWhere(sb.toString(), params)
