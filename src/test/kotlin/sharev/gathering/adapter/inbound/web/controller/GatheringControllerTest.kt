@@ -43,7 +43,7 @@ class GatheringControllerTest : ControllerTestSupport() {
     @DisplayName("전체 행사 목록 조회")
     fun allGatherings() {
         val pageable = PageRequest.of(0, 20)
-        val response = PageImpl(listOf(gatheringDetailResult(UUID.randomUUID())), pageable, 1)
+        val response = PageImpl(listOf(gatheringResult(UUID.randomUUID())), pageable, 1)
 
         given(mockBean<GetGatheringsUseCase>().getGatherings(any(), any()))
             .willReturn(response)
@@ -496,11 +496,26 @@ class GatheringControllerTest : ControllerTestSupport() {
             )
     }
 
-    private fun gatheringDetailResult(gatheringId: UUID): GatheringDetailResult = GatheringDetailResult(
+    private fun gatheringResult(gatheringId: UUID) = GatheringResult(
+        gatheringId,
+        1L,
+        GatheringVisible.PUBLIC,
+        "공유대학",
+        "owner_handle",
+        LocalDateTime.of(2025, 3, 20, 14, 0),
+        LocalDateTime.of(2025, 3, 20, 17, 0),
+        "서울 강남구",
+        "https://example.com/image.png",
+        "https://example.com/gathering",
+        "010-1234-5678",
+        LocalDateTime.of(2025, 3, 1, 0, 0),
+        LocalDateTime.of(2025, 3, 19, 23, 59),
+    )
+
+    private fun gatheringDetailResult(gatheringId: UUID) = GatheringDetailResult(
         gatheringId,
         1L,
         "공유대학",
-        "owner_handle",
         GatheringVisible.PUBLIC,
         "Spring 밋업",
         "Spring Boot 관련 밋업입니다.",

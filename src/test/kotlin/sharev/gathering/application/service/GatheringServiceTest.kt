@@ -18,13 +18,15 @@ import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpsertIntroductionCommand
 import sharev.gathering.application.port.outbound.*
-import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.exception.GatheringExceptionCode
 import sharev.gathering.domain.model.*
+import sharev.team.application.port.outbound.LoadTeamPort
 import sharev.team.application.port.outbound.TeamAccessPort
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
+import sharev.team.domain.model.Team
+import sharev.team.domain.model.TeamCertification
 import java.time.LocalDateTime
 import java.util.*
 
@@ -35,6 +37,7 @@ class GatheringServiceTest {
     private val loadIntroductionPort = mock(LoadIntroductionPort::class.java)
     private val teamAccessPort = mock(TeamAccessPort::class.java)
     private val saveIntroductionPort = mock(SaveIntroductionPort::class.java)
+    private val loadTeamPort = mock(LoadTeamPort::class.java)
 
     private val gatheringService = GatheringService(
         checkGatheringParticipantPort,
@@ -43,6 +46,7 @@ class GatheringServiceTest {
         loadIntroductionPort,
         teamAccessPort,
         saveIntroductionPort,
+        loadTeamPort,
     )
 
     @Test
@@ -86,8 +90,8 @@ class GatheringServiceTest {
         val pageable = PageRequest.of(0, 10)
         val command = getGatheringCommand()
         val summaries = listOf(
-            gatheringDetailSummary(title = "행사1"),
-            gatheringDetailSummary(title = "행사2"),
+            gathering(id = UUID.randomUUID(), title = "행사1"),
+            gathering(id = UUID.randomUUID(), title = "행사2"),
         )
 
         given(loadGatheringPort.loadAll(any(), any()))
@@ -107,7 +111,7 @@ class GatheringServiceTest {
         val command = getGatheringCommand()
 
         given(loadGatheringPort.loadAll(any(), any()))
-            .willReturn(PageImpl(emptyList<GatheringDetailSummary>(), pageable, 0))
+            .willReturn(PageImpl(emptyList<Gathering>(), pageable, 0))
 
         val result = gatheringService.getGatherings(command, pageable)
 
@@ -121,22 +125,30 @@ class GatheringServiceTest {
         val pageable = PageRequest.of(0, 10)
         val manageableTeamIds = listOf(1L, 2L)
         val manageableGatherings = PageImpl(
-            listOf<GatheringDetailSummary>(
-                gatheringDetailSummary(title = "행사1"),
-                gatheringDetailSummary(teamId = 2L, title = "행사2")
+            listOf(
+                gathering(id = UUID.randomUUID(), teamId = 1L, title = "행사1"),
+                gathering(id = UUID.randomUUID(), teamId = 2L, title = "행사2"),
             )
+        )
+        val manageableTeams = listOf(
+            Team(1L, "1팀", "", TeamCertification.NONE, LocalDateTime.now()),
+            Team(2L, "2팀", "", TeamCertification.NONE, LocalDateTime.now()),
         )
 
         given(teamAccessPort.loadManageableTeamIds(accountId))
             .willReturn(manageableTeamIds)
         given(loadGatheringPort.loadAllByTeams(manageableTeamIds, pageable))
             .willReturn(manageableGatherings)
+        given(loadTeamPort.loadAll(any()))
+            .willReturn(manageableTeams)
 
         val result = gatheringService.getManagedGatherings(accountId, pageable)
 
         assertThat(result.totalElements).isEqualTo(2)
+
         assertThat(result.content[0].teamId).isEqualTo(1L)
         assertThat(result.content[0].title).isEqualTo("행사1")
+
         assertThat(result.content[1].teamId).isEqualTo(2L)
         assertThat(result.content[1].title).isEqualTo("행사2")
     }
@@ -148,6 +160,8 @@ class GatheringServiceTest {
 
         given(loadGatheringPort.load(gatheringId))
             .willReturn(gathering(gatheringId))
+        given(loadTeamPort.load(any()))
+            .willReturn(Team(2L, "2팀", "", TeamCertification.NONE, LocalDateTime.now()))
 
         val result = gatheringService.getGathering(null, gatheringId)
 
@@ -204,6 +218,8 @@ class GatheringServiceTest {
             .willReturn(gathering(gatheringId, visible = GatheringVisible.PRIVATE))
         given(teamAccessPort.hasAccess(anyLong(), anyLong()))
             .willReturn(true)
+        given(loadTeamPort.load(any()))
+            .willReturn(Team(2L, "2팀", "", TeamCertification.NONE, LocalDateTime.now()))
 
         val result = gatheringService.getGathering(1L, gatheringId)
 
@@ -237,11 +253,13 @@ class GatheringServiceTest {
     fun update_updatesGathering_whenAdmin() {
         val command = updateGatheringCommand()
         val existing = gathering(command.gatheringId, teamId = 2L)
+        val team = Team(2L, "2팀", "", TeamCertification.NONE, LocalDateTime.now())
         val updatedGathering = gathering(command.gatheringId, teamId = existing.teamId, title = command.title)
         val captor = argumentCaptor<Gathering>()
 
         given(loadGatheringPort.load(command.gatheringId)).willReturn(existing)
         given(teamAccessPort.canManage(command.accountId, existing.teamId)).willReturn(true)
+        given(loadTeamPort.load(any())).willReturn(team)
         given(saveGatheringPort.update(any())).willReturn(updatedGathering)
 
         val result = gatheringService.update(command)
@@ -496,28 +514,6 @@ class GatheringServiceTest {
         id = id,
         teamId = teamId,
         visible = visible,
-        title = title,
-        content = "content",
-        startAt = LocalDateTime.of(2026, 5, 10, 10, 0),
-        endAt = LocalDateTime.of(2026, 5, 10, 12, 0),
-        place = "place",
-        imageUrl = null,
-        gatheringUrl = null,
-        contact = null,
-        registerStartAt = LocalDateTime.of(2026, 5, 1, 10, 0),
-        registerEndAt = LocalDateTime.of(2026, 5, 9, 18, 0),
-    )
-
-    private fun gatheringDetailSummary(
-        id: UUID = UUID.randomUUID(),
-        teamId: Long = 1L,
-        title: String = "title",
-    ) = GatheringDetailSummary(
-        id = id,
-        teamId = teamId,
-        teamTitle = "team",
-        ownerHandle = "owner",
-        visible = GatheringVisible.PUBLIC,
         title = title,
         content = "content",
         startAt = LocalDateTime.of(2026, 5, 10, 10, 0),
