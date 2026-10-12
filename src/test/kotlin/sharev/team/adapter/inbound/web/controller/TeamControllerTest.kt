@@ -9,6 +9,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.willThrow
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
@@ -33,7 +35,6 @@ import sharev.team.application.port.inbound.usecase.UpdateTeamInfoUseCase
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.TeamCertification
-import sharev.team.domain.model.TeamType
 import java.time.LocalDateTime
 
 class TeamControllerTest : ControllerTestSupport() {
@@ -42,7 +43,7 @@ class TeamControllerTest : ControllerTestSupport() {
     @DisplayName("팀 생성")
     fun createTeam() {
         val requestDto = CreateTeamRequest("새로운 팀", "설명")
-        given(mockBean<CreateTeamUseCase>().create(CreateTeamCommand(1L, "새로운 팀", "설명", TeamType.PUBLIC)))
+        given(mockBean<CreateTeamUseCase>().create(CreateTeamCommand(1L, "새로운 팀", "설명")))
             .willReturn(CreateTeamResult(1L))
 
         val request = RestDocumentationRequestBuilders.post("/teams")
@@ -74,26 +75,29 @@ class TeamControllerTest : ControllerTestSupport() {
     @WithCustomMockUser
     @DisplayName("내 팀 목록 조회")
     fun getMyTeams() {
-        val teams = listOf(
-            TeamInfoResult(
-                1L,
-                "요즘잘자쿨냥이",
-                "진짜 잘자",
-                LocalDateTime.of(2025, 1, 1, 10, 0),
-                MemberRole.ADMIN.name,
-                5,
-            ),
-            TeamInfoResult(
-                2L,
-                "아산행사",
-                "아산에서 열리는 행사 관리팀",
-                LocalDateTime.of(2025, 1, 2, 10, 0),
-                MemberRole.COMMON.name,
-                3,
-            ),
+        val pageable = PageRequest.of(0, 20)
+        val teams = PageImpl(
+            listOf(
+                JoinedTeamResult(
+                    1L,
+                    "요즘잘자쿨냥이",
+                    "진짜 잘자",
+                    LocalDateTime.of(2025, 1, 1, 10, 0),
+                    MemberRole.ADMIN.name,
+                    5,
+                ),
+                JoinedTeamResult(
+                    2L,
+                    "아산행사",
+                    "아산에서 열리는 행사 관리팀",
+                    LocalDateTime.of(2025, 1, 2, 10, 0),
+                    MemberRole.COMMON.name,
+                    3,
+                ),
+            )
         )
 
-        given(mockBean<GetMyTeamsUseCase>().getMyTeams(GetMyTeamsCommand(1L)))
+        given(mockBean<GetMyTeamsUseCase>().getJoinedTeams(GetMyTeamsCommand(1L), pageable))
             .willReturn(teams)
 
         val request = RestDocumentationRequestBuilders.get("/teams")
@@ -110,12 +114,16 @@ class TeamControllerTest : ControllerTestSupport() {
                             .summary("내 팀 목록 조회")
                             .description("현재 사용자가 속한 모든 팀의 목록을 조회합니다.")
                             .responseFields(
-                                fieldWithPath("[].id").type(NUMBER).description("팀 ID"),
-                                fieldWithPath("[].title").type(STRING).description("팀 이름"),
-                                fieldWithPath("[].content").type(STRING).description("팀 설명").optional(),
-                                fieldWithPath("[].createdAt").type(STRING).description("생성일시"),
-                                fieldWithPath("[].memberRole").type(STRING).description("권한"),
-                                fieldWithPath("[].headcount").type(NUMBER).description("팀 인원 수"),
+                                fieldWithPath("content.[].id").type(NUMBER).description("팀 ID"),
+                                fieldWithPath("content.[].title").type(STRING).description("팀 이름"),
+                                fieldWithPath("content.[].content").type(STRING).description("팀 설명").optional(),
+                                fieldWithPath("content.[].createdAt").type(STRING).description("생성일시"),
+                                fieldWithPath("content.[].memberRole").type(STRING).description("권한"),
+                                fieldWithPath("content.[].headcount").type(NUMBER).description("팀 인원 수"),
+                                fieldWithPath("page.size").type(NUMBER).description("현재 결과 수"),
+                                fieldWithPath("page.number").type(NUMBER).description("현재 페이지 숫자"),
+                                fieldWithPath("page.totalElements").type(NUMBER).description("모든 결과 수"),
+                                fieldWithPath("page.totalPages").type(NUMBER).description("모든 페이지 크기"),
                             )
                             .responseSchema(schema(TeamInfoResponse::class.java.simpleName))
                             .build()
@@ -158,7 +166,7 @@ class TeamControllerTest : ControllerTestSupport() {
                     "서울 강남구",
                 )
             ),
-            listOf(TeamMemberInfoResult("김주호", "admin@test.com", MemberRole.ADMIN)),
+            listOf(TeamMemberInfoResult("김주호", "admin@test.com", MemberRole.ADMIN.name)),
         )
 
         given(mockBean<GetTeamDetailUseCase>().getTeamDetail(1L, 1L))
@@ -211,7 +219,7 @@ class TeamControllerTest : ControllerTestSupport() {
 
         willThrow(TeamException(TeamExceptionCode.TEAM_NOT_FOUND))
             .given(mockBean<UpdateTeamInfoUseCase>())
-            .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title, requestDto.content))
+            .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title!!, requestDto.content))
 
         val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
             .content(objectMapper.writeValueAsString(requestDto))
@@ -230,7 +238,7 @@ class TeamControllerTest : ControllerTestSupport() {
 
         willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
             .given(mockBean<UpdateTeamInfoUseCase>())
-            .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title, requestDto.content))
+            .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title!!, requestDto.content))
 
         val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
             .content(objectMapper.writeValueAsString(requestDto))

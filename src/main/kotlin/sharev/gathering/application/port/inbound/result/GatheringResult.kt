@@ -1,14 +1,12 @@
-package sharev.gathering.application.port.outbound.summary
+package sharev.gathering.application.port.inbound.result
 
 import sharev.gathering.domain.model.GatheringVisible
 import java.time.LocalDateTime
 import java.util.*
 
-data class GatheringDetailSummary(
+data class GatheringResult(
     val id: UUID,
     val teamId: Long,
-    val teamTitle: String?,
-    val ownerHandle: String?,
     val visible: GatheringVisible,
     val title: String,
     val content: String,

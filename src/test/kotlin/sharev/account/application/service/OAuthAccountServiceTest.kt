@@ -31,7 +31,6 @@ class OAuthAccountServiceTest {
         saveOAuthAccountPort,
         loadAccountPort,
         saveAccountPort,
-        publishEventPort,
     )
 
     // ───────────── login ─────────────

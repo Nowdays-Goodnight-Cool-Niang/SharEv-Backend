@@ -7,8 +7,7 @@ import java.util.*
 data class GatheringDetailResponse(
     val id: UUID,
     val teamId: Long,
-    val teamTitle: String?,
-    val ownerHandle: String?,
+    val teamTitle: String,
     val visible: GatheringVisible,
     val title: String,
     val content: String,

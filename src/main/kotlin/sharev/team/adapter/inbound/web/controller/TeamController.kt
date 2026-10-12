@@ -1,6 +1,8 @@
 package sharev.team.adapter.inbound.web.controller
 
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -45,9 +47,10 @@ class TeamController(
     @GetMapping
     fun getMyTeams(
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-    ): ResponseEntity<List<TeamInfoResponse>> {
+        pageable: Pageable,
+    ): ResponseEntity<Page<TeamInfoResponse>> {
 
-        val response = getMyTeamsUseCase.getMyTeams(GetMyTeamsCommand(accountPrincipal.id))
+        val response = getMyTeamsUseCase.getJoinedTeams(GetMyTeamsCommand(accountPrincipal.id), pageable)
             .map { it.toResponse() }
 
         return ResponseEntity.ok(response)

@@ -6,27 +6,24 @@ import java.time.LocalDateTime
 
 data class Team(
     val id: Long,
-    val title: String?,
+    val title: String,
     val content: String?,
     val certification: TeamCertification,
-    val type: TeamType,
     val createdAt: LocalDateTime?,
 ) {
-    companion object {
-        fun create(title: String?, content: String?, type: TeamType): Team {
-            return Team(0L, title, content, TeamCertification.NONE, type, null)
+    init {
+        if (title.isBlank()) {
+            throw TeamException(TeamExceptionCode.TEAM_INFO_REQUIRED)
         }
     }
 
-    fun updateInfo(title: String, content: String): Team {
-        if (type != TeamType.PUBLIC) {
-            throw TeamException(TeamExceptionCode.NOT_MODIFIABLE_TEAM)
+    companion object {
+        fun create(title: String, content: String?): Team {
+            return Team(0L, title, content, TeamCertification.NONE, null)
         }
+    }
 
-        if (title.isBlank() || content.isBlank()) {
-            throw TeamException(TeamExceptionCode.TEAM_INFO_REQUIRED)
-        }
-
+    fun updateInfo(title: String, content: String?): Team {
         return copy(title = title, content = content)
     }
 }

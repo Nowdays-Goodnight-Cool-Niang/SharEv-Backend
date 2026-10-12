@@ -11,13 +11,12 @@ import sharev.gathering.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.gathering.adapter.outbound.jpa.repository.GatheringRepository
 import sharev.gathering.adapter.outbound.jpa.repository.IntroductionRepository
 import sharev.gathering.application.port.outbound.*
-import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.model.Gathering
 import sharev.gathering.domain.model.Introduction
 import sharev.team.adapter.outbound.jpa.repository.TeamRepository
-import sharev.team.application.port.outbound.QueryGatheringPort
-import sharev.team.application.port.outbound.summary.GatheringSummary
+import sharev.team.application.port.outbound.TeamGatheringPort
+import sharev.team.application.port.outbound.TeamGatherings
 import sharev.team.domain.exception.TeamException
 import java.util.*
 import sharev.gathering.domain.exception.GatheringExceptionCode as GatheringCode
@@ -31,7 +30,7 @@ class GatheringJpaAdapter(
 ) : SaveGatheringPort,
     LoadGatheringPort,
     LoadIntroductionPort,
-    QueryGatheringPort,
+    TeamGatheringPort,
     SaveIntroductionPort {
 
     override fun save(gathering: Gathering): Gathering {
@@ -91,8 +90,9 @@ class GatheringJpaAdapter(
             ?: throw GatheringException(GatheringCode.GATHERING_NOT_FOUND)
     }
 
-    override fun loadAll(filter: LoadGatheringFilter, pageable: Pageable): Page<GatheringDetailSummary> {
-        return gatheringRepository.searchGatheringDetails(filter, pageable)
+    override fun loadAll(filter: LoadGatheringFilter, pageable: Pageable): Page<Gathering> {
+        return gatheringRepository.searchGatherings(filter, pageable)
+            .map { it.toDomainModel() }
     }
 
     override fun loadAllByTeam(teamId: Long): List<Gathering> {
@@ -103,13 +103,14 @@ class GatheringJpaAdapter(
             .map { it.toDomainModel() }
     }
 
-    override fun loadAllByTeams(teamId: List<Long>, pageable: Pageable): Page<GatheringDetailSummary> {
+    override fun loadAllByTeams(teamId: List<Long>, pageable: Pageable): Page<Gathering> {
 
         if (teamId.isEmpty()) {
             return Page.empty(pageable)
         }
 
         return gatheringRepository.searchByTeamIds(teamId, pageable)
+            .map { it.toDomainModel() }
     }
 
     override fun loadLatestIntroduction(gatheringId: UUID): Introduction {
@@ -128,9 +129,9 @@ class GatheringJpaAdapter(
             ?: throw GatheringException(GatheringCode.INTRODUCTION_NOT_FOUND)
     }
 
-    override fun findByTeam(teamId: Long): List<GatheringSummary> {
+    override fun findGatheringsByTeamId(teamId: Long): List<TeamGatherings> {
         return loadAllByTeam(teamId).map {
-            GatheringSummary(it.title, it.startAt, it.endAt, it.place)
+            TeamGatherings(it.title, it.startAt, it.endAt, it.place)
         }
     }
 

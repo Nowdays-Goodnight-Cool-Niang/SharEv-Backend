@@ -66,7 +66,6 @@ fun GatheringDetailResult.toResponse() = GatheringDetailResponse(
     id,
     teamId,
     teamTitle,
-    ownerHandle,
     visible,
     title,
     content,
@@ -108,4 +107,20 @@ fun UpsertIntroductionRequest.toCommand(accountId: Long, gatheringId: UUID) = Up
 
 fun FieldSpecRequest.toModel() = FieldSpec(
     placeholder,
+)
+
+fun GatheringResult.toResponse() = GatheringResponse(
+    id,
+    teamId,
+    visible,
+    title,
+    content,
+    startAt,
+    endAt,
+    place,
+    imageUrl,
+    gatheringUrl,
+    contact,
+    registerStartAt,
+    registerEndAt,
 )

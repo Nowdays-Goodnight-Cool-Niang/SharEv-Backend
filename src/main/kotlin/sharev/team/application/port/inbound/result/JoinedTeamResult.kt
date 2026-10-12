@@ -1,12 +1,12 @@
-package sharev.team.application.port.outbound.summary
+package sharev.team.application.port.inbound.result
 
 import java.time.LocalDateTime
 
-data class MyTeamSummary(
+data class JoinedTeamResult(
     val id: Long,
-    val title: String?,
+    val title: String,
     val content: String?,
     val createdAt: LocalDateTime?,
     val memberRole: String,
-    val headcount: Int,
+    val headcount: Long,
 )

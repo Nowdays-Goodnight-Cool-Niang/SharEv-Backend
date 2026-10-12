@@ -38,7 +38,7 @@ class GatheringController(
         @ModelAttribute getGatheringRequest: GetGatheringRequest,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal?,
         @PageableDefault(size = 20) pageable: Pageable,
-    ): ResponseEntity<Page<GatheringDetailResponse>> {
+    ): ResponseEntity<Page<GatheringResponse>> {
         return ResponseEntity.ok(
             getGatheringsUseCase.getGatherings(
                 getGatheringRequest.toCommand(accountPrincipal?.id),
