@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
-import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
@@ -64,8 +63,27 @@ class GatheringControllerTest : ControllerTestSupport() {
                             .summary("전체 행사 목록 조회")
                             .description("모든 행사 목록을 페이지네이션으로 조회합니다.")
                             .queryParameters(*pageableQueryParameters())
-                            .responseFields(*gatheringPageFields())
-                            .responseSchema(schema(GatheringDetailResponse::class.java.simpleName))
+                            .responseFields(
+                                fieldWithPath("content[].id").type(STRING).description("행사 ID (UUID)"),
+                                fieldWithPath("content[].teamId").type(NUMBER).description("팀 ID"),
+                                fieldWithPath("content[].visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+                                fieldWithPath("content[].title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content[].content").type(STRING).description("행사 설명"),
+                                fieldWithPath("content[].startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("content[].endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("content[].place").type(STRING).description("행사 장소"),
+                                fieldWithPath("content[].imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("content[].gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+                                fieldWithPath("content[].contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("content[].registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("content[].registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                                fieldWithPath("page").type("OBJECT").description("페이지 정보"),
+                                fieldWithPath("page.size").type(NUMBER).description("페이지 크기"),
+                                fieldWithPath("page.number").type(NUMBER).description("현재 페이지"),
+                                fieldWithPath("page.totalElements").type(NUMBER).description("총 요소 수"),
+                                fieldWithPath("page.totalPages").type(NUMBER).description("총 페이지 수"),
+                            )
+                            .responseSchema(schema("GatheringPageResponse"))
                             .build()
                     )
                 )
@@ -98,8 +116,28 @@ class GatheringControllerTest : ControllerTestSupport() {
                             .summary("관리 가능한 전체 행사 목록 조회")
                             .description("모든 관리 가능한 행사 목록을 페이지네이션으로 조회합니다.")
                             .queryParameters(*pageableQueryParameters())
-                            .responseFields(*gatheringPageFields())
-                            .responseSchema(schema(GatheringDetailResponse::class.java.simpleName))
+                            .responseFields(
+                                fieldWithPath("content[].id").type(STRING).description("행사 ID (UUID)"),
+                                fieldWithPath("content[].teamId").type(NUMBER).description("팀 ID"),
+                                fieldWithPath("content[].teamTitle").type(STRING).description("팀 제목"),
+                                fieldWithPath("content[].visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+                                fieldWithPath("content[].title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content[].content").type(STRING).description("행사 설명"),
+                                fieldWithPath("content[].startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("content[].endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("content[].place").type(STRING).description("행사 장소"),
+                                fieldWithPath("content[].imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("content[].gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+                                fieldWithPath("content[].contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("content[].registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("content[].registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                                fieldWithPath("page").type("OBJECT").description("페이지 정보"),
+                                fieldWithPath("page.size").type(NUMBER).description("페이지 크기"),
+                                fieldWithPath("page.number").type(NUMBER).description("현재 페이지"),
+                                fieldWithPath("page.totalElements").type(NUMBER).description("총 요소 수"),
+                                fieldWithPath("page.totalPages").type(NUMBER).description("총 페이지 수"),
+                            )
+                            .responseSchema(schema("GatheringDetailPageResponse"))
                             .build()
                     )
                 )
@@ -299,7 +337,22 @@ class GatheringControllerTest : ControllerTestSupport() {
                             .summary("행사 상세 조회")
                             .description("특정 행사의 상세 정보를 조회합니다.")
                             .pathParameters(parameterWithName("gatheringId").description("행사 ID (UUID)"))
-                            .responseFields(*gatheringFields())
+                            .responseFields(
+                                fieldWithPath("id").type(STRING).description("행사 ID (UUID)"),
+                                fieldWithPath("teamId").type(NUMBER).description("팀 ID"),
+                                fieldWithPath("teamTitle").type(STRING).description("팀 제목"),
+                                fieldWithPath("visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+                                fieldWithPath("title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content").type(STRING).description("행사 설명"),
+                                fieldWithPath("startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("place").type(STRING).description("행사 장소"),
+                                fieldWithPath("imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+                                fieldWithPath("contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                            )
                             .responseSchema(schema(GatheringDetailResponse::class.java.simpleName))
                             .build()
                     )
@@ -364,8 +417,35 @@ class GatheringControllerTest : ControllerTestSupport() {
                             .summary("행사 수정")
                             .description("행사 정보를 수정합니다. 팀 관리자만 수정할 수 있습니다.")
                             .pathParameters(parameterWithName("gatheringId").description("행사 ID (UUID)"))
-                            .requestFields(*updateGatheringFields())
-                            .responseFields(*gatheringFields())
+                            .requestFields(
+                                fieldWithPath("visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+                                fieldWithPath("title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content").type(STRING).description("행사 설명"),
+                                fieldWithPath("startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("place").type(STRING).description("행사 장소"),
+                                fieldWithPath("imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+                                fieldWithPath("contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                            )
+                            .responseFields(
+                                fieldWithPath("id").type(STRING).description("행사 ID (UUID)"),
+                                fieldWithPath("teamId").type(NUMBER).description("팀 ID"),
+                                fieldWithPath("teamTitle").type(STRING).description("팀 제목"),
+                                fieldWithPath("visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+                                fieldWithPath("title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content").type(STRING).description("행사 설명"),
+                                fieldWithPath("startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("place").type(STRING).description("행사 장소"),
+                                fieldWithPath("imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+                                fieldWithPath("contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                            )
                             .requestSchema(schema(UpdateGatheringRequest::class.java.simpleName))
                             .responseSchema(schema(GatheringDetailResponse::class.java.simpleName))
                             .build()
@@ -529,64 +609,9 @@ class GatheringControllerTest : ControllerTestSupport() {
         LocalDateTime.of(2025, 3, 19, 23, 59),
     )
 
-    private fun updateGatheringFields(): Array<FieldDescriptor> = arrayOf(
-        fieldWithPath("visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
-        fieldWithPath("title").type(STRING).description("행사 제목"),
-        fieldWithPath("content").type(STRING).description("행사 설명"),
-        fieldWithPath("startAt").type(STRING).description("행사 시작일시"),
-        fieldWithPath("endAt").type(STRING).description("행사 종료일시"),
-        fieldWithPath("place").type(STRING).description("행사 장소"),
-        fieldWithPath("imageUrl").type(STRING).description("행사 이미지 URL").optional(),
-        fieldWithPath("gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
-        fieldWithPath("contact").type(STRING).description("연락처").optional(),
-        fieldWithPath("registerStartAt").type(STRING).description("참가 등록 시작일시"),
-        fieldWithPath("registerEndAt").type(STRING).description("참가 등록 종료일시"),
-    )
-
-    private fun gatheringFields(): Array<FieldDescriptor> = arrayOf(
-        fieldWithPath("id").type(STRING).description("행사 ID (UUID)"),
-        fieldWithPath("teamId").type(NUMBER).description("팀 ID"),
-        fieldWithPath("teamTitle").type(STRING).description("팀 제목").optional(),
-        fieldWithPath("ownerHandle").type(STRING).description("행사 소유자 핸들").optional(),
-        fieldWithPath("visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
-        fieldWithPath("title").type(STRING).description("행사 제목"),
-        fieldWithPath("content").type(STRING).description("행사 설명"),
-        fieldWithPath("startAt").type(STRING).description("행사 시작일시"),
-        fieldWithPath("endAt").type(STRING).description("행사 종료일시"),
-        fieldWithPath("place").type(STRING).description("행사 장소"),
-        fieldWithPath("imageUrl").type(STRING).description("행사 이미지 URL").optional(),
-        fieldWithPath("gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
-        fieldWithPath("contact").type(STRING).description("연락처").optional(),
-        fieldWithPath("registerStartAt").type(STRING).description("참가 등록 시작일시"),
-        fieldWithPath("registerEndAt").type(STRING).description("참가 등록 종료일시"),
-    )
-
     private fun pageableQueryParameters() = arrayOf(
         parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
         parameterWithName("size").description("페이지 크기").optional(),
         parameterWithName("sort").description("정렬 기준 (예: startAt,desc)").optional(),
-    )
-
-    private fun gatheringPageFields(): Array<FieldDescriptor> = arrayOf(
-        fieldWithPath("content[].id").type(STRING).description("행사 ID (UUID)"),
-        fieldWithPath("content[].teamId").type(NUMBER).description("팀 ID"),
-        fieldWithPath("content[].teamTitle").type(STRING).description("팀 제목").optional(),
-        fieldWithPath("content[].ownerHandle").type(STRING).description("행사 소유자 핸들").optional(),
-        fieldWithPath("content[].visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
-        fieldWithPath("content[].title").type(STRING).description("행사 제목"),
-        fieldWithPath("content[].content").type(STRING).description("행사 설명"),
-        fieldWithPath("content[].startAt").type(STRING).description("행사 시작일시"),
-        fieldWithPath("content[].endAt").type(STRING).description("행사 종료일시"),
-        fieldWithPath("content[].place").type(STRING).description("행사 장소"),
-        fieldWithPath("content[].imageUrl").type(STRING).description("행사 이미지 URL").optional(),
-        fieldWithPath("content[].gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
-        fieldWithPath("content[].contact").type(STRING).description("연락처").optional(),
-        fieldWithPath("content[].registerStartAt").type(STRING).description("참가 등록 시작일시"),
-        fieldWithPath("content[].registerEndAt").type(STRING).description("참가 등록 종료일시"),
-        fieldWithPath("page").type("OBJECT").description("페이지 정보"),
-        fieldWithPath("page.size").type(NUMBER).description("페이지 크기"),
-        fieldWithPath("page.number").type(NUMBER).description("현재 페이지"),
-        fieldWithPath("page.totalElements").type(NUMBER).description("총 요소 수"),
-        fieldWithPath("page.totalPages").type(NUMBER).description("총 페이지 수"),
     )
 }
