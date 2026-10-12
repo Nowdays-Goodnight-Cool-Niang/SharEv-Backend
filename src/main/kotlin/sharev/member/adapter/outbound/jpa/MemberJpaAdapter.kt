@@ -1,5 +1,7 @@
 package sharev.member.adapter.outbound.jpa
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import sharev.account.adapter.outbound.jpa.repository.AccountRepository
@@ -16,8 +18,7 @@ import sharev.member.domain.model.Member
 import sharev.member.domain.model.MemberRole
 import sharev.member.domain.model.MemberStatus
 import sharev.team.adapter.outbound.jpa.repository.TeamRepository
-import sharev.team.application.port.outbound.SaveTeamAdminPort
-import sharev.team.application.port.outbound.TeamAccessPort
+import sharev.team.application.port.outbound.*
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 
@@ -32,7 +33,9 @@ class MemberJpaAdapter(
     DeleteMemberPort,
     LoadAccountForMemberPort,
     TeamAccessPort,
-    CheckMemberPort {
+    CheckMemberPort,
+    TeamMemberPort,
+    LoadJoinedTeamPort {
 
     override fun save(
         teamId: Long,
@@ -153,5 +156,29 @@ class MemberJpaAdapter(
 
     override fun isMember(accountId: Long, teamId: Long): Boolean {
         return memberRepository.existsByTeamIdAndAccountId(teamId, accountId)
+    }
+
+    override fun load(accountId: Long, pageable: Pageable): Page<JoinedTeam> {
+        return memberRepository.findAllByAccountId(accountId, pageable)
+            .map { JoinedTeam(it.team.id!!, it.role.name) }
+    }
+
+    override fun findMembersByTeamId(teamId: Long): List<TeamMembers> {
+        return memberRepository.findAllByTeamId(teamId)
+            .map {
+                val account = it.account
+                return@map TeamMembers(account.name, account.email, it.role.name)
+            }
+    }
+
+    override fun headcount(teamIds: Collection<Long>): Map<Long, Long> {
+        if (teamIds.isEmpty()) {
+            return emptyMap()
+        }
+
+        val headcounts = memberRepository.countGroupByTeamId(teamIds)
+            .associate { it.teamId to it.headcount }
+
+        return teamIds.associateWith { headcounts[it] ?: 0 }
     }
 }

@@ -7,10 +7,7 @@ import sharev.team.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.team.adapter.outbound.jpa.mapper.toJpaEntity
 import sharev.team.adapter.outbound.jpa.repository.TeamRepository
 import sharev.team.application.port.outbound.LoadTeamPort
-import sharev.team.application.port.outbound.QueryTeamPort
 import sharev.team.application.port.outbound.SaveTeamPort
-import sharev.team.application.port.outbound.summary.MyTeamSummary
-import sharev.team.application.port.outbound.summary.TeamMemberSummary
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.Team
@@ -19,8 +16,7 @@ import sharev.team.domain.model.Team
 class TeamJpaAdapter(
     private val teamRepository: TeamRepository,
 ) : SaveTeamPort,
-    LoadTeamPort,
-    QueryTeamPort {
+    LoadTeamPort {
 
     override fun save(team: Team): Team {
         return onUniqueViolation({ TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME) }) {
@@ -54,13 +50,5 @@ class TeamJpaAdapter(
 
     override fun exists(teamId: Long): Boolean {
         return teamRepository.existsById(teamId)
-    }
-
-    override fun findMyTeams(accountId: Long): List<MyTeamSummary> {
-        return teamRepository.findMyTeams(accountId)
-    }
-
-    override fun findTeamMembers(teamId: Long): List<TeamMemberSummary> {
-        return teamRepository.findMyTeamMembers(teamId)
     }
 }

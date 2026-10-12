@@ -6,8 +6,8 @@ import sharev.team.adapter.inbound.web.dto.response.*
 import sharev.team.application.port.inbound.command.CreateTeamCommand
 import sharev.team.application.port.inbound.command.UpdateTeamInfoCommand
 import sharev.team.application.port.inbound.result.CreateTeamResult
+import sharev.team.application.port.inbound.result.JoinedTeamResult
 import sharev.team.application.port.inbound.result.TeamDetailResult
-import sharev.team.application.port.inbound.result.TeamInfoResult
 import sharev.team.application.port.inbound.result.TeamUpdateInfoResult
 
 fun CreateTeamRequest.toCommand(accountId: Long) = CreateTeamCommand(accountId, requireNotNull(title), content)
@@ -17,7 +17,7 @@ fun CreateTeamResult.toResponse() = CreateTeamResponse(teamId)
 fun UpdateTeamRequest.toCommand(accountId: Long, teamId: Long) =
     UpdateTeamInfoCommand(accountId, teamId, requireNotNull(title), content)
 
-fun TeamInfoResult.toResponse() = TeamInfoResponse(id, title, content, createdAt, memberRole, headcount)
+fun JoinedTeamResult.toResponse() = TeamInfoResponse(id, title, content, createdAt, memberRole, headcount)
 
 fun TeamUpdateInfoResult.toResponse() = TeamUpdateInfoResponse(title, content)
 
@@ -29,5 +29,5 @@ fun TeamDetailResult.toResponse() = TeamDetailResponse(
     headcount = headcount,
     certification = certification.name,
     gatherings = gatherings.map { GatheringInfoResponse(it.title, it.startAt!!, it.endAt!!, it.place) },
-    members = members.map { TeamMemberInfoResponse(it.name, it.email, it.role.name) },
+    members = members.map { TeamMemberInfoResponse(it.name, it.email, it.role) },
 )
