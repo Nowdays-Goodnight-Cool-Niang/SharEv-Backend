@@ -23,12 +23,8 @@ enum class TeamExceptionCode(
         ExceptionCategory.NOT_FOUND,
         "팀이 존재하지 않습니다."
     ),
-    NOT_MODIFIABLE_TEAM(
-        ExceptionCategory.FORBIDDEN,
-        "수정 가능한 팀 형태가 아닙니다."
-    ),
     TEAM_INFO_REQUIRED(
         ExceptionCategory.BAD_REQUEST,
-        "제목과 내용은 비워둘 수 없습니다."
+        "제목은 비워둘 수 없습니다."
     ),
 }

@@ -66,7 +66,6 @@ fun GatheringDetailResult.toResponse() = GatheringDetailResponse(
     id,
     teamId,
     teamTitle,
-    ownerHandle,
     visible,
     title,
     content,

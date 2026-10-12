@@ -8,7 +8,6 @@ data class GatheringDetailResult(
     val id: UUID,
     val teamId: Long,
     val teamTitle: String?,
-    val ownerHandle: String?,
     val visible: GatheringVisible,
     val title: String,
     val content: String,

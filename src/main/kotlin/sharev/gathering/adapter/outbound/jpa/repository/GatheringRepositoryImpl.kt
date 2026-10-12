@@ -11,8 +11,6 @@ import sharev.gathering.application.port.outbound.LoadGatheringFilter
 import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.model.GatheringVisible
 import sharev.gathering.domain.model.PeriodStatus
-import sharev.member.domain.model.MemberRole
-import sharev.team.domain.model.TeamType
 import java.time.LocalDateTime
 
 @Repository
@@ -55,10 +53,6 @@ class GatheringRepositoryImpl(
                 gathering.id,
                 gathering.team.id,
                 gathering.team.title,
-                (
-                    SELECT member.account.handle FROM MemberJpaEntity member
-                    WHERE member.team = gathering.team AND member.role = :adminRole AND member.team.type = :personalType
-                ),
                 gathering.visible,
                 gathering.title,
                 gathering.content,
@@ -77,8 +71,6 @@ class GatheringRepositoryImpl(
             """.trimIndent(),
             GatheringDetailSummary::class.java,
         ).apply {
-            setParameter("adminRole", MemberRole.ADMIN)
-            setParameter("personalType", TeamType.PERSONAL)
             setParameter("teamIds", teamIds)
             firstResult = pageable.offset.toInt()
             maxResults = pageable.pageSize

@@ -33,7 +33,7 @@ class TeamJpaAdapter(
         val entity = teamRepository.findByIdOrNull(team.id)
             ?: throw TeamException(TeamExceptionCode.TEAM_NOT_FOUND)
 
-        entity.update(checkNotNull(team.title), checkNotNull(team.content))
+        entity.update(team.title, team.content)
 
         return onUniqueViolation({ TeamException(TeamExceptionCode.DUPLICATE_TEAM_NAME) }) {
             teamRepository.saveAndFlush(entity)

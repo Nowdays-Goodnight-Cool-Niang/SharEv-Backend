@@ -32,7 +32,7 @@ class TeamService(
 
     @Transactional
     override fun create(command: CreateTeamCommand): CreateTeamResult {
-        val team = saveTeamPort.save(Team.create(command.title, command.content, command.type))
+        val team = saveTeamPort.save(Team.create(command.title, command.content))
         saveTeamAdminPort.save(team.id, command.accountId)
         return team.toCreateTeamResult()
     }
@@ -61,7 +61,7 @@ class TeamService(
 
         val updatedTeam = saveTeamPort.updateTitleAndContent(team.updateInfo(command.title, command.content))
 
-        return TeamUpdateInfoResult(checkNotNull(updatedTeam.title), checkNotNull(updatedTeam.content))
+        return TeamUpdateInfoResult(updatedTeam.title, updatedTeam.content)
     }
 
     override fun getTeamDetail(accountId: Long, teamId: Long): TeamDetailResult {
