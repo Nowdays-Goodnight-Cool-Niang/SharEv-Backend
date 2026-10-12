@@ -47,6 +47,11 @@ class TeamJpaAdapter(
             ?: throw TeamException(TeamExceptionCode.TEAM_NOT_FOUND)
     }
 
+    override fun loadAll(teamIds: Collection<Long>): List<Team> {
+        return teamRepository.findAllById(teamIds)
+            .map { it.toDomainModel() }
+    }
+
     override fun exists(teamId: Long): Boolean {
         return teamRepository.existsById(teamId)
     }

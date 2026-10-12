@@ -4,9 +4,9 @@ import sharev.gathering.application.port.inbound.result.CreateGatheringResult
 import sharev.gathering.application.port.inbound.result.GatheringDetailResult
 import sharev.gathering.application.port.inbound.result.GatheringResult
 import sharev.gathering.application.port.inbound.result.IntroductionResult
-import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.model.Gathering
 import sharev.gathering.domain.model.Introduction
+import sharev.team.domain.model.Team
 
 fun Gathering.toCreateGatheringResult() = CreateGatheringResult(
     id,
@@ -24,10 +24,10 @@ fun Gathering.toCreateGatheringResult() = CreateGatheringResult(
     registerEndAt,
 )
 
-fun Gathering.toDetailResult() = GatheringDetailResult(
+fun Gathering.toDetailResult(team: Team) = GatheringDetailResult(
     id = id,
     teamId = teamId,
-    teamTitle = null,
+    teamTitle = team.title,
     visible = visible,
     title = title,
     content = content,
@@ -44,23 +44,6 @@ fun Gathering.toDetailResult() = GatheringDetailResult(
 fun Gathering.toResult() = GatheringResult(
     id = id,
     teamId = teamId,
-    visible = visible,
-    title = title,
-    content = content,
-    startAt = startAt,
-    endAt = endAt,
-    place = place,
-    imageUrl = imageUrl,
-    gatheringUrl = gatheringUrl,
-    contact = contact,
-    registerStartAt = registerStartAt,
-    registerEndAt = registerEndAt,
-)
-
-fun GatheringDetailSummary.toDetailResult() = GatheringDetailResult(
-    id = id,
-    teamId = teamId,
-    teamTitle = teamTitle,
     visible = visible,
     title = title,
     content = content,

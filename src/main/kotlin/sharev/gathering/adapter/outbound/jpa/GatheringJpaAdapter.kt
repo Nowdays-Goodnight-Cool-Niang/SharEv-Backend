@@ -11,7 +11,6 @@ import sharev.gathering.adapter.outbound.jpa.mapper.toDomainModel
 import sharev.gathering.adapter.outbound.jpa.repository.GatheringRepository
 import sharev.gathering.adapter.outbound.jpa.repository.IntroductionRepository
 import sharev.gathering.application.port.outbound.*
-import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.exception.GatheringException
 import sharev.gathering.domain.model.Gathering
 import sharev.gathering.domain.model.Introduction
@@ -104,13 +103,14 @@ class GatheringJpaAdapter(
             .map { it.toDomainModel() }
     }
 
-    override fun loadAllByTeams(teamId: List<Long>, pageable: Pageable): Page<GatheringDetailSummary> {
+    override fun loadAllByTeams(teamId: List<Long>, pageable: Pageable): Page<Gathering> {
 
         if (teamId.isEmpty()) {
             return Page.empty(pageable)
         }
 
         return gatheringRepository.searchByTeamIds(teamId, pageable)
+            .map { it.toDomainModel() }
     }
 
     override fun loadLatestIntroduction(gatheringId: UUID): Introduction {

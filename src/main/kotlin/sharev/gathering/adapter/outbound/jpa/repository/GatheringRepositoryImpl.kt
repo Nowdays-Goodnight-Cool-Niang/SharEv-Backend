@@ -8,7 +8,6 @@ import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
 import sharev.gathering.adapter.outbound.jpa.entity.GatheringJpaEntity
 import sharev.gathering.application.port.outbound.LoadGatheringFilter
-import sharev.gathering.application.port.outbound.summary.GatheringDetailSummary
 import sharev.gathering.domain.model.GatheringVisible
 import sharev.gathering.domain.model.PeriodStatus
 import java.time.LocalDateTime
@@ -46,30 +45,15 @@ class GatheringRepositoryImpl(
         return PageableExecutionUtils.getPage(content, pageable) { countQuery.singleResult }
     }
 
-    override fun searchByTeamIds(teamIds: List<Long>, pageable: Pageable): Page<GatheringDetailSummary> {
+    override fun searchByTeamIds(teamIds: List<Long>, pageable: Pageable): Page<GatheringJpaEntity> {
         val content = entityManager.createQuery(
             """
-            SELECT new sharev.gathering.application.port.outbound.summary.GatheringDetailSummary(
-                gathering.id,
-                gathering.team.id,
-                gathering.team.title,
-                gathering.visible,
-                gathering.title,
-                gathering.content,
-                gathering.startAt,
-                gathering.endAt,
-                gathering.place,
-                gathering.imageUrl,
-                gathering.gatheringUrl,
-                gathering.contact,
-                gathering.registerStartAt,
-                gathering.registerEndAt
-            )
+            SELECT gathering
             FROM GatheringJpaEntity gathering
             WHERE gathering.team.id IN :teamIds
             ${orderBy(pageable.sort)}
             """.trimIndent(),
-            GatheringDetailSummary::class.java,
+            GatheringJpaEntity::class.java,
         ).apply {
             setParameter("teamIds", teamIds)
             firstResult = pageable.offset.toInt()
