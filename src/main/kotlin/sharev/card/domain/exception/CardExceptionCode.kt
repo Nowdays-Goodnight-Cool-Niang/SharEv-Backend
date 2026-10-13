@@ -31,4 +31,8 @@ enum class CardExceptionCode(
         ExceptionCategory.BAD_REQUEST,
         "pin number 발급 도중 예외가 발생했습니다. 운영진에게 알려 주십시오."
     ),
+    JOIN_CAPACITY_EXCEEDED(
+        ExceptionCategory.CONFLICT,
+        "행사 참여 인원이 가득 찼습니다."
+    ),
 }
