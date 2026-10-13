@@ -10,7 +10,7 @@ data class Card(
     val accountId: Long,
     val accountName: String,
     val accountEmail: String,
-    val pinNumber: Int?,
+    val joinOrder: Int,
     val introductionVersion: Int?,
     val fieldValues: Map<String, String>?,
 ) {
@@ -29,5 +29,5 @@ data class Card(
         }
     }
 
-    fun isCompleted(): Boolean = pinNumber != null && fieldValues != null
+    fun isCompleted(): Boolean = fieldValues != null
 }

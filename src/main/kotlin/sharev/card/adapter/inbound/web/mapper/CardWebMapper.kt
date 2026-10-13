@@ -1,7 +1,10 @@
 package sharev.card.adapter.inbound.web.mapper
 
 import sharev.card.adapter.inbound.web.dto.request.UpdateCardIntroduceRequest
-import sharev.card.adapter.inbound.web.dto.response.*
+import sharev.card.adapter.inbound.web.dto.response.CardResponse
+import sharev.card.adapter.inbound.web.dto.response.JoinCardResponse
+import sharev.card.adapter.inbound.web.dto.response.ParticipantFlagResponse
+import sharev.card.adapter.inbound.web.dto.response.UpdateCardIntroduceResponse
 import sharev.card.application.port.inbound.command.UpdateCardInfoCommand
 import sharev.card.application.port.inbound.result.CardResult
 import sharev.card.application.port.inbound.result.JoinCardResult
@@ -28,10 +31,8 @@ fun CardResult.toResponse() = CardResponse(
     fieldValues = fieldValues,
 )
 
-fun JoinCardResult.toResponse() = JoinCardResponse(cardId, pinNumber)
+fun JoinCardResult.toResponse() = JoinCardResponse(cardId, shareCode)
 
 fun ParticipantFlagResult.toResponse() = ParticipantFlagResponse(isParticipant)
 
 fun UpdateCardInfoResult.toResponse() = UpdateCardIntroduceResponse(introductionVersion, fieldValues)
-
-fun Int.toMyPinNumberResponse() = MyPinNumberResponse(this)

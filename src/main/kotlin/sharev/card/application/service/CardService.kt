@@ -2,7 +2,9 @@ package sharev.card.application.service
 
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import sharev.account.application.port.outbound.LoadAccountPort
 import sharev.card.application.port.inbound.command.*
 import sharev.card.application.port.inbound.mapper.toCardResult
@@ -11,7 +13,7 @@ import sharev.card.application.port.inbound.result.JoinCardResult
 import sharev.card.application.port.inbound.result.ParticipantFlagResult
 import sharev.card.application.port.inbound.result.UpdateCardInfoResult
 import sharev.card.application.port.inbound.usecase.*
-import sharev.card.application.port.outbound.CardPinNumberPoolPort
+import sharev.card.application.port.outbound.IssueJoinOrderPort
 import sharev.card.application.port.outbound.LoadCardPort
 import sharev.card.application.port.outbound.QueryCardPort
 import sharev.card.application.port.outbound.SaveCardPort
@@ -19,6 +21,7 @@ import sharev.card.domain.event.ShowCardEvent
 import sharev.card.domain.exception.CardException
 import sharev.card.domain.exception.CardExceptionCode
 import sharev.card.domain.model.Card
+import sharev.card.domain.model.ShareCodeConverter
 import sharev.common.application.port.outbound.PublishEventPort
 import sharev.gathering.application.port.outbound.LoadGatheringPort
 import sharev.gathering.application.port.outbound.LoadIntroductionPort
@@ -36,41 +39,37 @@ class CardService(
     private val loadAccountPort: LoadAccountPort,
     private val loadLinkPort: LoadLinkPort,
     private val publishEventPort: PublishEventPort,
-    private val cardPinNumberPoolPort: CardPinNumberPoolPort,
+    private val transactionTemplate: TransactionTemplate,
+    private val issueJoinOrderPort: IssueJoinOrderPort,
+    private val shareCodeConverter: ShareCodeConverter,
 ) : JoinCardUseCase,
     UpdateCardInfoUseCase,
-    GetCardByPinNumberUseCase,
+    GetCardByShareCodeUseCase,
     GetMyCardUseCase,
-    GetMyPinNumberUseCase,
+    GetMyShareCodeUseCase,
     GetAllCardsUseCase,
     IsJoinedUseCase {
 
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     override fun join(command: JoinCardCommand): JoinCardResult {
-        validateJoinTarget(command.gatheringId, command.accountId)
+        val (gatheringId, accountId) = command
 
-        val pinNumber = getPinNumber(command.gatheringId)
+        validateJoinTarget(gatheringId, accountId)
 
-        return try {
-            val card = saveCardPort.join(command.gatheringId, command.accountId, pinNumber)
-            JoinCardResult(card.id, pinNumber)
-        } catch (e: CardException) {
-            if (e.details.code == CardExceptionCode.JOIN_ALREADY.name) {
-                cardPinNumberPoolPort.restorePinNumber(command.gatheringId, pinNumber)
-            }
-            throw e
-        }
+        val joinOrder = transactionTemplate.execute { issueJoinOrderPort.issue(gatheringId) }!!
+
+        val shareCode = shareCodeConverter.toShareCode(gatheringId, joinOrder)
+        val card = transactionTemplate.execute { saveCardPort.join(gatheringId, accountId, joinOrder) }!!
+        return JoinCardResult(card.id, shareCode)
     }
 
     private fun validateJoinTarget(gatheringId: UUID, accountId: Long) {
         loadGatheringPort.load(gatheringId)
         loadAccountPort.load(accountId)
-    }
 
-    private fun getPinNumber(gatheringId: UUID): Int {
-        return cardPinNumberPoolPort.popAvailablePinNumber(gatheringId) {
-            loadCardPort.loadUsedPinNumbers(gatheringId)
-        } ?: throw CardException(CardExceptionCode.PIN_NUMBER_GENERATE)
+        if (loadCardPort.existsByGatheringAndAccount(gatheringId, accountId)) {
+            throw CardException(CardExceptionCode.JOIN_ALREADY)
+        }
     }
 
     @Transactional
@@ -92,12 +91,15 @@ class CardService(
         return UpdateCardInfoResult(updatedCard.introductionVersion!!, updatedCard.fieldValues!!)
     }
 
-    override fun getCardByPinNumber(command: GetCardByPinNumberCommand): CardResult {
-        validateCompletedCard(command.gatheringId, command.accountId)
+    override fun getCardByShareCode(command: GetCardByShareCodeCommand): CardResult {
+        val (gatheringId, accountId, shareCode) = command
 
-        val targetCard = loadCardPort.loadByGatheringAndPinNumber(command.gatheringId, command.pinNumber)
-        publishEventPort.publish(ShowCardEvent(command.gatheringId, command.accountId, targetCard.id))
-        return calculateCardResult(command.gatheringId, targetCard)
+        validateCompletedCard(gatheringId, accountId)
+
+        val joinOrder = shareCodeConverter.toJoinOrder(gatheringId, shareCode)
+        val targetCard = loadCardPort.loadByGatheringAndJoinOrder(gatheringId, joinOrder)
+        publishEventPort.publish(ShowCardEvent(gatheringId, accountId, targetCard.id))
+        return calculateCardResult(gatheringId, targetCard)
     }
 
     override fun getMyCard(command: GetMyCardCommand): CardResult {
@@ -107,11 +109,13 @@ class CardService(
         return calculateCardResult(command.gatheringId, card)
     }
 
-    override fun getMyPinNumber(command: GetMyPinNumberCommand): Int {
-        validateCompletedCard(command.gatheringId, command.accountId)
+    override fun getMyShareCode(command: GetMyShareCodeCommand): Int {
+        val (gatheringId, accountId) = command
 
-        return loadCardPort.loadByGatheringAndAccount(command.gatheringId, command.accountId).pinNumber
-            ?: throw CardException(CardExceptionCode.CARD_NOT_FOUND)
+        validateCompletedCard(gatheringId, accountId)
+
+        val joinOrder = loadCardPort.loadByGatheringAndAccount(gatheringId, accountId).joinOrder
+        return shareCodeConverter.toShareCode(gatheringId, joinOrder)
     }
 
     private fun calculateCardResult(gatheringId: UUID, card: Card): CardResult {

@@ -39,14 +39,14 @@ class CardJpaAdapter(
     CheckGatheringParticipantPort,
     LoadParticipatedGatheringsPort {
 
-    override fun join(gatheringId: UUID, accountId: Long, pinNumber: Int): Card {
+    override fun join(gatheringId: UUID, accountId: Long, joinOrder: Int): Card {
         val gathering = gatheringRepository.findByIdOrNull(gatheringId)
             ?: throw GatheringException(GatheringCode.GATHERING_NOT_FOUND)
         val account = accountRepository.findByIdOrNull(accountId)
             ?: throw AccountException(AccountCode.ACCOUNT_NOT_FOUND)
 
         return onUniqueViolation({ CardException(CardCode.JOIN_ALREADY) }) {
-            cardRepository.saveAndFlush(CardJpaEntity(gathering = gathering, account = account, pinNumber = pinNumber))
+            cardRepository.saveAndFlush(CardJpaEntity(gathering = gathering, account = account, joinOrder = joinOrder))
                 .toDomainModel()
         }
     }
@@ -70,8 +70,8 @@ class CardJpaAdapter(
             ?: throw CardException(CardCode.CARD_NOT_FOUND)
     }
 
-    override fun loadByGatheringAndPinNumber(gatheringId: UUID, pinNumber: Int): Card {
-        return cardRepository.findByGatheringIdAndPinNumber(gatheringId, pinNumber)
+    override fun loadByGatheringAndJoinOrder(gatheringId: UUID, joinOrder: Int): Card {
+        return cardRepository.findByGatheringIdAndJoinOrder(gatheringId, joinOrder)
             ?.toDomainModel()
             ?: throw CardException(CardCode.CARD_NOT_FOUND)
     }
@@ -80,10 +80,6 @@ class CardJpaAdapter(
         return cardRepository.findByIdOrNull(cardId)
             ?.toDomainModel()
             ?: throw CardException(CardCode.CARD_NOT_FOUND)
-    }
-
-    override fun loadUsedPinNumbers(gatheringId: UUID): Set<Int> {
-        return cardRepository.findPinNumbersByGatheringId(gatheringId)
     }
 
     override fun existsByGatheringAndAccount(gatheringId: UUID, accountId: Long): Boolean {
