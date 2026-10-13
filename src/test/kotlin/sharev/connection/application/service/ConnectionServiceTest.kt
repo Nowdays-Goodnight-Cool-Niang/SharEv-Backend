@@ -45,7 +45,7 @@ class ConnectionServiceTest {
         accountId = accountId,
         accountName = "name-$accountId",
         accountEmail = "account$accountId@test.com",
-        pinNumber = 1234,
+        joinOrder = 1234,
         introductionVersion = 1,
         fieldValues = mapOf("name" to "value"),
     )

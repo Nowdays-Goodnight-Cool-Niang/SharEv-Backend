@@ -182,15 +182,16 @@ VALUES (1,
 
 -- ============================================
 -- Cards (gatherings, accounts 참조)
---   흐름: join(pin 부여, 아직 미작성) → updateIntroduce(introduction_version + field_values 작성)
+--   흐름: join(join_order 발급, 아직 미작성) → updateIntroduce(introduction_version + field_values 작성)
+--   join_order: 행사별 0부터 시작하는 참가 순번 (card_id 순서대로 부여)
 --   모든 카드는 구성된 introduction(version 1)에 맞춰 작성 완료 상태 (field_values 키 = 해당 행사 fields)
 -- ============================================
-INSERT INTO "cards" ("card_id", "gathering_id", "account_id", "pin_number", "introduction_version", "field_values")
+INSERT INTO "cards" ("card_id", "gathering_id", "account_id", "join_order", "introduction_version", "field_values")
     OVERRIDING SYSTEM VALUE
 VALUES (1,
         'a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         2,
-        1234,
+        0,
         1,
         '{
           "name": "홍길동",
@@ -202,7 +203,7 @@ VALUES (1,
        (2,
         'a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         3,
-        5678,
+        1,
         1,
         '{
           "name": "김철수",
@@ -214,7 +215,7 @@ VALUES (1,
        (3,
         'd8f1e6c3-9a7b-4d4f-b6e1-5c8e3b7d2e0a'::UUID,
         4,
-        9012,
+        0,
         1,
         '{
           "name": "이영희",
@@ -225,7 +226,7 @@ VALUES (1,
        (4,
         'e9f2e7c4-0b8c-5e5f-c7f2-6d9f4e8c3f1b'::UUID,
         5,
-        3456,
+        0,
         1,
         '{
           "name": "박민수",
@@ -236,7 +237,7 @@ VALUES (1,
        (5,
         'a81bc81b-dead-4e5d-abff-90865d1e13b1'::UUID,
         1,
-        2468,
+        2,
         1,
         '{
           "name": "관리자",
@@ -245,6 +246,16 @@ VALUES (1,
           "techStack": "Kubernetes, PostgreSQL",
           "career": "8"
         }'::JSONB);
+
+-- ============================================
+-- Join Order Sequences (gatherings 참조)
+--   카드가 있는 행사만 행 보유, last_join_order = 마지막으로 발급한 join_order
+--   카드 없는 행사는 첫 join 시 upsert로 생성
+-- ============================================
+INSERT INTO "join_order_sequences" ("gathering_id", "last_join_order")
+SELECT "gathering_id", MAX("join_order")
+FROM "cards"
+GROUP BY "gathering_id";
 
 -- ============================================
 -- Connections (cards 참조)

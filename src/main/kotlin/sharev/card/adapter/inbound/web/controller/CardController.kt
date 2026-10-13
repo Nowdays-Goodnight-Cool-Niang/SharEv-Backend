@@ -11,10 +11,9 @@ import org.springframework.web.bind.annotation.*
 import sharev.card.adapter.inbound.web.dto.request.UpdateCardIntroduceRequest
 import sharev.card.adapter.inbound.web.dto.response.CardResponse
 import sharev.card.adapter.inbound.web.dto.response.JoinCardResponse
-import sharev.card.adapter.inbound.web.dto.response.MyPinNumberResponse
+import sharev.card.adapter.inbound.web.dto.response.MyShareCodeResponse
 import sharev.card.adapter.inbound.web.dto.response.UpdateCardIntroduceResponse
 import sharev.card.adapter.inbound.web.mapper.toCommand
-import sharev.card.adapter.inbound.web.mapper.toMyPinNumberResponse
 import sharev.card.adapter.inbound.web.mapper.toResponse
 import sharev.card.application.port.inbound.command.*
 import sharev.card.application.port.inbound.usecase.*
@@ -27,9 +26,9 @@ import java.util.*
 class CardController(
     private val joinCardUseCase: JoinCardUseCase,
     private val updateCardInfoUseCase: UpdateCardInfoUseCase,
-    private val getCardByPinNumberUseCase: GetCardByPinNumberUseCase,
+    private val getCardByShareCodeUseCase: GetCardByShareCodeUseCase,
     private val getMyCardUseCase: GetMyCardUseCase,
-    private val getMyPinNumberUseCase: GetMyPinNumberUseCase,
+    private val getMyShareCodeUseCase: GetMyShareCodeUseCase,
     private val getAllCardsUseCase: GetAllCardsUseCase,
 ) {
     @PostMapping
@@ -84,27 +83,24 @@ class CardController(
         )
     }
 
-    @GetMapping("/me/pin")
-    fun getMyPinNumber(
+    @GetMapping("/me/share-code")
+    fun getMyShareCode(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-    ): ResponseEntity<MyPinNumberResponse> {
-        return ResponseEntity.ok(
-            getMyPinNumberUseCase.getMyPinNumber(
-                GetMyPinNumberCommand(gatheringId, accountPrincipal.id)
-            ).toMyPinNumberResponse()
-        )
+    ): ResponseEntity<MyShareCodeResponse> {
+        val myShareCode = getMyShareCodeUseCase.getMyShareCode(GetMyShareCodeCommand(gatheringId, accountPrincipal.id))
+        return ResponseEntity.ok(MyShareCodeResponse(myShareCode))
     }
 
-    @GetMapping("by-pin/{pinNumber}")
-    fun getCardByPinNumber(
+    @GetMapping("/by-share-code/{shareCode}")
+    fun getCardByShareCode(
         @PathVariable gatheringId: UUID,
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-        @PathVariable pinNumber: Int,
+        @PathVariable shareCode: Int,
     ): ResponseEntity<CardResponse> {
         return ResponseEntity.ok(
-            getCardByPinNumberUseCase.getCardByPinNumber(
-                GetCardByPinNumberCommand(gatheringId, accountPrincipal.id, pinNumber)
+            getCardByShareCodeUseCase.getCardByShareCode(
+                GetCardByShareCodeCommand(gatheringId, accountPrincipal.id, shareCode)
             ).toResponse()
         )
     }

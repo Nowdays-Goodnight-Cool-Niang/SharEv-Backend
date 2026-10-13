@@ -61,6 +61,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     testRuntimeOnly 'com.h2database:h2'
 
+    // testcontainers
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:junit-jupiter'
+
     // docker compose
     if ("${profile}" != 'dev') {
         runtimeOnly 'org.springframework.boot:spring-boot-docker-compose'
@@ -97,6 +102,9 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
+
+    // jooq
+    implementation 'org.springframework.boot:spring-boot-starter-jooq'
 }
 
 kotlin {

@@ -23,7 +23,7 @@ import sharev.WithCustomMockUser
 import sharev.card.adapter.inbound.web.dto.request.UpdateCardIntroduceRequest
 import sharev.card.adapter.inbound.web.dto.response.CardResponse
 import sharev.card.adapter.inbound.web.dto.response.JoinCardResponse
-import sharev.card.adapter.inbound.web.dto.response.MyPinNumberResponse
+import sharev.card.adapter.inbound.web.dto.response.MyShareCodeResponse
 import sharev.card.adapter.inbound.web.dto.response.UpdateCardIntroduceResponse
 import sharev.card.application.port.inbound.result.CardResult
 import sharev.card.application.port.inbound.result.JoinCardResult
@@ -59,7 +59,7 @@ class CardControllerTest : ControllerTestSupport() {
                             .pathParameters(parameterWithName("gatheringId").description("행사 ID"))
                             .responseFields(
                                 fieldWithPath("cardId").type(NUMBER).description("생성된 카드 ID"),
-                                fieldWithPath("pinNumber").type(NUMBER).description("생성된 PIN 번호"),
+                                fieldWithPath("shareCode").type(NUMBER).description("생성된 공유 번호"),
                             )
                             .responseSchema(schema(JoinCardResponse::class.java.simpleName))
                             .build()
@@ -219,13 +219,13 @@ class CardControllerTest : ControllerTestSupport() {
     @Test
     @WithCustomMockUser
     @DisplayName("내 PIN 조회")
-    fun getMyPinNumber() {
+    fun getMyShareCode() {
         val gatheringId = UUID.randomUUID()
 
-        given(mockBean<GetMyPinNumberUseCase>().getMyPinNumber(any()))
+        given(mockBean<GetMyShareCodeUseCase>().getMyShareCode(any()))
             .willReturn(1234)
 
-        val request = RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}/cards/me/pin", gatheringId)
+        val request = RestDocumentationRequestBuilders.get("/gatherings/{gatheringId}/cards/me/share-code", gatheringId)
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -233,14 +233,14 @@ class CardControllerTest : ControllerTestSupport() {
             .andExpect(status().isOk())
             .andDo(
                 documentResource(
-                    "getMyPinNumber",
+                    "getMyShareCode",
                     resource(
                         ResourceSnippetParameters.builder()
-                            .summary("내 PIN 조회")
-                            .description("내 카드를 열람할 수 있는 PIN 번호를 조회합니다.")
+                            .summary("내 공유 번호 조회")
+                            .description("내 카드를 열람할 수 있는 공유 번호를 조회합니다.")
                             .pathParameters(parameterWithName("gatheringId").description("행사 ID"))
-                            .responseFields(fieldWithPath("pinNumber").type(NUMBER).description("PIN 번호"))
-                            .responseSchema(schema(MyPinNumberResponse::class.java.simpleName))
+                            .responseFields(fieldWithPath("shareCode").type(NUMBER).description("공유 번호"))
+                            .responseSchema(schema(MyShareCodeResponse::class.java.simpleName))
                             .build()
                     )
                 )
@@ -250,15 +250,15 @@ class CardControllerTest : ControllerTestSupport() {
     @Test
     @WithCustomMockUser
     @DisplayName("PIN으로 카드 조회")
-    fun getCardByPinNumber() {
+    fun getCardByShareCode() {
         val gatheringId = UUID.randomUUID()
-        val pinNumber = 1234
+        val shareCode = 1234
 
-        given(mockBean<GetCardByPinNumberUseCase>().getCardByPinNumber(any()))
+        given(mockBean<GetCardByShareCodeUseCase>().getCardByShareCode(any()))
             .willReturn(cardResult(2L))
 
         val request = RestDocumentationRequestBuilders
-            .get("/gatherings/{gatheringId}/cards/by-pin/{pinNumber}", gatheringId, pinNumber)
+            .get("/gatherings/{gatheringId}/cards/by-share-code/{shareCode}", gatheringId, shareCode)
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -266,14 +266,14 @@ class CardControllerTest : ControllerTestSupport() {
             .andExpect(status().isOk())
             .andDo(
                 documentResource(
-                    "getCardByPinNumber",
+                    "getCardByShareCode",
                     resource(
                         ResourceSnippetParameters.builder()
-                            .summary("PIN으로 카드 조회")
-                            .description("PIN 번호로 행사 참여자의 카드를 조회합니다.")
+                            .summary("공유 번호로 카드 조회")
+                            .description("공유 번호로 행사 참여자의 카드를 조회합니다.")
                             .pathParameters(
                                 parameterWithName("gatheringId").description("행사 ID"),
-                                parameterWithName("pinNumber").description("PIN 번호"),
+                                parameterWithName("shareCode").description("공유 번호"),
                             )
                             .responseFields(*cardFields())
                             .responseSchema(schema(CardResponse::class.java.simpleName))

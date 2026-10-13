@@ -25,7 +25,7 @@ class CardJpaEntity(
     val account: AccountJpaEntity,
 
     @Column
-    var pinNumber: Int?,
+    var joinOrder: Int,
 
     @Column
     var introductionVersion: Int? = null,

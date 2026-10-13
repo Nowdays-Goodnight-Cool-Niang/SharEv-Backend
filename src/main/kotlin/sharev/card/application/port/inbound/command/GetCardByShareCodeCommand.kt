@@ -2,8 +2,8 @@ package sharev.card.application.port.inbound.command
 
 import java.util.*
 
-data class GetCardByPinNumberCommand(
+data class GetCardByShareCodeCommand(
     val gatheringId: UUID,
     val accountId: Long,
-    val pinNumber: Int,
+    val shareCode: Int,
 )

@@ -107,12 +107,20 @@ CREATE TABLE introductions
     CONSTRAINT uk_introductions_gathering_version UNIQUE (gathering_id, version)
 );
 
+CREATE TABLE join_order_sequences
+(
+    gathering_id UUID PRIMARY KEY,
+    last_join_order INT NOT NULL,
+
+    CONSTRAINT fk_join_order_sequences_gatherings FOREIGN KEY (gathering_id) REFERENCES gatherings (gathering_id)
+);
+
 CREATE TABLE cards
 (
     card_id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     gathering_id         UUID        NOT NULL,
     account_id           BIGINT      NOT NULL,
-    pin_number           INT         NULL,
+    join_order           INT         NOT NULL,
     introduction_version INT         NULL,
     field_values         JSONB       NULL,
     created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -121,7 +129,7 @@ CREATE TABLE cards
     CONSTRAINT fk_cards_gatherings FOREIGN KEY (gathering_id) REFERENCES gatherings (gathering_id),
     CONSTRAINT fk_cards_account FOREIGN KEY (account_id) REFERENCES accounts (account_id) ON DELETE CASCADE,
     CONSTRAINT uk_cards_gatherings_account UNIQUE (gathering_id, account_id),
-    CONSTRAINT uk_cards_gatherings_pin_number UNIQUE (gathering_id, pin_number),
+    CONSTRAINT uk_cards_gatherings_join_order UNIQUE (gathering_id, join_order),
     CONSTRAINT fk_cards_introduction_integrity FOREIGN KEY (gathering_id, introduction_version) REFERENCES introductions (gathering_id, version)
 );
 
