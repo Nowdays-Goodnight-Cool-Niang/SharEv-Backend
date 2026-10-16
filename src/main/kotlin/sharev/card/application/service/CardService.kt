@@ -56,10 +56,10 @@ class CardService(
 
         validateJoinTarget(gatheringId, accountId)
 
-        val joinOrder = transactionTemplate.execute { issueJoinOrderPort.issue(gatheringId) }!!
+        val joinOrder = transactionTemplate.execute { issueJoinOrderPort.issue(gatheringId) }
 
         val shareCode = shareCodeConverter.toShareCode(gatheringId, joinOrder)
-        val card = transactionTemplate.execute { saveCardPort.join(gatheringId, accountId, joinOrder) }!!
+        val card = transactionTemplate.execute { saveCardPort.join(gatheringId, accountId, joinOrder) }
         return JoinCardResult(card.id, shareCode)
     }
 

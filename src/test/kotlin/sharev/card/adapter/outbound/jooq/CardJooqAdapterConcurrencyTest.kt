@@ -64,7 +64,7 @@ class CardJooqAdapterConcurrencyTest @Autowired constructor(
             val futures = (1..THREAD_COUNT).map {
                 executor.submit(Callable {
                     start.await()
-                    transactionTemplate.execute { issueJoinOrderPort.issue(gatheringId) }!!
+                    transactionTemplate.execute { issueJoinOrderPort.issue(gatheringId) }
                 })
             }
             start.countDown()
