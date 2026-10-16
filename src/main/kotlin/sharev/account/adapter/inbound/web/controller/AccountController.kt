@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.authority.FactorGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
@@ -103,13 +104,15 @@ private fun updateSessionInfo(
     newAccount: AccountPrincipal,
     httpSession: HttpSession
 ) {
-    val clientRegistrationId = (SecurityContextHolder.getContext().authentication as OAuth2AuthenticationToken)
-        .authorizedClientRegistrationId
-    val newAuth = OAuth2AuthenticationToken(
-        newAccount, newAccount.authorities, clientRegistrationId
-    )
-
     val context = SecurityContextHolder.getContext()
+    val currentAuth = context.authentication as OAuth2AuthenticationToken
+
+    // 로그인 시 Spring Security가 부여한 인증 요소(FACTOR_*) 권한과 요청 정보는 그대로 유지한다.
+    val factorAuthorities = currentAuth.authorities.filterIsInstance<FactorGrantedAuthority>()
+    val newAuth = OAuth2AuthenticationToken(
+        newAccount, newAccount.authorities + factorAuthorities, currentAuth.authorizedClientRegistrationId
+    ).apply { details = currentAuth.details }
+
     context.authentication = newAuth
     httpSession.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context)
 }
