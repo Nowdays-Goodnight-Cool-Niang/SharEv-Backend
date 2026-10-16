@@ -1,6 +1,5 @@
 package sharev.common.adapter.inbound.web.advice
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -10,6 +9,7 @@ import org.springframework.validation.BindException
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import tools.jackson.databind.exc.MismatchedInputException
 
 @RestControllerAdvice
 class InvalidRequestExceptionAdvice {
@@ -49,7 +49,7 @@ class InvalidRequestExceptionAdvice {
         val cause = exception.cause
 
         if (cause is MismatchedInputException && cause.path.isNotEmpty()) {
-            val field = cause.path.lastOrNull()?.fieldName ?: "request"
+            val field = cause.path.lastOrNull()?.propertyName ?: "request"
             errorMessages.add(field, "필수 값이거나 형식이 올바르지 않습니다.")
         } else {
             errorMessages.add("request", "요청 본문을 해석할 수 없습니다.")

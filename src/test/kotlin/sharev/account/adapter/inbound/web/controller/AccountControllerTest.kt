@@ -4,12 +4,19 @@ import com.epages.restdocs.apispec.ResourceDocumentation.resource
 import com.epages.restdocs.apispec.ResourceSnippetParameters
 import com.epages.restdocs.apispec.SimpleType.NUMBER
 import com.epages.restdocs.apispec.SimpleType.STRING
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
+import org.springframework.security.core.authority.FactorGrantedAuthority
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication
+import org.springframework.security.web.authentication.WebAuthenticationDetails
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import sharev.ControllerTestSupport
@@ -30,6 +37,7 @@ import sharev.account.application.port.inbound.result.UpdateAccountInfoResult
 import sharev.account.application.port.inbound.usecase.DeleteAccountUseCase
 import sharev.account.application.port.inbound.usecase.UpdateAccountHandleUseCase
 import sharev.account.application.port.inbound.usecase.UpdateAccountInfoUseCase
+import sharev.common.adapter.inbound.security.model.AccountPrincipal
 
 class AccountControllerTest : ControllerTestSupport() {
     @Test
@@ -74,6 +82,44 @@ class AccountControllerTest : ControllerTestSupport() {
                     )
                 )
             )
+    }
+
+    @Test
+    @DisplayName("회원 정보 업데이트 후에도 세션의 인증 정보는 로그인 인증 요소와 요청 정보를 유지한다")
+    fun updateAccountInfo_keepsFactorAuthorityAndDetails() {
+        val principal = AccountPrincipal(1L, "USER", "test", "test@test.com", "handle", emptyMap())
+        val details = WebAuthenticationDetails("127.0.0.1", "session-id")
+        val token = OAuth2AuthenticationToken(
+            principal,
+            principal.authorities + FactorGrantedAuthority.fromAuthority(FactorGrantedAuthority.AUTHORIZATION_CODE_AUTHORITY),
+            "kakao",
+        ).apply { this.details = details }
+
+        val requestDto = UpdateAccountInfoRequest("김주호", "eora21@naver.com", setOf("https://link.com"), setOf(1L))
+        val command = UpdateAccountInfoCommand(1L, "김주호", "eora21@naver.com", setOf("https://link.com"), setOf(1L))
+
+        given(mockBean<UpdateAccountInfoUseCase>().updateAccountInfo(command)).willReturn(
+            UpdateAccountInfoResult(1L, "김주호", "eora21@naver.com")
+        )
+
+        val request = RestDocumentationRequestBuilders.patch("/accounts")
+            .with(authentication(token))
+            .content(objectMapper.writeValueAsString(requestDto))
+            .contentType(MediaType.APPLICATION_JSON)
+
+        val session = mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andReturn()
+            .request
+            .session
+
+        val context = session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY) as SecurityContext
+        val authentication = context.authentication as OAuth2AuthenticationToken
+
+        assertThat((authentication.principal as AccountPrincipal).accountName).isEqualTo("김주호")
+        assertThat(authentication.authorities.map { it.authority })
+            .containsExactlyInAnyOrder("ROLE_USER", "ROLE_VERIFIED", FactorGrantedAuthority.AUTHORIZATION_CODE_AUTHORITY)
+        assertThat(authentication.details).isEqualTo(details)
     }
 
     @Test
