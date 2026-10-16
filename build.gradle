@@ -44,10 +44,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
-    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     implementation "jakarta.persistence:jakarta.persistence-api:3.2.0"
 
     compileOnly 'org.projectlombok:lombok'
@@ -87,9 +83,6 @@ dependencies {
     // embedded redis
     implementation 'com.github.codemonstur:embedded-redis:1.4.3'
 
-    // redisson
-    implementation 'org.redisson:redisson:3.50.0'
-
     // logging
     if ("${profile}" == 'prod') {
         implementation 'com.google.cloud:spring-cloud-gcp-starter'
@@ -127,43 +120,6 @@ tasks.named('test') {
         exceptionFormat "full"
     }
 }
-
-// === querydsl start ===
-
-def qClassDir = "${layout.buildDirectory.get().asFile}/generated/querydsl"
-
-tasks.withType(JavaCompile).configureEach {
-    options.getGeneratedSourceOutputDirectory().set(file(qClassDir))
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs += [qClassDir]
-        }
-    }
-}
-
-tasks.register('cleanQClass', Delete) {
-    delete file(qClassDir)
-}
-
-// Deletes and regenerates all QueryDSL Q-classes.
-tasks.register('regenerateQClasses') {
-    group = 'build'
-    description = 'Deletes and regenerates all QueryDSL Q-classes.'
-    dependsOn 'cleanQClass', 'compileJava'
-}
-
-tasks.named('compileJava') {
-    mustRunAfter 'cleanQClass'
-}
-
-clean {
-    delete file(qClassDir)
-}
-
-// === querydsl end ===
 
 // === swagger start ===
 
