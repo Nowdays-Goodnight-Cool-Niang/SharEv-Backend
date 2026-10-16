@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk:17.0.9 AS builder
+FROM azul/zulu-openjdk:21.0.11 AS builder
 
 WORKDIR /app
 
@@ -26,7 +26,7 @@ else \
 fi
 
 # 런타임 스테이지: 최종 이미지
-FROM azul/zulu-openjdk:17.0.9
+FROM azul/zulu-openjdk:21.0.11
 
 WORKDIR /app
 # 빌더 스테이지에서 생성된 JAR 파일을 복사
