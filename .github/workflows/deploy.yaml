@@ -31,10 +31,10 @@ jobs:
       - name: db 설정 로드
         run: echo "${{ secrets.PROD_PROPERTIES }}" > ./src/main/resources/application-prod.properties
 
-      - name: Set up JDK 17 (Azul Zulu)
+      - name: Set up JDK 21 (Azul Zulu)
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'zulu'
           cache: 'gradle'
 

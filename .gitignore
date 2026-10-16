@@ -572,3 +572,6 @@ src/main/generated
 
 # swagger
 src/main/resources/static/docs
+
+# oh-my-claudecode
+.omc/
