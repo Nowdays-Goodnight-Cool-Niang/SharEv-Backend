@@ -2,7 +2,6 @@ package sharev.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -26,6 +25,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import sharev.common.adapter.inbound.security.model.AccountPrincipal;
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableWebSecurity

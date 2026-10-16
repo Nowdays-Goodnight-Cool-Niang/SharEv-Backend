@@ -2,14 +2,14 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 buildscript {
     ext {
-        restdocsApiSpecVersion = '0.19.2'
+        restdocsApiSpecVersion = '0.20.1'
         profile = (!project.hasProperty('profile') || !profile) ? 'none' : profile
     }
 }
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.1'
+    id 'org.springframework.boot' version '4.1.1'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
     id 'org.hidetake.swagger.generator' version '2.19.2'
@@ -34,24 +34,26 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom 'com.google.cloud:spring-cloud-gcp-dependencies:6.2.3'
+        mavenBom 'com.google.cloud:spring-cloud-gcp-dependencies:8.2.4'
+    }
+    dependencies {
+        // GCP BOM이 Boot가 관리하는 3.0.0(Jakarta EE 11)을 2.1.1로 덮어쓰므로 Boot 버전으로 고정한다.
+        dependency 'jakarta.annotation:jakarta.annotation-api:3.0.0'
     }
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-
-    implementation "jakarta.persistence:jakarta.persistence-api:3.2.0"
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
     testImplementation 'org.mockito.kotlin:mockito-kotlin:5.4.0'
-    testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -59,8 +61,8 @@ dependencies {
 
     // testcontainers
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-    testImplementation 'org.testcontainers:postgresql'
-    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
 
     // docker compose
     if ("${profile}" != 'dev') {
@@ -68,6 +70,7 @@ dependencies {
     }
 
     // swagger
+    testImplementation 'org.springframework.boot:spring-boot-starter-restdocs'
     testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc"
     testImplementation "com.epages:restdocs-api-spec-mockmvc:${restdocsApiSpecVersion}"
     swaggerUI 'org.webjars:swagger-ui:5.15.1'
@@ -75,7 +78,7 @@ dependencies {
     // production
     implementation 'com.google.cloud:spring-cloud-gcp-starter-sql-mysql'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springframework.session:spring-session-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-session-data-redis'
 
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -88,11 +91,8 @@ dependencies {
         implementation 'com.google.cloud:spring-cloud-gcp-starter'
     }
 
-    // hibernate
-    implementation "org.hibernate.orm:hibernate-core:7.1.11.Final"
-
     // kotlin
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
+    implementation "tools.jackson.module:jackson-module-kotlin"
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
 
