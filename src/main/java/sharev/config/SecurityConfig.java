@@ -43,6 +43,9 @@ public class SecurityConfig {
 
         http.formLogin(AbstractHttpConfigurer::disable);
 
+        // 로그인 성공 시 JSON으로 응답하므로 이전 요청을 저장해 둘 필요가 없다. 비로그인 요청이 세션을 만들지 않도록 끈다.
+        http.requestCache(AbstractHttpConfigurer::disable);
+
         http.cors(withDefaults());
 
         http.oauth2Login(httpSecurityOAuth2LoginConfigurer ->
