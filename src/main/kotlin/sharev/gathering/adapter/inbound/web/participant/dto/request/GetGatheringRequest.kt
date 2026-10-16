@@ -1,4 +1,4 @@
-package sharev.gathering.adapter.inbound.web.dto.request
+package sharev.gathering.adapter.inbound.web.participant.dto.request
 
 import sharev.gathering.domain.model.GatheringVisible
 import sharev.gathering.domain.model.PeriodStatus

@@ -1,16 +1,36 @@
-package sharev.gathering.adapter.inbound.web.mapper
+package sharev.gathering.adapter.inbound.web.console.mapper
 
-import sharev.gathering.adapter.inbound.web.dto.request.*
-import sharev.gathering.adapter.inbound.web.dto.response.*
+import sharev.gathering.adapter.inbound.web.console.dto.request.CreateGatheringRequest
+import sharev.gathering.adapter.inbound.web.console.dto.request.FieldSpecRequest
+import sharev.gathering.adapter.inbound.web.console.dto.request.UpdateGatheringRequest
+import sharev.gathering.adapter.inbound.web.console.dto.request.UpsertIntroductionRequest
+import sharev.gathering.adapter.inbound.web.console.dto.response.*
 import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
-import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpsertIntroductionCommand
-import sharev.gathering.application.port.inbound.result.*
+import sharev.gathering.application.port.inbound.result.CreateGatheringResult
+import sharev.gathering.application.port.inbound.result.DeleteGatheringResult
+import sharev.gathering.application.port.inbound.result.ManagedGatheringDetailResult
+import sharev.gathering.application.port.inbound.result.UpsertIntroductionResult
 import sharev.gathering.domain.model.FieldSpec
 import java.util.*
 
-fun ParticipantResult.toResponse() = ParticipantResponse(isParticipant)
+fun ManagedGatheringDetailResult.toResponse() = ManagedGatheringDetailResponse(
+    id,
+    teamId,
+    teamTitle,
+    visible,
+    title,
+    content,
+    startAt,
+    endAt,
+    place,
+    imageUrl,
+    gatheringUrl,
+    contact,
+    registerStartAt,
+    registerEndAt,
+)
 
 fun CreateGatheringRequest.toCommand(accountId: Long) = CreateGatheringCommand(
     accountId = accountId,
@@ -62,42 +82,6 @@ fun CreateGatheringResult.toResponse() = CreateGatheringResponse(
 
 fun DeleteGatheringResult.toResponse() = DeleteGatheringResponse(gatheringId)
 
-fun GatheringDetailResult.toResponse() = GatheringDetailResponse(
-    id,
-    teamId,
-    teamTitle,
-    visible,
-    title,
-    content,
-    startAt,
-    endAt,
-    place,
-    imageUrl,
-    gatheringUrl,
-    contact,
-    registerStartAt,
-    registerEndAt,
-)
-
-fun IntroductionResult.toResponse() = IntroductionResponse(
-    version,
-    source,
-    fields.mapValues { (_, field) -> field.toResponse() }
-)
-
-fun FieldSpec.toResponse() = FieldSpecResponse(
-    placeholder,
-)
-
-fun GetGatheringRequest.toCommand(accountId: Long?) = GetGatheringCommand(
-    accountId,
-    participated,
-    teamId,
-    visibility,
-    progress,
-    registration,
-)
-
 fun UpsertIntroductionRequest.toCommand(accountId: Long, gatheringId: UUID) = UpsertIntroductionCommand(
     accountId,
     gatheringId,
@@ -109,18 +93,12 @@ fun FieldSpecRequest.toModel() = FieldSpec(
     placeholder,
 )
 
-fun GatheringResult.toResponse() = GatheringResponse(
-    id,
-    teamId,
-    visible,
-    title,
-    content,
-    startAt,
-    endAt,
-    place,
-    imageUrl,
-    gatheringUrl,
-    contact,
-    registerStartAt,
-    registerEndAt,
+fun UpsertIntroductionResult.toResponse() = UpsertIntroductionResponse(
+    version,
+    source,
+    fields.mapValues { (_, field) -> field.toResponse() }
+)
+
+fun FieldSpec.toResponse() = UpsertFieldSpecResponse(
+    placeholder,
 )

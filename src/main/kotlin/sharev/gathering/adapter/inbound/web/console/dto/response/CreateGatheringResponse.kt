@@ -1,14 +1,12 @@
-package sharev.gathering.adapter.inbound.web.dto.response
+package sharev.gathering.adapter.inbound.web.console.dto.response
 
-import sharev.gathering.domain.model.GatheringVisible
 import java.time.LocalDateTime
 import java.util.*
 
-data class GatheringDetailResponse(
+data class CreateGatheringResponse(
     val id: UUID,
     val teamId: Long,
-    val teamTitle: String,
-    val visible: GatheringVisible,
+    val visible: String,
     val title: String,
     val content: String,
     val startAt: LocalDateTime,

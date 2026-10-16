@@ -1,4 +1,4 @@
-package sharev.gathering.adapter.inbound.web.dto.request
+package sharev.gathering.adapter.inbound.web.console.dto.request
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank

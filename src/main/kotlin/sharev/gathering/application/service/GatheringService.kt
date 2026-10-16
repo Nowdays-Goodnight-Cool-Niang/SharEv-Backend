@@ -8,9 +8,7 @@ import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
 import sharev.gathering.application.port.inbound.command.GetGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
 import sharev.gathering.application.port.inbound.command.UpsertIntroductionCommand
-import sharev.gathering.application.port.inbound.mapper.toCreateGatheringResult
-import sharev.gathering.application.port.inbound.mapper.toDetailResult
-import sharev.gathering.application.port.inbound.mapper.toResult
+import sharev.gathering.application.port.inbound.mapper.*
 import sharev.gathering.application.port.inbound.result.*
 import sharev.gathering.application.port.inbound.usecase.*
 import sharev.gathering.application.port.outbound.*
@@ -43,7 +41,8 @@ class GatheringService(
     GetIntroductionUseCase,
     GetGatheringsUseCase,
     GetGatheringUseCase,
-    UpsertIntroductionUseCase {
+    UpsertIntroductionUseCase,
+    GetManagedGatheringsUseCase {
 
     override fun isParticipant(accountId: Long, gatheringId: UUID): ParticipantResult {
         return ParticipantResult(checkGatheringParticipantPort.isParticipant(gatheringId, accountId))
@@ -91,7 +90,7 @@ class GatheringService(
     override fun getManagedGatherings(
         accountId: Long,
         pageable: Pageable
-    ): Page<GatheringDetailResult> {
+    ): Page<ManagedGatheringDetailResult> {
         val manageableTeamIds = teamAccessPort.loadManageableTeamIds(accountId)
         val manageableGatherings = loadGatheringPort.loadAllByTeams(manageableTeamIds, pageable)
         val manageableGatheringTeamIds = manageableGatherings.content.map { it.teamId }
@@ -101,7 +100,7 @@ class GatheringService(
             .associateBy { it.id }
         // TODO: 팀 softDelete 시 에러 발생할 수 있음, 발생하지 않으려면 !! 대신 team이 null일 시 생성되지 않도록 해야 함. 쿼리에서 조정해야 함
         return manageableGatherings
-            .map { it.toDetailResult(manageableTeams[it.teamId]!!) }
+            .map { it.toManagedDetailResult(manageableTeams[it.teamId]!!) }
     }
 
     override fun getGathering(accountId: Long?, gatheringId: UUID): GatheringDetailResult {
@@ -125,7 +124,7 @@ class GatheringService(
     }
 
     @Transactional
-    override fun update(command: UpdateGatheringCommand): GatheringDetailResult {
+    override fun update(command: UpdateGatheringCommand): ManagedGatheringDetailResult {
         val gathering = loadGatheringPort.load(command.gatheringId)
 
         validateTeamManage(command.accountId, gathering.teamId)
@@ -146,7 +145,7 @@ class GatheringService(
                 registerStartAt = command.registerStartAt,
                 registerEndAt = command.registerEndAt,
             )
-        ).toDetailResult(team)
+        ).toManagedDetailResult(team)
     }
 
     @Transactional
@@ -175,7 +174,7 @@ class GatheringService(
     }
 
     @Transactional
-    override fun upsertIntroduction(command: UpsertIntroductionCommand): IntroductionResult {
+    override fun upsertIntroduction(command: UpsertIntroductionCommand): UpsertIntroductionResult {
         val gathering = loadGatheringPort.load(command.gatheringId)
         validateTeamManage(command.accountId, gathering.teamId)
 
@@ -184,6 +183,6 @@ class GatheringService(
             ?: Introduction.create(command.gatheringId, Template(command.source, command.fields))
 
         return saveIntroductionPort.save(introduction)
-            .toResult()
+            .toUpsertResult()
     }
 }

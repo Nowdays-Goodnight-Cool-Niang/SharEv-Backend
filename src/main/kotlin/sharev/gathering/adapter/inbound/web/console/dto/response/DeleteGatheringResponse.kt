@@ -1,4 +1,4 @@
-package sharev.gathering.adapter.inbound.web.dto.response
+package sharev.gathering.adapter.inbound.web.console.dto.response
 
 import java.util.*
 

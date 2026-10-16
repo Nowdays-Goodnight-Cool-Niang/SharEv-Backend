@@ -1,12 +1,13 @@
-package sharev.gathering.adapter.inbound.web.dto.response
+package sharev.gathering.adapter.inbound.web.participant.dto.response
 
 import sharev.gathering.domain.model.GatheringVisible
 import java.time.LocalDateTime
 import java.util.*
 
-data class GatheringResponse(
+data class GatheringDetailResponse(
     val id: UUID,
     val teamId: Long,
+    val teamTitle: String,
     val visible: GatheringVisible,
     val title: String,
     val content: String,
@@ -18,5 +19,4 @@ data class GatheringResponse(
     val contact: String?,
     val registerStartAt: LocalDateTime,
     val registerEndAt: LocalDateTime,
-) {
-}
+)
