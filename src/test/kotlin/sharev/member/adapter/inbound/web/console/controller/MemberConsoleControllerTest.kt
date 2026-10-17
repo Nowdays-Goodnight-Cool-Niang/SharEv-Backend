@@ -1,4 +1,4 @@
-package sharev.member.adapter.inbound.web.controller
+package sharev.member.adapter.inbound.web.console.controller
 
 import com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName
 import com.epages.restdocs.apispec.ResourceDocumentation.resource
@@ -15,9 +15,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import sharev.ControllerTestSupport
 import sharev.WithCustomMockUser
-import sharev.member.adapter.inbound.web.dto.request.InviteMemberRequest
-import sharev.member.adapter.inbound.web.dto.request.UpdateMemberRoleRequest
-import sharev.member.adapter.inbound.web.dto.response.*
+import sharev.member.adapter.inbound.web.console.dto.request.InviteMemberRequest
+import sharev.member.adapter.inbound.web.console.dto.request.UpdateMemberRoleRequest
+import sharev.member.adapter.inbound.web.console.dto.response.*
 import sharev.member.application.port.inbound.command.*
 import sharev.member.application.port.inbound.result.*
 import sharev.member.application.port.inbound.usecase.*
@@ -26,7 +26,7 @@ import sharev.member.domain.model.MemberStatus
 import sharev.team.domain.exception.TeamException
 import sharev.team.domain.exception.TeamExceptionCode
 
-class MemberControllerTest : ControllerTestSupport() {
+class MemberConsoleControllerTest : ControllerTestSupport() {
     @Test
     @WithCustomMockUser
     @DisplayName("멤버 목록 조회")
@@ -41,7 +41,7 @@ class MemberControllerTest : ControllerTestSupport() {
         given(mockBean<GetMembersUseCase>().getMembers(GetMembersCommand(1L, teamId)))
             .willReturn(response)
 
-        val request = RestDocumentationRequestBuilders.get("/teams/{teamId}/members", teamId)
+        val request = RestDocumentationRequestBuilders.get("/console/teams/{teamId}/members", teamId)
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -80,7 +80,7 @@ class MemberControllerTest : ControllerTestSupport() {
         given(mockBean<InviteMemberUseCase>().invite(InviteMemberCommand(1L, teamId, dto.handle)))
             .willReturn(InviteMemberResult(2L, MemberRole.COMMON, MemberStatus.INVITE))
 
-        val request = RestDocumentationRequestBuilders.post("/teams/{teamId}/members", teamId)
+        val request = RestDocumentationRequestBuilders.post("/console/teams/{teamId}/members", teamId)
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -119,47 +119,13 @@ class MemberControllerTest : ControllerTestSupport() {
         given(mockBean<InviteMemberUseCase>().invite(InviteMemberCommand(1L, teamId, dto.handle)))
             .willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
 
-        val request = RestDocumentationRequestBuilders.post("/teams/{teamId}/members", teamId)
+        val request = RestDocumentationRequestBuilders.post("/console/teams/{teamId}/members", teamId)
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andDo(print())
             .andExpect(status().isForbidden())
-    }
-
-    @Test
-    @WithCustomMockUser
-    @DisplayName("초대 수락")
-    fun acceptInvitation() {
-        val teamId = 1L
-
-        given(mockBean<AcceptInvitationUseCase>().acceptInvitation(AcceptInvitationCommand(1L, teamId)))
-            .willReturn(AcceptInvitationResult(1L, MemberStatus.ACTIVATE))
-
-        val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}/members/me/accept", teamId)
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andDo(
-                documentResource(
-                    "acceptInvitation",
-                    resource(
-                        ResourceSnippetParameters.builder()
-                            .summary("초대 수락")
-                            .description("팀 초대를 수락합니다. INVITE 상태인 본인의 멤버십을 ACTIVATE로 변경합니다.")
-                            .pathParameters(parameterWithName("teamId").description("팀 ID"))
-                            .responseFields(
-                                fieldWithPath("memberId").type(NUMBER).description("멤버 ID"),
-                                fieldWithPath("status").type(STRING).description("상태 (INVITE, ACTIVATE, DEACTIVATE)"),
-                            )
-                            .responseSchema(schema(AcceptInvitationResponse::class.java.simpleName))
-                            .build()
-                    )
-                )
-            )
     }
 
     @Test
@@ -171,7 +137,7 @@ class MemberControllerTest : ControllerTestSupport() {
         given(mockBean<LeaveTeamUseCase>().leave(LeaveTeamCommand(1L, teamId)))
             .willReturn(LeaveTeamResult(1L))
 
-        val request = RestDocumentationRequestBuilders.delete("/teams/{teamId}/members/me", teamId)
+        val request = RestDocumentationRequestBuilders.delete("/console/teams/{teamId}/members/leave", teamId)
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -206,7 +172,7 @@ class MemberControllerTest : ControllerTestSupport() {
             .willReturn(UpdateMemberRoleResult(memberId, role))
 
         val request = RestDocumentationRequestBuilders
-            .patch("/teams/{teamId}/members/{memberId}/role", teamId, memberId)
+            .patch("/console/teams/{teamId}/members/{memberId}/role", teamId, memberId)
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -250,7 +216,7 @@ class MemberControllerTest : ControllerTestSupport() {
             .willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
 
         val request = RestDocumentationRequestBuilders
-            .patch("/teams/{teamId}/members/{memberId}/role", teamId, memberId)
+            .patch("/console/teams/{teamId}/members/{memberId}/role", teamId, memberId)
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -269,7 +235,7 @@ class MemberControllerTest : ControllerTestSupport() {
         given(mockBean<RemoveMemberUseCase>().removeMember(RemoveMemberCommand(1L, teamId, memberId)))
             .willReturn(RemoveMemberResult(memberId))
 
-        val request = RestDocumentationRequestBuilders.delete("/teams/{teamId}/members/{memberId}", teamId, memberId)
+        val request = RestDocumentationRequestBuilders.delete("/console/teams/{teamId}/members/{memberId}", teamId, memberId)
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -304,7 +270,7 @@ class MemberControllerTest : ControllerTestSupport() {
         given(mockBean<RemoveMemberUseCase>().removeMember(RemoveMemberCommand(1L, teamId, memberId)))
             .willThrow(TeamException(TeamExceptionCode.UNAUTHORIZED_TEAM_MANAGE))
 
-        val request = RestDocumentationRequestBuilders.delete("/teams/{teamId}/members/{memberId}", teamId, memberId)
+        val request = RestDocumentationRequestBuilders.delete("/console/teams/{teamId}/members/{memberId}", teamId, memberId)
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
