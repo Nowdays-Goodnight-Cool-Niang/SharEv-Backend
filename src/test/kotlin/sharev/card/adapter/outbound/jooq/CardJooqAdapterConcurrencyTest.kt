@@ -4,9 +4,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.jooq.test.autoconfigure.JooqTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.TestPropertySource
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -19,11 +22,12 @@ import java.util.concurrent.TimeUnit
 
 private const val THREAD_COUNT = 20
 
-@SpringBootTest
+@JooqTest
 @Testcontainers
+@Import(CardJooqAdapter::class)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 @TestPropertySource(
     properties = [
-        "spring.jpa.hibernate.ddl-auto=validate",
         "spring.sql.init.mode=always",
         "spring.sql.init.schema-locations=classpath:ddl.sql",
         "spring.sql.init.data-locations=classpath:dml.sql",
