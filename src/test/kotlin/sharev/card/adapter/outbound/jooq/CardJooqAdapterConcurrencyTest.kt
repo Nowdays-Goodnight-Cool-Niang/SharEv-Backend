@@ -8,10 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.test.context.TestPropertySource
 import org.springframework.transaction.support.TransactionTemplate
-import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
-import sharev.card.application.port.outbound.IssueJoinOrderPort
+import org.testcontainers.postgresql.PostgreSQLContainer
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
@@ -32,7 +31,7 @@ private const val THREAD_COUNT = 20
     ]
 )
 class CardJooqAdapterConcurrencyTest @Autowired constructor(
-    private val issueJoinOrderPort: IssueJoinOrderPort,
+    private val cardJooqAdapter: CardJooqAdapter,
     private val transactionTemplate: TransactionTemplate,
 ) {
 
@@ -64,7 +63,7 @@ class CardJooqAdapterConcurrencyTest @Autowired constructor(
             val futures = (1..THREAD_COUNT).map {
                 executor.submit(Callable {
                     start.await()
-                    transactionTemplate.execute { issueJoinOrderPort.issue(gatheringId) }
+                    transactionTemplate.execute { cardJooqAdapter.issue(gatheringId) }
                 })
             }
             start.countDown()
