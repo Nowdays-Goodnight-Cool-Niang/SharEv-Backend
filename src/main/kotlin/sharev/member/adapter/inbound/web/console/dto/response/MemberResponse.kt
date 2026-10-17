@@ -1,4 +1,4 @@
-package sharev.member.adapter.inbound.web.dto.response
+package sharev.member.adapter.inbound.web.console.dto.response
 
 data class MemberResponse(
     val memberId: Long,

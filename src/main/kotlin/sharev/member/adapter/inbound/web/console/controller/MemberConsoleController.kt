@@ -1,27 +1,25 @@
-package sharev.member.adapter.inbound.web.controller
+package sharev.member.adapter.inbound.web.console.controller
 
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import sharev.common.adapter.inbound.security.model.AccountPrincipal
-import sharev.member.adapter.inbound.web.dto.request.InviteMemberRequest
-import sharev.member.adapter.inbound.web.dto.request.UpdateMemberRoleRequest
-import sharev.member.adapter.inbound.web.dto.response.*
-import sharev.member.adapter.inbound.web.mapper.toCommand
-import sharev.member.adapter.inbound.web.mapper.toResponse
-import sharev.member.application.port.inbound.command.AcceptInvitationCommand
+import sharev.member.adapter.inbound.web.console.dto.request.InviteMemberRequest
+import sharev.member.adapter.inbound.web.console.dto.request.UpdateMemberRoleRequest
+import sharev.member.adapter.inbound.web.console.dto.response.*
+import sharev.member.adapter.inbound.web.console.mapper.toCommand
+import sharev.member.adapter.inbound.web.console.mapper.toResponse
 import sharev.member.application.port.inbound.command.GetMembersCommand
 import sharev.member.application.port.inbound.command.LeaveTeamCommand
 import sharev.member.application.port.inbound.command.RemoveMemberCommand
 import sharev.member.application.port.inbound.usecase.*
 
 @RestController
-@RequestMapping("/teams/{teamId}/members")
-class MemberController(
+@RequestMapping("/console/teams/{teamId}/members")
+class MemberConsoleController(
     private val getMembersUseCase: GetMembersUseCase,
     private val inviteMemberUseCase: InviteMemberUseCase,
-    private val acceptInvitationUseCase: AcceptInvitationUseCase,
     private val leaveTeamUseCase: LeaveTeamUseCase,
     private val updateMemberRoleUseCase: UpdateMemberRoleUseCase,
     private val removeMemberUseCase: RemoveMemberUseCase,
@@ -51,19 +49,7 @@ class MemberController(
         return ResponseEntity.ok(response)
     }
 
-    @PatchMapping("/me/accept")
-    fun acceptInvitation(
-        @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
-        @PathVariable teamId: Long,
-    ): ResponseEntity<AcceptInvitationResponse> {
-        val response = acceptInvitationUseCase.acceptInvitation(
-            AcceptInvitationCommand(accountPrincipal.id, teamId)
-        ).toResponse()
-
-        return ResponseEntity.ok(response)
-    }
-
-    @DeleteMapping("/me")
+    @DeleteMapping("/leave")
     fun leave(
         @AuthenticationPrincipal accountPrincipal: AccountPrincipal,
         @PathVariable teamId: Long,

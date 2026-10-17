@@ -1,4 +1,4 @@
-package sharev.member.adapter.inbound.web.dto
+package sharev.member.adapter.inbound.web.console.dto
 
 import sharev.member.domain.model.MemberRole
 
