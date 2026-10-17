@@ -65,7 +65,6 @@ CREATE TABLE members
 );
 
 CREATE INDEX idx_members_account_id ON members (account_id);
-CREATE INDEX idx_members_team_id ON members (team_id);
 
 CREATE TABLE gatherings
 (
