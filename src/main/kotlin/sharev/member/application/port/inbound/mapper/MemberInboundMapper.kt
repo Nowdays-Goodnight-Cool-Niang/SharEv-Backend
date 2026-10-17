@@ -1,6 +1,7 @@
 package sharev.member.application.port.inbound.mapper
 
 import sharev.member.application.port.inbound.result.*
+import sharev.member.application.port.outbound.Invitation
 import sharev.member.domain.model.Member
 
 fun Member.toResult() = MemberResult(
@@ -33,4 +34,14 @@ fun Member.toUpdateMemberRoleResult() = UpdateMemberRoleResult(
 
 fun Member.toRemoveMemberResult() = RemoveMemberResult(
     memberId = id,
+)
+
+fun Invitation.toInvitationResult() = GetInvitationResult(
+    teamId,
+    title,
+    content,
+    certification,
+    role,
+    headcount,
+    createdAt,
 )

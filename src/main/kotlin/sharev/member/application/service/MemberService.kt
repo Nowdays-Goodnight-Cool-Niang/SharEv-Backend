@@ -1,5 +1,7 @@
 package sharev.member.application.service
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import sharev.member.application.port.inbound.command.*
@@ -27,20 +29,18 @@ class MemberService(
     private val loadAccountForMemberPort: LoadAccountForMemberPort,
     private val teamAccessPort: TeamAccessPort,
     private val checkMemberPort: CheckMemberPort,
+    private val loadInvitationPort: LoadInvitationPort,
 ) : GetMembersUseCase,
     InviteMemberUseCase,
     AcceptInvitationUseCase,
     LeaveTeamUseCase,
     UpdateMemberRoleUseCase,
     RemoveMemberUseCase,
-    CheckTeamAdminUseCase {
+    CheckTeamAdminUseCase,
+    GetInvitationsUseCase {
 
     override fun isAdmin(teamId: Long, accountId: Long): Boolean {
-        if (!loadTeamPort.exists(teamId)) {
-            return false
-        }
-
-        return teamAccessPort.canManage(accountId, teamId)
+        return loadTeamPort.exists(teamId) && teamAccessPort.canManage(accountId, teamId)
     }
 
     override fun getMembers(command: GetMembersCommand): List<MemberResult> {
@@ -113,6 +113,11 @@ class MemberService(
         deleteMemberPort.delete(member.id)
 
         return member.toRemoveMemberResult()
+    }
+
+    override fun getInvitations(command: GetInvitationsCommand, pageable: Pageable): Page<GetInvitationResult> {
+        return loadInvitationPort.loadAll(command.accountId, pageable)
+            .map { it.toInvitationResult() }
     }
 
     private fun findMemberInTeam(memberId: Long, teamId: Long): Member {
