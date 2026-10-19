@@ -1,4 +1,4 @@
-package sharev.team.adapter.inbound.web.controller
+package sharev.team.adapter.inbound.web.console.controller
 
 import com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName
 import com.epages.restdocs.apispec.ResourceDocumentation.resource
@@ -19,11 +19,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import sharev.ControllerTestSupport
 import sharev.WithCustomMockUser
 import sharev.member.domain.model.MemberRole
-import sharev.team.adapter.inbound.web.dto.request.CreateTeamRequest
-import sharev.team.adapter.inbound.web.dto.request.UpdateTeamRequest
-import sharev.team.adapter.inbound.web.dto.response.TeamDetailResponse
-import sharev.team.adapter.inbound.web.dto.response.TeamInfoResponse
-import sharev.team.adapter.inbound.web.dto.response.TeamUpdateInfoResponse
+import sharev.team.adapter.inbound.web.console.dto.request.CreateTeamRequest
+import sharev.team.adapter.inbound.web.console.dto.request.UpdateTeamRequest
+import sharev.team.adapter.inbound.web.console.dto.response.TeamDetailResponse
+import sharev.team.adapter.inbound.web.console.dto.response.TeamInfoResponse
+import sharev.team.adapter.inbound.web.console.dto.response.TeamUpdateInfoResponse
 import sharev.team.application.port.inbound.command.CreateTeamCommand
 import sharev.team.application.port.inbound.command.GetMyTeamsCommand
 import sharev.team.application.port.inbound.command.UpdateTeamInfoCommand
@@ -37,7 +37,7 @@ import sharev.team.domain.exception.TeamExceptionCode
 import sharev.team.domain.model.TeamCertification
 import java.time.LocalDateTime
 
-class TeamControllerTest : ControllerTestSupport() {
+class TeamConsoleControllerTest : ControllerTestSupport() {
     @Test
     @WithCustomMockUser
     @DisplayName("팀 생성")
@@ -46,7 +46,7 @@ class TeamControllerTest : ControllerTestSupport() {
         given(mockBean<CreateTeamUseCase>().create(CreateTeamCommand(1L, "새로운 팀", "설명")))
             .willReturn(CreateTeamResult(1L))
 
-        val request = RestDocumentationRequestBuilders.post("/teams")
+        val request = RestDocumentationRequestBuilders.post("/console/teams")
             .content(objectMapper.writeValueAsString(requestDto))
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -100,7 +100,7 @@ class TeamControllerTest : ControllerTestSupport() {
         given(mockBean<GetMyTeamsUseCase>().getJoinedTeams(GetMyTeamsCommand(1L), pageable))
             .willReturn(teams)
 
-        val request = RestDocumentationRequestBuilders.get("/teams")
+        val request = RestDocumentationRequestBuilders.get("/console/teams")
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -139,7 +139,7 @@ class TeamControllerTest : ControllerTestSupport() {
         given(mockBean<GetTeamDetailUseCase>().getTeamDetail(1L, 1L))
             .willThrow(TeamException(TeamExceptionCode.TEAM_NOT_FOUND))
 
-        val request = RestDocumentationRequestBuilders.get("/teams/{teamId}", 1L)
+        val request = RestDocumentationRequestBuilders.get("/console/teams/{teamId}", 1L)
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -172,7 +172,7 @@ class TeamControllerTest : ControllerTestSupport() {
         given(mockBean<GetTeamDetailUseCase>().getTeamDetail(1L, 1L))
             .willReturn(response)
 
-        val request = RestDocumentationRequestBuilders.get("/teams/{teamId}", 1L)
+        val request = RestDocumentationRequestBuilders.get("/console/teams/{teamId}", 1L)
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
@@ -221,7 +221,7 @@ class TeamControllerTest : ControllerTestSupport() {
             .given(mockBean<UpdateTeamInfoUseCase>())
             .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title!!, requestDto.content))
 
-        val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
+        val request = RestDocumentationRequestBuilders.patch("/console/teams/{teamId}", 1L)
             .content(objectMapper.writeValueAsString(requestDto))
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -240,7 +240,7 @@ class TeamControllerTest : ControllerTestSupport() {
             .given(mockBean<UpdateTeamInfoUseCase>())
             .updateTeamInfo(UpdateTeamInfoCommand(1L, 1L, requestDto.title!!, requestDto.content))
 
-        val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
+        val request = RestDocumentationRequestBuilders.patch("/console/teams/{teamId}", 1L)
             .content(objectMapper.writeValueAsString(requestDto))
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -269,7 +269,7 @@ class TeamControllerTest : ControllerTestSupport() {
         )
             .willReturn(TeamUpdateInfoResult(updateTitle, updateContent))
 
-        val request = RestDocumentationRequestBuilders.patch("/teams/{teamId}", 1L)
+        val request = RestDocumentationRequestBuilders.patch("/console/teams/{teamId}", 1L)
             .content(objectMapper.writeValueAsString(requestDto))
             .contentType(MediaType.APPLICATION_JSON)
 
