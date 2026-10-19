@@ -1,4 +1,4 @@
-package sharev.card.adapter.inbound.web.controller
+package sharev.card.adapter.inbound.web.participant.controller
 
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -8,13 +8,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
-import sharev.card.adapter.inbound.web.dto.request.UpdateCardIntroduceRequest
-import sharev.card.adapter.inbound.web.dto.response.CardResponse
-import sharev.card.adapter.inbound.web.dto.response.JoinCardResponse
-import sharev.card.adapter.inbound.web.dto.response.MyShareCodeResponse
-import sharev.card.adapter.inbound.web.dto.response.UpdateCardIntroduceResponse
-import sharev.card.adapter.inbound.web.mapper.toCommand
-import sharev.card.adapter.inbound.web.mapper.toResponse
+import sharev.card.adapter.inbound.web.participant.dto.request.UpdateCardIntroduceRequest
+import sharev.card.adapter.inbound.web.participant.dto.response.CardResponse
+import sharev.card.adapter.inbound.web.participant.dto.response.JoinCardResponse
+import sharev.card.adapter.inbound.web.participant.dto.response.MyShareCodeResponse
+import sharev.card.adapter.inbound.web.participant.dto.response.UpdateCardIntroduceResponse
+import sharev.card.adapter.inbound.web.participant.mapper.toCommand
+import sharev.card.adapter.inbound.web.participant.mapper.toResponse
 import sharev.card.application.port.inbound.command.*
 import sharev.card.application.port.inbound.usecase.*
 import sharev.common.adapter.inbound.security.model.AccountPrincipal

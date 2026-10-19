@@ -1,4 +1,4 @@
-package sharev.card.adapter.inbound.web.dto.request
+package sharev.card.adapter.inbound.web.participant.dto.request
 
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive

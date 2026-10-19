@@ -1,4 +1,4 @@
-package sharev.card.adapter.inbound.web.dto.response
+package sharev.card.adapter.inbound.web.participant.dto.response
 
 data class JoinCardResponse(
     val cardId: Long,

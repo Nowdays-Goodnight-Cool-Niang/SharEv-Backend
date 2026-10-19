@@ -1,10 +1,10 @@
-package sharev.card.adapter.inbound.web.mapper
+package sharev.card.adapter.inbound.web.participant.mapper
 
-import sharev.card.adapter.inbound.web.dto.request.UpdateCardIntroduceRequest
-import sharev.card.adapter.inbound.web.dto.response.CardResponse
-import sharev.card.adapter.inbound.web.dto.response.JoinCardResponse
-import sharev.card.adapter.inbound.web.dto.response.ParticipantFlagResponse
-import sharev.card.adapter.inbound.web.dto.response.UpdateCardIntroduceResponse
+import sharev.card.adapter.inbound.web.participant.dto.request.UpdateCardIntroduceRequest
+import sharev.card.adapter.inbound.web.participant.dto.response.CardResponse
+import sharev.card.adapter.inbound.web.participant.dto.response.JoinCardResponse
+import sharev.card.adapter.inbound.web.participant.dto.response.ParticipantFlagResponse
+import sharev.card.adapter.inbound.web.participant.dto.response.UpdateCardIntroduceResponse
 import sharev.card.application.port.inbound.command.UpdateCardInfoCommand
 import sharev.card.application.port.inbound.result.CardResult
 import sharev.card.application.port.inbound.result.JoinCardResult

@@ -1,4 +1,4 @@
-package sharev.card.adapter.inbound.web.dto.response
+package sharev.card.adapter.inbound.web.participant.dto.response
 
 import sharev.card.domain.model.CardDisplay
 
