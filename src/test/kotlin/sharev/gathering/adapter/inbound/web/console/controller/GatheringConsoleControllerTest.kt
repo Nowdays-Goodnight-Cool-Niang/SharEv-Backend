@@ -1,0 +1,413 @@
+package sharev.gathering.adapter.inbound.web.console.controller
+
+import com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName
+import com.epages.restdocs.apispec.ResourceDocumentation.resource
+import com.epages.restdocs.apispec.ResourceSnippetParameters
+import com.epages.restdocs.apispec.SimpleType.*
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.BDDMockito.given
+import org.mockito.kotlin.any
+import org.mockito.kotlin.then
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.http.MediaType
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
+import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
+import org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import sharev.ControllerTestSupport
+import sharev.WithCustomMockUser
+import sharev.gathering.adapter.inbound.web.console.dto.request.CreateGatheringRequest
+import sharev.gathering.adapter.inbound.web.console.dto.request.FieldSpecRequest
+import sharev.gathering.adapter.inbound.web.console.dto.request.UpdateGatheringRequest
+import sharev.gathering.adapter.inbound.web.console.dto.request.UpsertIntroductionRequest
+import sharev.gathering.adapter.inbound.web.console.dto.response.CreateGatheringResponse
+import sharev.gathering.adapter.inbound.web.console.dto.response.DeleteGatheringResponse
+import sharev.gathering.adapter.inbound.web.console.dto.response.ManagedGatheringDetailResponse
+import sharev.gathering.adapter.inbound.web.console.dto.response.UpsertIntroductionResponse
+import sharev.gathering.adapter.inbound.web.console.mapper.toModel
+import sharev.gathering.application.port.inbound.command.CreateGatheringCommand
+import sharev.gathering.application.port.inbound.command.UpdateGatheringCommand
+import sharev.gathering.application.port.inbound.result.*
+import sharev.gathering.application.port.inbound.usecase.*
+import sharev.gathering.domain.model.GatheringVisible
+import java.time.LocalDateTime
+import java.util.*
+
+class GatheringConsoleControllerTest : ControllerTestSupport() {
+    @Test
+    @WithCustomMockUser
+    @DisplayName("관리 가능한 행사 목록 조회")
+    fun getManagedGatherings() {
+        val pageable = PageRequest.of(0, 20)
+        val response = PageImpl(listOf(managedGatheringDetailResult(UUID.randomUUID())), pageable, 1)
+
+        given(mockBean<GetManagedGatheringsUseCase>().getManagedGatherings(anyLong(), any<Pageable>()))
+            .willReturn(response)
+
+        val request = RestDocumentationRequestBuilders.get("/console/gatherings")
+            .param("page", "0")
+            .param("size", "20")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(
+                documentResource(
+                    "allManagedGatherings",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("관리 가능한 전체 행사 목록 조회")
+                            .description("모든 관리 가능한 행사 목록을 페이지네이션으로 조회합니다.")
+                            .queryParameters(*pageableQueryParameters())
+                            .responseFields(
+                                fieldWithPath("content[].id").type(STRING).description("행사 ID (UUID)"),
+                                fieldWithPath("content[].teamId").type(NUMBER).description("팀 ID"),
+                                fieldWithPath("content[].teamTitle").type(STRING).description("팀 제목"),
+                                fieldWithPath("content[].visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+                                fieldWithPath("content[].title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content[].content").type(STRING).description("행사 설명"),
+                                fieldWithPath("content[].startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("content[].endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("content[].place").type(STRING).description("행사 장소"),
+                                fieldWithPath("content[].imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("content[].gatheringUrl").type(STRING).description("행사 관련 URL")
+                                    .optional(),
+                                fieldWithPath("content[].contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("content[].registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("content[].registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                                fieldWithPath("page").type("OBJECT").description("페이지 정보"),
+                                fieldWithPath("page.size").type(NUMBER).description("페이지 크기"),
+                                fieldWithPath("page.number").type(NUMBER).description("현재 페이지"),
+                                fieldWithPath("page.totalElements").type(NUMBER).description("총 요소 수"),
+                                fieldWithPath("page.totalPages").type(NUMBER).description("총 페이지 수"),
+                            )
+                            .responseSchema(schema("ManagedGatheringDetailPageResponse"))
+                            .build()
+                    )
+                )
+            )
+    }
+
+    @Test
+    @DisplayName("관리 가능한 행사 목록 조회 실패 - 비로그인")
+    fun getManagedGatheringsFail() {
+        val request = RestDocumentationRequestBuilders.get("/console/gatherings")
+            .param("page", "0")
+            .param("size", "20")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isUnauthorized())
+
+        then(mockBean<GetManagedGatheringsUseCase>()).shouldHaveNoInteractions()
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("행사 생성")
+    fun createGathering() {
+        val teamId = 1L
+        val gatheringId = UUID.randomUUID()
+        val dto = CreateGatheringRequest(
+            teamId,
+            GatheringVisible.PUBLIC,
+            "Spring 밋업",
+            "Spring Boot 관련 밋업입니다.",
+            LocalDateTime.of(2025, 3, 20, 14, 0),
+            LocalDateTime.of(2025, 3, 20, 17, 0),
+            "서울 강남구",
+            "https://example.com/image.png",
+            "https://example.com/gathering",
+            "010-1234-5678",
+            LocalDateTime.of(2025, 3, 1, 0, 0),
+            LocalDateTime.of(2025, 3, 19, 23, 59),
+        )
+
+        given(
+            mockBean<CreateGatheringUseCase>().create(
+                CreateGatheringCommand(
+                    1L,
+                    teamId,
+                    requireNotNull(dto.visible),
+                    requireNotNull(dto.title),
+                    requireNotNull(dto.content),
+                    requireNotNull(dto.startAt),
+                    requireNotNull(dto.endAt),
+                    requireNotNull(dto.place),
+                    dto.imageUrl,
+                    dto.gatheringUrl,
+                    dto.contact,
+                    requireNotNull(dto.registerStartAt),
+                    requireNotNull(dto.registerEndAt),
+                )
+            )
+        ).willReturn(
+            CreateGatheringResult(
+                gatheringId,
+                teamId,
+                requireNotNull(dto.visible),
+                requireNotNull(dto.title),
+                requireNotNull(dto.content),
+                requireNotNull(dto.startAt),
+                requireNotNull(dto.endAt),
+                requireNotNull(dto.place),
+                dto.imageUrl,
+                dto.gatheringUrl,
+                dto.contact,
+                requireNotNull(dto.registerStartAt),
+                requireNotNull(dto.registerEndAt),
+            )
+        )
+
+        val request = RestDocumentationRequestBuilders.post("/console/gatherings")
+            .content(objectMapper.writeValueAsString(dto))
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isCreated())
+            .andDo(
+                documentResource(
+                    "createGathering",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("행사 생성")
+                            .description("새로운 행사를 생성합니다. 팀 관리자만 생성할 수 있습니다.")
+                            .requestFields(
+                                fieldWithPath("teamId").type(NUMBER).description("행사를 생성할 팀 ID"),
+                                fieldWithPath("visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+                                fieldWithPath("title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content").type(STRING).description("행사 설명"),
+                                fieldWithPath("startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("place").type(STRING).description("행사 장소"),
+                                fieldWithPath("imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+                                fieldWithPath("contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                            )
+                            .requestSchema(schema(CreateGatheringRequest::class.java.simpleName))
+                            .responseFields(
+                                fieldWithPath("id").type(STRING).description("생성된 행사 ID"),
+                                fieldWithPath("teamId").type(NUMBER).description("팀 ID"),
+                                fieldWithPath("visible").type(STRING).description("공개 범위"),
+                                fieldWithPath("title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content").type(STRING).description("행사 설명"),
+                                fieldWithPath("startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("place").type(STRING).description("행사 장소"),
+                                fieldWithPath("imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+                                fieldWithPath("contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                            )
+                            .responseSchema(schema(CreateGatheringResponse::class.java.simpleName))
+                            .build()
+                    )
+                )
+            )
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("행사 수정")
+    fun updateGathering() {
+        val gatheringId = UUID.randomUUID()
+        val dto = UpdateGatheringRequest(
+            GatheringVisible.PRIVATE,
+            "수정된 행사 제목",
+            "수정된 행사 설명",
+            LocalDateTime.of(2025, 4, 1, 10, 0),
+            LocalDateTime.of(2025, 4, 1, 18, 0),
+            "서울 서초구",
+            "https://example.com/new-image.png",
+            "https://example.com/new-gathering",
+            "010-9876-5432",
+            LocalDateTime.of(2025, 3, 15, 0, 0),
+            LocalDateTime.of(2025, 3, 31, 23, 59),
+        )
+
+        given(
+            mockBean<UpdateGatheringUseCase>().update(
+                UpdateGatheringCommand(
+                    1L,
+                    gatheringId,
+                    requireNotNull(dto.visible),
+                    requireNotNull(dto.title),
+                    requireNotNull(dto.content),
+                    requireNotNull(dto.startAt),
+                    requireNotNull(dto.endAt),
+                    requireNotNull(dto.place),
+                    dto.imageUrl,
+                    dto.gatheringUrl,
+                    dto.contact,
+                    requireNotNull(dto.registerStartAt),
+                    requireNotNull(dto.registerEndAt),
+                )
+            )
+        ).willReturn(managedGatheringDetailResult(gatheringId))
+
+        val request = RestDocumentationRequestBuilders.patch(
+            "/console/gatherings/{gatheringId}",
+            gatheringId,
+        )
+            .content(objectMapper.writeValueAsString(dto))
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(
+                documentResource(
+                    "updateGathering",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("행사 수정")
+                            .description("행사 정보를 수정합니다. 팀 관리자만 수정할 수 있습니다.")
+                            .pathParameters(parameterWithName("gatheringId").description("행사 ID (UUID)"))
+                            .requestFields(
+                                fieldWithPath("visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+                                fieldWithPath("title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content").type(STRING).description("행사 설명"),
+                                fieldWithPath("startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("place").type(STRING).description("행사 장소"),
+                                fieldWithPath("imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+                                fieldWithPath("contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                            )
+                            .responseFields(
+                                fieldWithPath("id").type(STRING).description("행사 ID (UUID)"),
+                                fieldWithPath("teamId").type(NUMBER).description("팀 ID"),
+                                fieldWithPath("teamTitle").type(STRING).description("팀 제목"),
+                                fieldWithPath("visible").type(STRING).description("공개 범위 (PUBLIC, PRIVATE)"),
+                                fieldWithPath("title").type(STRING).description("행사 제목"),
+                                fieldWithPath("content").type(STRING).description("행사 설명"),
+                                fieldWithPath("startAt").type(STRING).description("행사 시작일시"),
+                                fieldWithPath("endAt").type(STRING).description("행사 종료일시"),
+                                fieldWithPath("place").type(STRING).description("행사 장소"),
+                                fieldWithPath("imageUrl").type(STRING).description("행사 이미지 URL").optional(),
+                                fieldWithPath("gatheringUrl").type(STRING).description("행사 관련 URL").optional(),
+                                fieldWithPath("contact").type(STRING).description("연락처").optional(),
+                                fieldWithPath("registerStartAt").type(STRING).description("참가 등록 시작일시"),
+                                fieldWithPath("registerEndAt").type(STRING).description("참가 등록 종료일시"),
+                            )
+                            .requestSchema(schema(UpdateGatheringRequest::class.java.simpleName))
+                            .responseSchema(schema(ManagedGatheringDetailResponse::class.java.simpleName))
+                            .build()
+                    )
+                )
+            )
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("행사 삭제")
+    fun deleteGathering() {
+        val gatheringId = UUID.randomUUID()
+
+        given(mockBean<DeleteGatheringUseCase>().delete(1L, gatheringId))
+            .willReturn(DeleteGatheringResult(gatheringId))
+
+        val request = RestDocumentationRequestBuilders.delete(
+            "/console/gatherings/{gatheringId}",
+            gatheringId,
+        )
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(
+                documentResource(
+                    "deleteGathering",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("행사 삭제")
+                            .description("행사를 삭제합니다. 팀 관리자만 삭제할 수 있습니다.")
+                            .pathParameters(parameterWithName("gatheringId").description("행사 ID (UUID)"))
+                            .responseFields(fieldWithPath("gatheringId").type(STRING).description("삭제된 행사 ID"))
+                            .responseSchema(schema(DeleteGatheringResponse::class.java.simpleName))
+                            .build()
+                    )
+                )
+            )
+    }
+
+    @Test
+    @WithCustomMockUser
+    @DisplayName("행사 소개 템플릿 upsert")
+    fun upsertIntroduction() {
+        val gatheringId = UUID.randomUUID()
+        val source = $$"안녕하세요. ${name}입니다."
+        val fields = mapOf("name" to FieldSpecRequest("이름을 입력해 주세요"))
+        val dto = UpsertIntroductionRequest(source, fields)
+        val result = UpsertIntroductionResult(1, source, fields.mapValues { (_, field) -> field.toModel() })
+
+        given(mockBean<UpsertIntroductionUseCase>().upsertIntroduction(any()))
+            .willReturn(result)
+
+        val request = RestDocumentationRequestBuilders.put("/console/gatherings/{gatheringId}/introduction", gatheringId)
+            .content(objectMapper.writeValueAsString(dto))
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andDo(print())
+            .andExpect(status().isOk)
+            .andDo(
+                documentResource(
+                    "upsertIntroduction",
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .summary("행사 소개 템플릿 upsert")
+                            .description("행사의 자기소개 템플릿을 추가하거나 업데이트됩니다. 기존 필드 형식과 같다면 업데이트, 다르다면 추가되며 버전이 상승합니다.")
+                            .pathParameters(parameterWithName("gatheringId").description("행사 ID (UUID 형식)"))
+                            .responseFields(
+                                fieldWithPath("source").type(STRING)
+                                    .description($$"템플릿 원문. ${변수명} 패턴이 입력 필드가 됩니다."),
+                                fieldWithPath("version").type(NUMBER)
+                                    .description("템플릿 버전"),
+                                subsectionWithPath("fields").type("OBJECT")
+                                    .description("필드별 명세 (placeholder 포함)"),
+                            )
+                            .responseSchema(schema(UpsertIntroductionResponse::class.java.simpleName))
+                            .build()
+                    )
+                )
+            )
+    }
+
+    private fun managedGatheringDetailResult(gatheringId: UUID) = ManagedGatheringDetailResult(
+        gatheringId,
+        1L,
+        "공유대학",
+        GatheringVisible.PUBLIC,
+        "Spring 밋업",
+        "Spring Boot 관련 밋업입니다.",
+        LocalDateTime.of(2025, 3, 20, 14, 0),
+        LocalDateTime.of(2025, 3, 20, 17, 0),
+        "서울 강남구",
+        "https://example.com/image.png",
+        "https://example.com/gathering",
+        "010-1234-5678",
+        LocalDateTime.of(2025, 3, 1, 0, 0),
+        LocalDateTime.of(2025, 3, 19, 23, 59),
+    )
+
+    private fun pageableQueryParameters() = arrayOf(
+        parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
+        parameterWithName("size").description("페이지 크기").optional(),
+        parameterWithName("sort").description("정렬 기준 (예: startAt,desc)").optional(),
+    )
+}

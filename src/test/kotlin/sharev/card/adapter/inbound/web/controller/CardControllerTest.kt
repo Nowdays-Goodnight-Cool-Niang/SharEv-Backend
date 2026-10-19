@@ -20,11 +20,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import sharev.ControllerTestSupport
 import sharev.WithCustomMockUser
-import sharev.card.adapter.inbound.web.dto.request.UpdateCardIntroduceRequest
-import sharev.card.adapter.inbound.web.dto.response.CardResponse
-import sharev.card.adapter.inbound.web.dto.response.JoinCardResponse
-import sharev.card.adapter.inbound.web.dto.response.MyShareCodeResponse
-import sharev.card.adapter.inbound.web.dto.response.UpdateCardIntroduceResponse
+import sharev.card.adapter.inbound.web.participant.dto.request.UpdateCardIntroduceRequest
+import sharev.card.adapter.inbound.web.participant.dto.response.CardResponse
+import sharev.card.adapter.inbound.web.participant.dto.response.JoinCardResponse
+import sharev.card.adapter.inbound.web.participant.dto.response.MyShareCodeResponse
+import sharev.card.adapter.inbound.web.participant.dto.response.UpdateCardIntroduceResponse
 import sharev.card.application.port.inbound.result.CardResult
 import sharev.card.application.port.inbound.result.JoinCardResult
 import sharev.card.application.port.inbound.result.UpdateCardInfoResult

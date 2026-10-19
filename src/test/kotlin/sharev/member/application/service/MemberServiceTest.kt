@@ -28,6 +28,7 @@ class MemberServiceTest {
     private val loadAccountForMemberPort = mock(LoadAccountForMemberPort::class.java)
     private val teamAccessPort = mock(TeamAccessPort::class.java)
     private val checkMemberPort = mock(CheckMemberPort::class.java)
+    private val loadInvitationPort = mock(LoadInvitationPort::class.java)
 
     private val memberService = MemberService(
         loadTeamPort,
@@ -37,6 +38,7 @@ class MemberServiceTest {
         loadAccountForMemberPort,
         teamAccessPort,
         checkMemberPort,
+        loadInvitationPort,
     )
 
     // ───────────── isAdmin ─────────────
