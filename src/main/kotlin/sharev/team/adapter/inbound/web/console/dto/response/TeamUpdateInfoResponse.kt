@@ -1,4 +1,4 @@
-package sharev.team.adapter.inbound.web.dto.response
+package sharev.team.adapter.inbound.web.console.dto.response
 
 data class TeamUpdateInfoResponse(
     val title: String,

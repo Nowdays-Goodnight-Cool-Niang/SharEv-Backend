@@ -1,4 +1,4 @@
-package sharev.team.adapter.inbound.web.dto.request
+package sharev.team.adapter.inbound.web.console.dto.request
 
 import jakarta.validation.constraints.NotBlank
 

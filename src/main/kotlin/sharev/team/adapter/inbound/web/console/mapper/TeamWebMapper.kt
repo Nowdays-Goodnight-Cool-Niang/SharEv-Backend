@@ -1,8 +1,8 @@
-package sharev.team.adapter.inbound.web.mapper
+package sharev.team.adapter.inbound.web.console.mapper
 
-import sharev.team.adapter.inbound.web.dto.request.CreateTeamRequest
-import sharev.team.adapter.inbound.web.dto.request.UpdateTeamRequest
-import sharev.team.adapter.inbound.web.dto.response.*
+import sharev.team.adapter.inbound.web.console.dto.request.CreateTeamRequest
+import sharev.team.adapter.inbound.web.console.dto.request.UpdateTeamRequest
+import sharev.team.adapter.inbound.web.console.dto.response.*
 import sharev.team.application.port.inbound.command.CreateTeamCommand
 import sharev.team.application.port.inbound.command.UpdateTeamInfoCommand
 import sharev.team.application.port.inbound.result.CreateTeamResult
